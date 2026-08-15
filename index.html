@@ -205,12 +205,19 @@ function askPassword(showError) {
 }
 function loadOpenPGP() {
   if (window.openpgp) return Promise.resolve();
-  return new Promise((res, rej) => {
+  const cdns = [
+    'https://cdn.jsdelivr.net/npm/openpgp@5.11.0/dist/openpgp.min.js',
+    'https://unpkg.com/openpgp@5.11.0/dist/openpgp.min.js'
+  ];
+  const tryCdn = i => new Promise((res, rej) => {
+    if (i >= cdns.length) return rej(new Error('falha ao carregar biblioteca de criptografia'));
     const s = document.createElement('script');
-    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/openpgp/5.11.0/openpgp.min.js';
-    s.onload = () => res(); s.onerror = () => rej(new Error('falha ao carregar biblioteca de criptografia'));
+    s.src = cdns[i];
+    s.onload = () => res();
+    s.onerror = () => { s.remove(); tryCdn(i+1).then(res, rej); };
     document.head.appendChild(s);
   });
+  return tryCdn(0);
 }
 async function fetchAndDecrypt(pw) {
   const r = await fetch(SB_URL+'/rest/v1/habilis_painel_cripto?select=source,chunk_key,enc', {headers:{apikey:SB_KEY, Authorization:'Bearer '+SB_KEY}});
