@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Habilis · Direção de Desempenho</title>
+<style>
+  :root {
+    color-scheme: light;
+    --surface: #fcfcfb; --surface-2: #f4f3f0; --card: #ffffff;
+    --ink: #1c1c1c; --ink-2: #52514e; --ink-3: #8a897f;
+    --brand-yellow: #f9b233; --brand-magenta: #a93a8d; --brand-teal: #52a8b0; --brand-dark: #262626;
+    --s-bessa: #eda100; --s-sul: #a93a8d;
+    --flag-bad: #c92a3d; --flag-bad-bg: #fdeef0; --flag-warn-bg: #fdf6e4;
+    --ok: #0b7a3e; --ok-bg: #eaf6ef;
+    --line: #e6e4de; --radius: 12px;
+    font-size: 15px;
+  }
+  [data-theme="dark"] {
+    color-scheme: dark;
+    --surface: #17171c; --surface-2: #1f1f26; --card: #22222a;
+    --ink: #f4f4f0; --ink-2: #c3c2b7; --ink-3: #8a897f;
+    --brand-dark: #101014;
+    --s-bessa: #c98500; --s-sul: #c355a5;
+    --flag-bad: #ff7b8a; --flag-bad-bg: #3a2027; --flag-warn-bg: #33301f;
+    --ok: #58c98a; --ok-bg: #1d3226;
+    --line: #34343c;
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family: "Segoe UI", system-ui, -apple-system, sans-serif; background: var(--surface); color: var(--ink); }
+  header { background: var(--card); color: var(--ink); padding: 12px 22px; display:flex; align-items:center; gap:16px; flex-wrap:wrap; }
+  header h1 { font-size: 1.05rem; margin:0; font-weight:700; }
+  header .sub { font-size:.8rem; color: var(--ink-2); }
+  header .spacer { flex:1; }
+  header button.theme { background:transparent; border:1px solid var(--line); color:var(--ink-2); border-radius:8px; padding:5px 10px; cursor:pointer; }
+  .brandstripe { height:5px; display:flex; }
+  .brandstripe span { flex:1; }
+  .brandstripe span:nth-child(1){ background:var(--brand-yellow); }
+  .brandstripe span:nth-child(2){ background:var(--brand-magenta); }
+  .brandstripe span:nth-child(3){ background:var(--brand-teal); }
+  nav.tabs { display:flex; gap:4px; padding: 10px 18px 0; background: var(--brand-dark); flex-wrap:wrap; }
+  nav.tabs button { border:none; background:rgba(255,255,255,.09); color:#e8e8e8; padding:9px 16px; border-radius: 10px 10px 0 0; cursor:pointer; font-size:.9rem; }
+  nav.tabs button.active { background: var(--surface); color: var(--ink); font-weight:600; box-shadow: inset 0 3px 0 var(--brand-yellow); }
+  .filters { display:flex; gap:10px; padding: 14px 22px; flex-wrap: wrap; align-items:flex-end; background:var(--surface); position:sticky; top:0; z-index:20; border-bottom:1px solid var(--line); }
+  .filters label { display:flex; flex-direction:column; font-size:.72rem; color:var(--ink-2); gap:4px; font-weight:600; text-transform:uppercase; letter-spacing:.4px; }
+  .filters select, .filters input { padding:7px 10px; border:1px solid var(--line); border-radius:8px; background:var(--card); color:var(--ink); font-size:.9rem; min-width:120px; }
+  main { padding: 18px 22px 60px; max-width: 1400px; margin: 0 auto; }
+  h2 { font-size:1.15rem; margin: 18px 0 4px; }
+  h3 { font-size:.98rem; margin: 20px 0 8px; }
+  p.hint { color: var(--ink-2); font-size:.85rem; margin: 2px 0 14px; }
+  .cards { display:grid; grid-template-columns: repeat(auto-fit, minmax(170px,1fr)); gap:12px; margin: 14px 0; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius: var(--radius); padding: 14px 16px; border-top:3px solid var(--brand-yellow); }
+  .card:nth-child(even) { border-top-color: var(--brand-magenta); }
+  .card .k { font-size:.72rem; color:var(--ink-2); text-transform:uppercase; letter-spacing:.5px; font-weight:700; }
+  .card .v { font-size:1.7rem; font-weight:750; margin-top:2px; font-variant-numeric: tabular-nums; }
+  .card .d { font-size:.78rem; color:var(--ink-3); margin-top:2px; }
+  .panel { background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:16px; margin: 12px 0; overflow-x:auto; }
+  .legend { display:flex; gap:16px; align-items:center; font-size:.82rem; color:var(--ink-2); margin: 6px 0 10px; flex-wrap:wrap; }
+  .legend .sw { display:inline-block; width:11px; height:11px; border-radius:3px; margin-right:5px; vertical-align:-1px; }
+  table.grid { border-collapse: separate; border-spacing:0; font-size:.85rem; min-width: 100%; }
+  table.grid th, table.grid td { padding: 6px 9px; border-bottom: 1px solid var(--line); text-align:right; font-variant-numeric: tabular-nums; white-space:nowrap; }
+  table.grid th { color: var(--ink-2); font-size:.74rem; text-transform:uppercase; letter-spacing:.3px; position:sticky; top:0; background:var(--card); z-index:3; }
+  table.grid th:first-child, table.grid td:first-child { text-align:left; position:sticky; left:0; background:var(--card); z-index:2; max-width:240px; overflow:hidden; text-overflow:ellipsis; }
+  table.grid th:first-child { z-index:4; }
+  table.grid tr:hover td { background: var(--surface-2); }
+  table.grid td.hm { text-align:center; min-width:44px; }
+  table.grid tr.foot td { font-weight:700; border-top:2px solid var(--line); }
+  .badge { display:inline-block; border-radius: 20px; padding: 2px 10px; font-size:.75rem; font-weight:600; }
+  .badge.bad { background:var(--flag-bad-bg); color:var(--flag-bad); }
+  .badge.ok { background:var(--ok-bg); color:var(--ok); }
+  .flagcard { border-left: 4px solid var(--flag-bad); }
+  .flaglist { display:grid; grid-template-columns: repeat(auto-fill,minmax(320px,1fr)); gap:10px; }
+  .flaglist .item { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:10px 14px; font-size:.86rem; }
+  .flaglist .item b { display:block; margin-bottom:3px; }
+  .flaglist .why { color:var(--ink-2); font-size:.8rem; }
+  .tooltip { position:fixed; pointer-events:none; background:var(--ink); color:var(--surface); padding:8px 11px; border-radius:8px; font-size:.8rem; z-index:99; max-width:340px; opacity:0; transition:opacity .08s; box-shadow: 0 4px 14px rgba(0,0,0,.25); }
+  .tooltip b { display:block; }
+  svg.chart text { fill: var(--ink-2); font-size: 11px; }
+  svg.chart .gridline { stroke: var(--line); stroke-dasharray: 2 3; }
+  svg.chart .val { fill: var(--ink); font-weight:600; }
+  .daygrid { display:grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap:8px; }
+  .daycell { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:8px 10px; min-height:74px; }
+  .daycell.today { outline: 2px solid var(--brand-yellow); }
+  .daycell .dt { font-size:.72rem; font-weight:700; color:var(--ink-2); margin-bottom:5px; }
+  .chip { display:inline-block; font-size:.7rem; background:var(--surface-2); border:1px solid var(--line); border-radius:12px; padding:1px 8px; margin:1px 2px 1px 0; }
+  .chip.bessa { border-left:3px solid var(--s-bessa); }
+  .chip.sul { border-left:3px solid var(--s-sul); }
+  .muted { color: var(--ink-3); }
+  .notice { background: var(--flag-warn-bg); border:1px solid var(--line); border-radius:10px; padding:10px 14px; font-size:.83rem; color:var(--ink-2); margin: 10px 0; }
+  .statgrid td.big { font-weight: 750; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { color-scheme: dark; } }
+</style>
+</head>
+<body>
+<header>
+  <svg id="hablogo" width="185" height="47" viewBox="0 0 220 56" aria-label="Habilis">
+    <path fill="#f9b233" d="M 8 10 Q 8 5.5 12.5 6 L 20.5 7 L 20.5 22 L 33.5 22 L 33.5 7 L 41.5 6 Q 46 5.5 46 10 L 46 46 Q 46 50.5 41.5 50 L 33.5 49 L 33.5 34 L 20.5 34 L 20.5 49 L 12.5 50 Q 8 50.5 8 46 Z"/>
+    <text id="hablogo-wm" x="56" y="44" font-family="'Segoe UI', system-ui, sans-serif" font-size="33" font-weight="800" letter-spacing="0" fill="var(--ink)">hab&#305;l&#305;s</text>
+    <circle id="hablogo-d1" cx="79" cy="16" r="4" fill="#f9b233"/>
+    <circle id="hablogo-d2" cx="126" cy="16" r="4" fill="#a93a8d"/>
+    <circle id="hablogo-d3" cx="146" cy="16" r="4" fill="#52a8b0"/>
+  </svg>
+  <div>
+    <h1>Direção de Desempenho</h1>
+    <div class="sub">Unidades Bessa e Sul (Bancários) · ActiveSoft + GeekieOne · dados de <span id="extractedAt"></span></div>
+  </div>
+  <div class="spacer"></div>
+  <button class="theme" id="themeBtn">◐ Tema</button>
+</header>
+<div class="brandstripe"><span></span><span></span><span></span></div>
+<nav class="tabs" id="tabs"></nav>
+<div class="filters" id="filters">
+  <label>Unidade
+    <select id="fUnit"><option value="Ambas">Ambas</option><option>Bessa</option><option>Sul</option></select>
+  </label>
+  <label>Série
+    <select id="fSerie"></select>
+  </label>
+  <label>Trimestre
+    <select id="fTri"><option value="0">Ano (1º+2º)</option><option value="1">1º Trimestre</option><option value="2" selected>2º Trimestre</option></select>
+  </label>
+  <label>Disciplina
+    <select id="fDisc"></select>
+  </label>
+  <label>Aluno
+    <select id="fAluno" style="max-width:240px"><option value="">Todos</option></select>
+  </label>
+</div>
+<main id="main"></main>
+<div class="tooltip" id="tooltip"></div>
+<script id="DATA" type="application/json"></script>
+<script>
+"use strict";
+/* ============ carga de dados: embutida (arquivo local) ou remota (Supabase) ============ */
+const SB_URL = 'https://lnwkkomjfidfqqsxtznd.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2trb21qZmlkZnFxc3h0em5kIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUyNDgwODcsImV4cCI6MjEwMDgyNDA4N30.pyIKIqe_VuJIjJ-eD_12ugAVygvALy21IA9f1GRwyso';
+let DATA = null;
+
+const ASF_TURMA = {230:['6º ano','6ºA','Sul'],231:['7º ano','7ºA','Sul'],232:['8º ano','8ºA','Sul'],218:['9º ano','9ºA','Bessa'],229:['9º ano','9ºA','Sul'],217:['1ª série','1ªA','Bessa'],233:['1ª série','1ªA','Sul'],219:['2ª série','2ªA','Bessa'],234:['2ª série','2ªA','Sul'],216:['3ª série','3ªA','Bessa'],228:['3ª série','3ªB','Bessa'],235:['3ª série','3ªA','Sul']};
+const GK_GROUP = {'75605':['6º ano','6ºA','Sul'],'75606':['7º ano','7ºA','Sul'],'75607':['8º ano','8ºA','Sul'],'75608':['9º ano','9ºA','Sul'],'75609':['1ª série','1ªA','Sul'],'75604':['2ª série','2ªA','Sul'],'75610':['3ª série','3ªA','Sul'],'75919':['9º ano','9ºA','Bessa'],'75921':['1ª série','1ªA','Bessa'],'75920':['2ª série','2ªA','Bessa'],'75922':['3ª série','3ªA','Bessa'],'75923':['3ª série','3ªB','Bessa']};
+const toTitle = s => String(s||'').toLowerCase().replace(/(^|[\s(])\p{L}/gu, c=>c.toUpperCase());
+function cleanDisc(n){
+  n = String(n).replace(/\s+/g,' ').trim();
+  n = toTitle(n);
+  const fix = {'Fisica':'Física','Matematica':'Matemática','Quimica':'Química','Historia':'História','Ingles':'Inglês','Redacao':'Redação','Ciencias':'Ciências','Educacao':'Educação'};
+  for (const [a,b] of Object.entries(fix)) n = n.split(a).join(b);
+  return n;
+}
+function transformRemote(rows) {
+  const get = (src,key) => rows.find(r=>r.source===src && r.chunk_key===key)?.payload;
+  const many = (src,prefix) => rows.filter(r=>r.source===src && r.chunk_key.startsWith(prefix)).sort((a,b)=>a.chunk_key.localeCompare(b.chunk_key)).map(r=>r.payload);
+  const cfg = get('config','info') || {};
+  const T1_END = '2026-04-25';
+  /* ActiveSoft */
+  const am = get('activesoft_all','meta_v2');
+  const discNames = {}; for (const [t,ds] of Object.entries(am.discs)) ds.forEach(d=>discNames[t+'|'+d.id] = cleanDisc(d.label));
+  const faseTri = {}; for (const [t,fs] of Object.entries(am.fases)) fs.forEach(f=>faseTri[t+'|'+f.id] = f.label.includes('1º') ? 1 : 2);
+  const asf_rows = [];
+  many('activesoft_all','notas_v2').forEach(ch => ch.notas.forEach(n => {
+    if (n.a==null || !ASF_TURMA[n.t]) return;
+    const [serie, turma, unit] = ASF_TURMA[n.t];
+    const v = x => { if (x==null) return null; const f = parseFloat(x); return f<0 ? null : f; };
+    asf_rows.push({unit, serie, turma: turma+' '+unit, tri: faseTri[n.t+'|'+n.f] ?? 2,
+      disc: discNames[n.t+'|'+n.d] || ('Disc '+n.d), aluno: toTitle(am.alunos[String(n.a)].n),
+      ae1: v(n.n1), ae2: v(n.n2), aq: v(n.n3), media: v(n.nf), faltas: n.fal});
+  }));
+  /* GeekieOne */
+  const gm = get('geekieone_all','meta_v2');
+  const slist = Object.entries(gm.students).map(([id,nome])=>({id, nome: toTitle(nome)})).sort((a,b)=>a.id.localeCompare(b.id));
+  const sidx = {}; slist.forEach((s,i)=>sidx[s.id]=i);
+  const gk_acts = [];
+  many('geekieone_all','acts_v2').forEach(ch => ch.acts.forEach(a => {
+    if (!GK_GROUP[a.grp]) return;
+    const [serie, turma, unit] = GK_GROUP[a.grp];
+    const end = (a.end || a.start || a.created).slice(0,10);
+    const d = new Date(end+'T12:00:00');
+    const monday = new Date(d); monday.setDate(d.getDate() - ((d.getDay()+6)%7));
+    gk_acts.push({id:a.id.slice(0,8), unit, serie, turma: turma+' '+unit, disc: String(a.disc).trim(), prof:a.prof,
+      title:a.title, type:a.type, end, created:(a.created||end).slice(0,10), monday: monday.toISOString().slice(0,10),
+      tri: end <= T1_END ? 1 : 2, tq: a.tq,
+      students: (a.students||[]).filter(s=>sidx[s.m]!=null).map(s=>[sidx[s.m], s.d, s.a, s.k])});
+  }));
+  return {asf_rows, gk_acts, students_list: slist, extraido_em: cfg.extraido_em || new Date().toISOString().slice(0,10)};
+}
+/* ---- senha + criptografia (modo remoto) ---- */
+function askPassword(showError) {
+  return new Promise(resolve => {
+    let ov = document.getElementById('pwOverlay');
+    if (ov) ov.remove();
+    ov = el('div', {id:'pwOverlay', style:'position:fixed;inset:0;background:var(--surface);display:flex;align-items:center;justify-content:center;z-index:200'});
+    ov.innerHTML = `<div style="background:var(--card);border:1px solid var(--line);border-radius:16px;padding:34px 38px;max-width:360px;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,.12)">
+      <div style="display:flex;justify-content:center;margin-bottom:10px"><svg width="150" height="38" viewBox="0 0 220 56"><path fill="#f9b233" d="M 8 10 Q 8 5.5 12.5 6 L 20.5 7 L 20.5 22 L 33.5 22 L 33.5 7 L 41.5 6 Q 46 5.5 46 10 L 46 46 Q 46 50.5 41.5 50 L 33.5 49 L 33.5 34 L 20.5 34 L 20.5 49 L 12.5 50 Q 8 50.5 8 46 Z"/><text x="56" y="44" font-family="'Segoe UI', system-ui, sans-serif" font-size="33" font-weight="800" fill="var(--ink)">habilis</text></svg></div>
+      <h2 style="margin:0 0 4px;font-size:1.05rem">Painel de Desempenho</h2>
+      <p style="color:var(--ink-2);font-size:.85rem;margin:0 0 16px">Digite a senha de acesso para carregar os dados.</p>
+      ${showError ? '<p style="color:var(--flag-bad);font-size:.85rem;margin:0 0 10px">Senha incorreta — tente novamente.</p>' : ''}
+      <input id="pwInput" type="password" placeholder="senha" style="width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:9px;background:var(--surface);color:var(--ink);font-size:1rem;text-align:center" autofocus>
+      <button id="pwBtn" style="margin-top:12px;width:100%;padding:10px;border:none;border-radius:9px;background:var(--brand-yellow);color:#262626;font-weight:700;font-size:.95rem;cursor:pointer">Entrar</button>
+    </div>`;
+    document.body.appendChild(ov);
+    const done = () => { const v = ov.querySelector('#pwInput').value; ov.remove(); resolve(v); };
+    ov.querySelector('#pwBtn').onclick = done;
+    ov.querySelector('#pwInput').addEventListener('keydown', e => { if (e.key==='Enter') done(); });
+    ov.querySelector('#pwInput').focus();
+  });
+}
+function loadOpenPGP() {
+  if (window.openpgp) return Promise.resolve();
+  return new Promise((res, rej) => {
+    const s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/openpgp/5.11.0/openpgp.min.js';
+    s.onload = () => res(); s.onerror = () => rej(new Error('falha ao carregar biblioteca de criptografia'));
+    document.head.appendChild(s);
+  });
+}
+async function fetchAndDecrypt(pw) {
+  const r = await fetch(SB_URL+'/rest/v1/habilis_painel_cripto?select=source,chunk_key,enc', {headers:{apikey:SB_KEY, Authorization:'Bearer '+SB_KEY}});
+  if (!r.ok) throw new Error('HTTP '+r.status);
+  const encRows = await r.json();
+  if (!encRows.length) throw new Error('sem dados');
+  await loadOpenPGP();
+  const out = [];
+  for (const row of encRows) {
+    const bin = Uint8Array.from(atob(row.enc.replace(/\s/g,'')), c=>c.charCodeAt(0));
+    const msg = await openpgp.readMessage({binaryMessage: bin});
+    const dec = await openpgp.decrypt({message: msg, passwords: [pw], format: 'utf8'});
+    out.push({source: row.source, chunk_key: row.chunk_key, payload: JSON.parse(dec.data)});
+  }
+  return out;
+}
+async function loadData() {
+  const inline = document.getElementById('DATA');
+  const txt = inline ? inline.textContent.trim() : '';
+  if (txt.length > 20 && txt[0]==='{') { DATA = JSON.parse(txt); return; }
+  let pw = sessionStorage.getItem('hab_pw') || '';
+  let showError = false;
+  while (true) {
+    if (!pw) pw = await askPassword(showError);
+    $('#main').innerHTML = '<div class="panel" style="text-align:center;padding:40px">🔐 Verificando e carregando dados das turmas…</div>';
+    try {
+      const rows = await fetchAndDecrypt(pw);
+      try { sessionStorage.setItem('hab_pw', pw); } catch(e) {}
+      DATA = transformRemote(rows);
+      return;
+    } catch (e) {
+      if (String(e).includes('HTTP') || String(e).includes('biblioteca')) throw e;
+      try { sessionStorage.removeItem('hab_pw'); } catch(_) {}
+      pw = ''; showError = true;
+      $('#main').innerHTML = '';
+    }
+  }
+}
+
+const $ = sel => document.querySelector(sel);
+const el = (tag, attrs={}, html) => { const e = document.createElement(tag); for (const [k,v] of Object.entries(attrs)) e.setAttribute(k,v); if (html!==undefined) e.innerHTML = html; return e; };
+const fmt = (x, d=1) => x==null || isNaN(x) ? '—' : x.toLocaleString('pt-BR', {minimumFractionDigits:d, maximumFractionDigits:d});
+const pct = x => x==null || isNaN(x) ? '—' : Math.round(x*100) + '%';
+const UNITS = ['Bessa','Sul'];
+const UCOLOR = { Bessa: 'var(--s-bessa)', Sul: 'var(--s-sul)' };
+const SERIES = ['6º ano','7º ano','8º ano','9º ano','1ª série','2ª série','3ª série'];
+
+/* ---------- estatística ---------- */
+const mean = a => a.length ? a.reduce((x,y)=>x+y,0)/a.length : null;
+const median = a => { if(!a.length) return null; const s=[...a].sort((x,y)=>x-y); const m=Math.floor(s.length/2); return s.length%2 ? s[m] : (s[m-1]+s[m])/2; };
+const stdev = a => { if(a.length<2) return null; const m=mean(a); return Math.sqrt(a.reduce((acc,x)=>acc+(x-m)**2,0)/a.length); }; // populacional
+const mode = a => {
+  if(!a.length) return '—';
+  const c = {}; a.forEach(x => { const k = x.toFixed(1); c[k]=(c[k]||0)+1; });
+  const mx = Math.max(...Object.values(c));
+  if (mx===1) return 'sem moda';
+  const ms = Object.keys(c).filter(k=>c[k]===mx).sort((x,y)=>x-y);
+  return ms.length>3 ? 'multimodal' : ms.map(m=>(+m).toLocaleString('pt-BR',{minimumFractionDigits:1})).join(' · ');
+};
+
+/* ---------- tooltip ---------- */
+const tip = $('#tooltip');
+function bindTips(root) {
+  root.querySelectorAll('[data-tip]').forEach(n => {
+    n.addEventListener('mousemove', ev => { tip.innerHTML = n.dataset.tip; tip.style.opacity = 1;
+      const w = tip.offsetWidth, h = tip.offsetHeight;
+      let x = ev.clientX+14, y = ev.clientY+14;
+      if (x+w > innerWidth-8) x = ev.clientX-w-10;
+      if (y+h > innerHeight-8) y = ev.clientY-h-10;
+      tip.style.left = x+'px'; tip.style.top = y+'px'; });
+    n.addEventListener('mouseleave', () => tip.style.opacity = 0);
+  });
+}
+
+/* ---------- filtros globais ---------- */
+const state = { tab:'visao', unit:'Ambas', serie:'1ª série', tri:2, disc:'Todas', aluno:'' };
+function unitsSel() { return state.unit==='Ambas' ? UNITS : [state.unit]; }
+/* comparação de nomes entre fontes (ActiveSoft × Geekie): normaliza e exige 2+ tokens em comum */
+const normName = s => String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/\s+/g,' ').trim();
+function sameStudent(a, b) {
+  const na = normName(a), nb = normName(b);
+  if (!na || !nb) return false;
+  if (na===nb || na.includes(nb) || nb.includes(na)) return true;
+  const stop = new Set(['de','da','do','das','dos','e']);
+  const ta = new Set(na.split(' ').filter(t=>!stop.has(t)));
+  const tb = nb.split(' ').filter(t=>!stop.has(t));
+  const common = tb.filter(t=>ta.has(t)).length;
+  return common >= 2 && (common >= ta.size-1 || common >= tb.length-1);
+}
+function matchAluno(nome) { return !state.aluno || sameStudent(nome, state.aluno); }
+/* nomes por turma (união Geekie + ActiveSoft, sem quase-duplicatas) */
+let ALUNOS_POR_TURMA = {};
+function buildAlunosIndex() {
+  const byTurma = {};
+  DATA.gk_acts.forEach(a => { const s = byTurma[a.turma] = byTurma[a.turma] || []; a.students.forEach(st => { if (!s.some(x=>sameStudent(x, st.nome))) s.push(st.nome); }); });
+  DATA.asf_rows.forEach(r => { const s = byTurma[r.turma] = byTurma[r.turma] || []; if (!s.some(x=>sameStudent(x, r.aluno))) s.push(r.aluno); });
+  for (const t of Object.keys(byTurma)) byTurma[t].sort((a,b)=>a.localeCompare(b,'pt'));
+  ALUNOS_POR_TURMA = byTurma;
+}
+/* posiciona os pontos coloridos da logo sobre a/ı/ı */
+function placeLogoDots() {
+  try {
+    const wm = document.getElementById('hablogo-wm');
+    if (!wm || !wm.getNumberOfChars || wm.getNumberOfChars() < 7) return;
+    const c = i => { const s = wm.getStartPositionOfChar(i), e = wm.getEndPositionOfChar(i); return (s.x+e.x)/2; };
+    const topY = wm.getExtentOfChar(1).y - 2;
+    const set = (id, i) => { const d = document.getElementById(id); d.setAttribute('cx', c(i)); d.setAttribute('cy', topY); };
+    set('hablogo-d1', 1); set('hablogo-d2', 3); set('hablogo-d3', 5);
+  } catch(e) {}
+}
+function triMatch(t) { return state.tri===0 || t===state.tri; }
+function serieMatch(s) { return state.serie==='Todas' || s===state.serie; }
+
+const asfDiscsAll = sr => [...new Set(DATA.asf_rows.filter(r=>sr==='Todas'||r.serie===sr).map(r=>r.disc))].sort((a,b)=>a.localeCompare(b,'pt'));
+const gkDiscsAll  = sr => [...new Set(DATA.gk_acts.filter(a=>sr==='Todas'||a.serie===sr).map(a=>a.disc))].sort((a,b)=>a.localeCompare(b,'pt'));
+
+const isDue = a => a.end <= DATA.extraido_em;
+
+/* ---------- SVG: barras horizontais agrupadas ---------- */
+function groupedBarChart(items, opts={}) {
+  const max = opts.max ?? Math.max(1e-9, ...items.flatMap(i=>[i.a?.v||0, i.b?.v||0]));
+  const rowH = 40, barH = 13, labelW = opts.labelW ?? 180, W = opts.width ?? 860, chartW = W-labelW-60;
+  const H = items.length*rowH + 26;
+  let s = `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" style="width:100%;max-width:${W}px">`;
+  const ticks = opts.ticks ?? 5;
+  for (let t=0; t<=ticks; t++) {
+    const x = labelW + chartW*t/ticks;
+    s += `<line class="gridline" x1="${x}" y1="6" x2="${x}" y2="${H-20}"></line>`;
+    s += `<text x="${x}" y="${H-6}" text-anchor="middle">${opts.tickFmt ? opts.tickFmt(max*t/ticks) : fmt(max*t/ticks,1)}</text>`;
+  }
+  items.forEach((it,i) => {
+    const y = i*rowH+10;
+    s += `<text x="${labelW-8}" y="${y+barH+3}" text-anchor="end" style="font-size:11.5px">${it.label}</text>`;
+    [['a','Bessa'],['b','Sul']].forEach(([k,u],j) => {
+      const d = it[k]; if (!d || d.v==null) return;
+      const w = Math.max(2, chartW*d.v/max), y2 = y + j*(barH+3);
+      s += `<rect x="${labelW}" y="${y2}" width="${w}" height="${barH}" rx="4" fill="${UCOLOR[u]}" data-tip="${d.tip||''}"></rect>`;
+      s += `<text class="val" x="${labelW+w+5}" y="${y2+barH-3}" style="font-size:10.5px">${opts.valFmt ? opts.valFmt(d.v) : fmt(d.v,1)}</text>`;
+    });
+  });
+  s += '</svg>';
+  return s;
+}
+
+/* ---------- rampa sequencial (magenta) ---------- */
+function isDarkMode(){ return document.documentElement.dataset.theme==='dark' || (matchMedia('(prefers-color-scheme: dark)').matches && document.documentElement.dataset.theme!=='light'); }
+function heat(v01) {
+  if (v01==null || isNaN(v01)) return 'transparent';
+  const v = Math.max(0, Math.min(1, v01));
+  const L = isDarkMode() ? (18 + 38*v) : (97 - 42*v);
+  const C = 4 + 46*v;
+  return `oklch(${L}% ${C/100*0.34} 340)`;
+}
+function heatInk(v01) {
+  if (v01==null || isNaN(v01)) return 'var(--ink-3)';
+  if (isDarkMode()) return v01>0.45 ? '#fff' : 'var(--ink)';
+  return v01>0.55 ? '#fff' : 'var(--ink)';
+}
+
+/* ============================================================ dados derivados (Geekie) */
+function gkFiltered() {
+  return DATA.gk_acts.filter(a => unitsSel().includes(a.unit) && serieMatch(a.serie) && triMatch(a.tri) && (state.disc==='Todas' || a.disc===state.disc));
+}
+function engagementByStudent(acts) {
+  const m = {};
+  acts.forEach(a => { const due = isDue(a); a.students.forEach(s => {
+    const e = m[s.m] = m[s.m] || {nome:s.nome, unit:a.unit, serie:a.serie, total:0, fez:0, resp:0, acertos:0};
+    if (due) { e.total++; if (s.fez) e.fez++; }
+    e.resp += s.resp; e.acertos += s.acertos;
+  }); });
+  return m;
+}
+function weeksOf(acts) { return [...new Set(acts.map(a=>a.monday))].sort(); }
+const brDate = iso => { const [y,m,d] = iso.split('-'); return `${d}/${m}`; };
+
+function lowEngagementFlags() {
+  const acts = DATA.gk_acts.filter(a => unitsSel().includes(a.unit) && serieMatch(a.serie) && triMatch(a.tri) && isDue(a));
+  const perStudent = {};
+  acts.forEach(a => a.students.forEach(s => {
+    const e = perStudent[s.m] = perStudent[s.m] || {nome:s.nome, unit:a.unit, serie:a.serie, byWeek:{}, byDisc:{}};
+    (e.byWeek[a.monday] = e.byWeek[a.monday] || []).push({a, fez:s.fez});
+    (e.byDisc[a.disc] = e.byDisc[a.disc] || []).push({end:a.end, fez:s.fez});
+  }));
+  const flags = [];
+  for (const [m,e] of Object.entries(perStudent)) {
+    const reasons = [];
+    for (const [wk, list] of Object.entries(e.byWeek)) {
+      const missed = list.filter(x=>!x.fez);
+      if (missed.length>=3) reasons.push(`${missed.length} atividades não feitas na semana de ${brDate(wk)} (${[...new Set(missed.map(x=>x.a.disc))].join(', ')})`);
+    }
+    for (const [disc, list] of Object.entries(e.byDisc)) {
+      list.sort((x,y)=>x.end.localeCompare(y.end));
+      let run=0, best=0;
+      list.forEach(x => { run = x.fez ? 0 : run+1; best = Math.max(best,run); });
+      if (best>=2) reasons.push(`${best} atividades seguidas de ${disc} sem fazer`);
+    }
+    if (reasons.length) flags.push({m, nome:e.nome, unit:e.unit, serie:e.serie, reasons});
+  }
+  return flags.sort((a,b)=> b.reasons.length - a.reasons.length || a.nome.localeCompare(b.nome,'pt'));
+}
+function lowPerformanceFlags() {
+  const acts = DATA.gk_acts.filter(a => unitsSel().includes(a.unit) && serieMatch(a.serie) && triMatch(a.tri));
+  const per = {};
+  acts.forEach(a => a.students.forEach(s => {
+    if (s.resp===0) return;
+    const e = per[s.m] = per[s.m] || {nome:s.nome, unit:a.unit, serie:a.serie, byDisc:{}};
+    const d = e.byDisc[a.disc] = e.byDisc[a.disc] || {resp:0, ok:0, n:0};
+    d.resp += s.resp; d.ok += s.acertos; d.n++;
+  }));
+  const flags = [];
+  for (const [m,e] of Object.entries(per)) {
+    const discs = [];
+    let R=0, K=0;
+    for (const [disc,d] of Object.entries(e.byDisc)) {
+      R += d.resp; K += d.ok;
+      if (d.resp>=5 && d.ok/d.resp <= 0.5) discs.push(`${disc} (${Math.round(100*d.ok/d.resp)}% em ${d.n} ativ.)`);
+    }
+    const overall = R>0 ? K/R : null;
+    if (discs.length || (overall!=null && overall<=0.5 && R>=10))
+      flags.push({m, nome:e.nome, unit:e.unit, serie:e.serie, overall, discs});
+  }
+  return flags.sort((a,b)=> (a.overall??1)-(b.overall??1));
+}
+
+/* ============================================================ TABS */
+const TABS = [
+  ['visao','Visão geral'], ['notas','Notas (AE1/AE2)'], ['desempenho','Desempenho Geekie'],
+  ['engajamento','Engajamento semanal'], ['sinalizacoes','Sinalizações'], ['aq','AQ calculada'], ['professores','Envios dos professores']
+];
+function renderTabs() {
+  const nav = $('#tabs'); nav.innerHTML='';
+  TABS.forEach(([id,label]) => {
+    const b = el('button', {}, label);
+    if (state.tab===id) b.classList.add('active');
+    b.onclick = () => { state.tab=id; render(); };
+    nav.appendChild(b);
+  });
+}
+const serieLabel = () => state.serie==='Todas' ? 'todas as séries' : state.serie;
+
+/* ---------- VISÃO GERAL ---------- */
+function tabVisao(root) {
+  const acts = gkFiltered();
+  const eng = engagementByStudent(acts);
+  const engVals = Object.values(eng);
+  const engPct = u => { const v = engVals.filter(e=>e.unit===u); const t=v.reduce((a,e)=>a+e.total,0), f=v.reduce((a,e)=>a+e.fez,0); return t? f/t : null; };
+  const perfPct = u => { const v = engVals.filter(e=>e.unit===u); const r=v.reduce((a,e)=>a+e.resp,0), k=v.reduce((a,e)=>a+e.acertos,0); return r? k/r : null; };
+  const asfR = DATA.asf_rows.filter(r => serieMatch(r.serie) && triMatch(r.tri) && (state.disc==='Todas'||r.disc===state.disc));
+  const mediaU = u => { const v = asfR.filter(r=>r.unit===u).flatMap(r=>[r.ae1, r.ae2]).filter(x=>x!=null); return mean(v); };
+  const nAlunos = u => new Set(DATA.gk_acts.filter(a=>a.unit===u && serieMatch(a.serie)).flatMap(a=>a.students.map(s=>s.m))).size;
+
+  root.appendChild(el('h2',{}, `Visão geral — ${serieLabel()}`));
+  root.appendChild(el('p',{class:'hint'}, 'Os números respeitam os filtros acima. Engajamento = atividades feitas ÷ atribuídas (prazo encerrado); desempenho = questões corretas ÷ respondidas.'));
+  const cards = el('div',{class:'cards'});
+  const mk = (k,v,d) => { const c = el('div',{class:'card'}); c.append(el('div',{class:'k'},k), el('div',{class:'v'},v), el('div',{class:'d'},d||'')); return c; };
+  cards.append(
+    mk('Alunos (Geekie)', `${nAlunos('Bessa')} · ${nAlunos('Sul')}`, 'Bessa · Sul'),
+    mk('Atividades no filtro', String(acts.length), `${acts.filter(a=>a.unit==='Bessa').length} Bessa · ${acts.filter(a=>a.unit==='Sul').length} Sul`),
+    mk('Engajamento Bessa', pct(engPct('Bessa')), 'atividades feitas'),
+    mk('Engajamento Sul', pct(engPct('Sul')), 'atividades feitas'),
+    mk('Desempenho Bessa', pct(perfPct('Bessa')), 'acertos nas respondidas'),
+    mk('Desempenho Sul', pct(perfPct('Sul')), 'acertos nas respondidas'),
+    mk('Média provas Bessa', fmt(mediaU('Bessa')), 'AE1/AE2 digitadas'),
+    mk('Média provas Sul', fmt(mediaU('Sul')), 'AE1/AE2 digitadas'),
+  );
+  root.appendChild(cards);
+
+  /* ---- ANÁLISE ESTATÍSTICA ---- */
+  const pa = el('div',{class:'panel'});
+  const metric = state.statMetric || 'ae1';
+  const nice = {ae1:'AE1', ae2:'AE2', aq:'AQ lançada', media:'Nota da fase'};
+  const h3 = el('h3',{}, `Análise estatística — ${nice[metric]} · ${serieLabel()} (${state.tri===0?'ano':state.tri+'º tri'}) `);
+  const msel = el('select',{style:'margin-left:10px;font-size:.8rem;padding:3px 6px;border-radius:6px;border:1px solid var(--line);background:var(--card);color:var(--ink)'});
+  msel.innerHTML = Object.entries(nice).map(([k,v])=>`<option value="${k}"${k===metric?' selected':''}>${v}</option>`).join('');
+  msel.onchange = e => { state.statMetric = e.target.value; render(); };
+  h3.appendChild(msel);
+  pa.appendChild(h3);
+  pa.appendChild(el('p',{class:'hint'}, state.disc==='Todas' ? 'Todas as disciplinas agregadas — selecione uma disciplina no filtro para a análise específica.' : `Disciplina: ${state.disc}.`));
+  const tbl = el('table',{class:'grid statgrid'});
+  tbl.innerHTML = `<thead><tr><th>Turma</th><th>Notas</th><th>Média</th><th>Mediana</th><th>Moda</th><th>Desvio padrão</th><th>Mín</th><th>Máx</th><th>% ≥ 7</th></tr></thead>`;
+  const tb = el('tbody');
+  UNITS.filter(u=>unitsSel().includes(u)).forEach(u => {
+    const vals = asfR.filter(r=>r.unit===u).map(r=>r[metric]).filter(v=>v!=null);
+    const tr = el('tr');
+    tr.innerHTML = `<td><span class="sw" style="background:${UCOLOR[u]};display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px"></span>${state.serie==='Todas'?'':state.serie+' '}${u}</td>
+      <td>${vals.length}</td><td class="big">${fmt(mean(vals))}</td><td class="big">${fmt(median(vals))}</td><td>${mode(vals)}</td>
+      <td class="big">${fmt(stdev(vals),2)}</td><td>${vals.length?fmt(Math.min(...vals)):'—'}</td><td>${vals.length?fmt(Math.max(...vals)):'—'}</td>
+      <td>${vals.length?Math.round(100*vals.filter(v=>v>=7).length/vals.length)+'%':'—'}</td>`;
+    tb.appendChild(tr);
+  });
+  tbl.appendChild(tb); pa.appendChild(tbl);
+  if (!asfR.some(r=>r[metric]!=null)) pa.appendChild(el('div',{class:'notice'}, `Sem notas de <b>${nice[metric]}</b> digitadas no período/série selecionados.`));
+  root.appendChild(pa);
+
+  /* engajamento semanal — linhas por unidade */
+  const wActs = DATA.gk_acts.filter(a=>serieMatch(a.serie) && triMatch(a.tri) && isDue(a) && (state.disc==='Todas'||a.disc===state.disc));
+  const weeks = weeksOf(wActs);
+  if (weeks.length>1) {
+    const panel = el('div',{class:'panel'});
+    panel.appendChild(el('h3',{}, 'Engajamento por semana'));
+    panel.appendChild(el('div',{class:'legend'}, `<span><span class="sw" style="background:var(--s-bessa)"></span>Bessa</span><span><span class="sw" style="background:var(--s-sul)"></span>Sul</span>`));
+    const W=900, H=230, padL=46, padB=30, padT=14, cw=(W-padL-20)/(weeks.length-1||1);
+    let s = `<svg class="chart" viewBox="0 0 ${W} ${H}" style="width:100%;max-width:${W}px">`;
+    for (let t=0;t<=4;t++){ const y=padT+(H-padT-padB)*t/4; s+=`<line class="gridline" x1="${padL}" y1="${y}" x2="${W-16}" y2="${y}"/><text x="${padL-6}" y="${y+4}" text-anchor="end">${100-25*t}%</text>`; }
+    UNITS.forEach(u => {
+      const pts = weeks.map((wk,i) => {
+        const wacts = wActs.filter(a=>a.monday===wk && a.unit===u);
+        let t=0,f=0; wacts.forEach(a=>a.students.forEach(st=>{t++; if(st.fez) f++;}));
+        return {x: padL+i*cw, v: t? f/t : null, n:wacts.length, wk};
+      }).filter(p=>p.v!=null);
+      if (!pts.length) return;
+      s += `<path d="${pts.map((p,i)=>(i?'L':'M')+p.x+' '+(padT+(H-padT-padB)*(1-p.v))).join(' ')}" fill="none" stroke="${UCOLOR[u]}" stroke-width="2.2"/>`;
+      pts.forEach(p => { s += `<circle cx="${p.x}" cy="${padT+(H-padT-padB)*(1-p.v)}" r="4.5" fill="${UCOLOR[u]}" stroke="var(--card)" stroke-width="2" data-tip="<b>${u} — semana de ${brDate(p.wk)}</b>${Math.round(p.v*100)}% de engajamento · ${p.n} atividades"/>`; });
+    });
+    weeks.forEach((wk,i)=>{ if (i%Math.ceil(weeks.length/12)===0) s+=`<text x="${padL+i*cw}" y="${H-8}" text-anchor="middle">${brDate(wk)}</text>`; });
+    s+='</svg>';
+    panel.appendChild(el('div',{}, s));
+    root.appendChild(panel);
+  }
+
+  /* médias por disciplina — barras Bessa × Sul */
+  const panel2 = el('div',{class:'panel'});
+  const metric2 = state.visMetric || 'ae1';
+  const h32 = el('h3',{}, `Média por disciplina — ${nice[metric2]} · ${serieLabel()} (${state.tri===0?'ano':state.tri+'º tri'}) `);
+  const msel2 = el('select',{style:'margin-left:10px;font-size:.8rem;padding:3px 6px;border-radius:6px;border:1px solid var(--line);background:var(--card);color:var(--ink)'});
+  msel2.innerHTML = Object.entries(nice).map(([k,v])=>`<option value="${k}"${k===metric2?' selected':''}>${v}</option>`).join('');
+  msel2.onchange = e => { state.visMetric = e.target.value; render(); };
+  h32.appendChild(msel2);
+  panel2.appendChild(h32);
+  panel2.appendChild(el('div',{class:'legend'}, `<span><span class="sw" style="background:var(--s-bessa)"></span>Bessa</span><span><span class="sw" style="background:var(--s-sul)"></span>Sul</span>`));
+  if (state.serie==='Todas') {
+    panel2.appendChild(el('div',{class:'notice'}, 'Selecione uma <b>série</b> para comparar disciplina a disciplina (disciplinas variam entre séries).'));
+  } else {
+    const items = asfDiscsAll(state.serie).map(d => {
+      const it = {label:d};
+      UNITS.forEach((u) => {
+        const vals = DATA.asf_rows.filter(r=>r.disc===d && r.serie===state.serie && r.unit===u && triMatch(r.tri) && r[metric2]!=null).map(r=>r[metric2]);
+        if (vals.length) it[u==='Bessa'?'a':'b'] = {v: mean(vals), tip:`<b>${d} — ${u} (${nice[metric2]})</b>média ${fmt(mean(vals))} · mediana ${fmt(median(vals))}<br>desvio padrão ${fmt(stdev(vals),2)} · ${vals.length} alunos`};
+      });
+      return it;
+    }).filter(it=>it.a||it.b);
+    if (!items.length) panel2.appendChild(el('div',{class:'notice'}, `Sem notas de <b>${nice[metric2]}</b> digitadas no período.`));
+    else panel2.insertAdjacentHTML('beforeend', groupedBarChart(items, {max:10, labelW:210}));
+  }
+  root.appendChild(panel2);
+}
+
+/* ---------- NOTAS ---------- */
+function tabNotas(root) {
+  root.appendChild(el('h2',{}, `Notas de provas — ActiveSoft · ${serieLabel()}`));
+  root.appendChild(el('p',{class:'hint'}, 'AE1 e AE2 (peso 10 cada) e AQ lançada, com estatísticas da turma e da turma espelhada. Notas abaixo de 7 em vermelho.'));
+  if (state.serie==='Todas') { root.appendChild(el('div',{class:'notice'}, 'Selecione uma <b>série</b> no filtro para ver notas e estatísticas.')); return; }
+  const rows = DATA.asf_rows.filter(r => r.serie===state.serie && triMatch(r.tri) && (state.disc==='Todas'||r.disc===state.disc));
+  const t2 = DATA.asf_rows.filter(r=>r.serie===state.serie && r.tri===2);
+  if (state.tri!==1 && t2.length && !t2.some(r=>r.ae2!=null))
+    root.appendChild(el('div',{class:'notice'}, '⚠️ No <b>2º trimestre</b>, até a data da extração só a <b>AE1</b> havia sido digitada nesta série (AE2 e AQ pendentes) — a "nota da fase" ainda é parcial.'));
+
+  ['ae1','ae2','aq','media'].forEach(metric => {
+    const nice = {ae1:'AE1', ae2:'AE2', aq:'AQ (lançada)', media:'Nota da fase'}[metric];
+    if (!rows.some(r=>r[metric]!=null)) return;
+    const panel = el('div',{class:'panel'});
+    panel.appendChild(el('h3',{}, `${nice} — estatísticas por turma`));
+    const tbl = el('table',{class:'grid'});
+    tbl.innerHTML = `<thead><tr><th>Turma</th><th>Notas</th><th>Média</th><th>Mediana</th><th>Moda</th><th>Desvio padrão</th><th>Mín</th><th>Máx</th><th>% ≥ 7</th></tr></thead>`;
+    const tb = el('tbody');
+    UNITS.filter(u=>unitsSel().includes(u)).forEach(u => {
+      const vals = rows.filter(r=>r.unit===u).map(r=>r[metric]).filter(v=>v!=null);
+      if (!vals.length) return;
+      const tr = el('tr');
+      tr.innerHTML = `<td><span class="sw" style="background:${UCOLOR[u]};display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px"></span>${state.serie} ${u}</td>
+        <td>${vals.length}</td><td><b>${fmt(mean(vals))}</b></td><td>${fmt(median(vals))}</td><td>${mode(vals)}</td>
+        <td>${fmt(stdev(vals),2)}</td><td>${fmt(Math.min(...vals))}</td><td>${fmt(Math.max(...vals))}</td>
+        <td>${Math.round(100*vals.filter(v=>v>=7).length/vals.length)}%</td>`;
+      tb.appendChild(tr);
+    });
+    tbl.appendChild(tb); panel.appendChild(tbl); root.appendChild(panel);
+  });
+
+  if (state.disc==='Todas') {
+    root.appendChild(el('div',{class:'notice'}, 'Escolha uma <b>disciplina</b> no filtro acima para ver a tabela de notas aluno a aluno.'));
+    return;
+  }
+  UNITS.filter(u=>unitsSel().includes(u)).forEach(u => {
+    const urows = rows.filter(r=>r.unit===u);
+    if (!urows.length) return;
+    const multiTurma = new Set(urows.map(r=>r.turma)).size > 1;
+    const panel = el('div',{class:'panel'});
+    panel.appendChild(el('h3',{}, `${state.disc} — ${state.serie} ${u}`));
+    const tbl = el('table',{class:'grid'});
+    const tris = state.tri===0 ? [1,2] : [state.tri];
+    let head = `<thead><tr><th>Aluno</th>${multiTurma?'<th>Turma</th>':''}`;
+    tris.forEach(t => head += `<th>AE1 (${t}º)</th><th>AE2 (${t}º)</th><th>AQ (${t}º)</th><th>Fase (${t}º)</th><th>Faltas</th>`);
+    head += '</tr></thead>';
+    tbl.innerHTML = head;
+    const tb = el('tbody');
+    const alunos = [...new Set(urows.map(r=>r.aluno))].sort((a,b)=>a.localeCompare(b,'pt'))
+      .filter(a => matchAluno(a));
+    alunos.forEach(al => {
+      const tr = el('tr');
+      const t0 = urows.find(x=>x.aluno===al);
+      let h = `<td>${al}</td>${multiTurma?`<td>${t0.turma}</td>`:''}`;
+      tris.forEach(t => {
+        const r = urows.find(x=>x.aluno===al && x.tri===t) || {};
+        const cell = v => v==null ? '<td class="muted">—</td>' : `<td style="${v<7?'color:var(--flag-bad);font-weight:700':''}">${fmt(v)}</td>`;
+        h += cell(r.ae1)+cell(r.ae2)+cell(r.aq)+cell(r.media)+`<td>${r.faltas??'—'}</td>`;
+      });
+      tr.innerHTML = h; tb.appendChild(tr);
+    });
+    tbl.appendChild(tb); panel.appendChild(tbl); root.appendChild(panel);
+  });
+}
+
+/* ---------- DESEMPENHO GEEKIE ---------- */
+function tabDesempenho(root) {
+  root.appendChild(el('h2',{}, `Desempenho nas atividades — GeekieOne · ${serieLabel()}`));
+  root.appendChild(el('p',{class:'hint'}, '% de acertos nas questões respondidas. Célula cinza: não fez. ◌ = prazo ainda aberto.'));
+  if (state.serie==='Todas') { root.appendChild(el('div',{class:'notice'}, 'Selecione uma <b>série</b> no filtro.')); return; }
+  if (state.disc==='Todas') {
+    const panel = el('div',{class:'panel'});
+    panel.appendChild(el('h3',{}, 'Desempenho médio por disciplina'));
+    panel.appendChild(el('div',{class:'legend'}, `<span><span class="sw" style="background:var(--s-bessa)"></span>Bessa</span><span><span class="sw" style="background:var(--s-sul)"></span>Sul</span>`));
+    const items = gkDiscsAll(state.serie).map(d => {
+      const it = {label:d};
+      UNITS.forEach(u => {
+        const acts = DATA.gk_acts.filter(a=>a.disc===d && a.serie===state.serie && a.unit===u && triMatch(a.tri));
+        let R=0,K=0; acts.forEach(a=>a.students.forEach(s=>{R+=s.resp; K+=s.acertos;}));
+        if (R>0) it[u==='Bessa'?'a':'b'] = {v: K/R, tip:`<b>${d} — ${u}</b>${Math.round(100*K/R)}% de acerto médio<br>${acts.length} atividades no período`};
+      });
+      return it;
+    }).filter(it=>it.a||it.b);
+    panel.insertAdjacentHTML('beforeend', groupedBarChart(items, {max:1, labelW:200, valFmt:v=>Math.round(v*100)+'%', tickFmt:v=>Math.round(v*100)+'%'}));
+    panel.appendChild(el('p',{class:'hint'}, 'Selecione uma disciplina no filtro para abrir a matriz aluno × atividade.'));
+    root.appendChild(panel);
+    return;
+  }
+  UNITS.filter(u=>unitsSel().includes(u)).forEach(u => {
+    const acts = DATA.gk_acts.filter(a=>a.disc===state.disc && a.serie===state.serie && a.unit===u && triMatch(a.tri));
+    if (!acts.length) return;
+    const panel = el('div',{class:'panel'});
+    panel.appendChild(el('h3',{}, `${state.disc} — ${state.serie} ${u} <span class="muted">(${acts.length} atividades)</span>`));
+    const tbl = el('table',{class:'grid'});
+    let head = '<thead><tr><th>Aluno</th>';
+    acts.forEach((a,i) => head += `<th class="hm" data-tip="<b>${a.title.replace(/"/g,'&quot;')}</b>${a.prof??''}<br>prazo ${brDate(a.end)} · ${a.tq} questões">${brDate(a.end)}</th>`);
+    head += '<th>Média</th><th>Fez</th></tr></thead>';
+    tbl.innerHTML = head;
+    const tb = el('tbody');
+    const studs = {};
+    acts.forEach(a => a.students.forEach(s => { (studs[s.m] = studs[s.m] || {nome:s.nome, cells:{}, resp:0, ok:0, fez:0}); }));
+    acts.forEach((a,i) => a.students.forEach(s => { const e=studs[s.m]; e.cells[i]=s; e.resp+=s.resp; e.ok+=s.acertos; if(s.fez && isDue(a))e.fez++; }));
+    const nDue = acts.filter(isDue).length;
+    Object.entries(studs).sort((a,b)=>a[1].nome.localeCompare(b[1].nome,'pt'))
+      .filter(([m,e]) => matchAluno(e.nome))
+      .forEach(([m,e]) => {
+        const tr = el('tr');
+        let h = `<td>${e.nome}</td>`;
+        acts.forEach((a,i) => {
+          const s = e.cells[i];
+          if ((!s || (!s.fez && s.resp===0)) && !isDue(a)) { h += `<td class="hm" data-tip="<b>${e.nome}</b>prazo aberto até ${brDate(a.end)} · ${a.title.replace(/"/g,'&quot;')}"><span class="muted">◌</span></td>`; return; }
+          if (!s || (!s.fez && s.resp===0)) { h += `<td class="hm" style="background:var(--surface-2)" data-tip="<b>${e.nome}</b>não fez · ${a.title.replace(/"/g,'&quot;')}"><span class="muted">·</span></td>`; return; }
+          const p = s.resp ? s.acertos/s.resp : null;
+          h += `<td class="hm" style="background:${heat(p==null?null:1-p)};color:${heatInk(p==null?null:1-p)}" data-tip="<b>${e.nome}</b>${a.title.replace(/"/g,'&quot;')}<br>${s.acertos}/${s.resp} corretas ${s.fez?'· entregue':'· respondeu sem entregar'}">${p==null?'—':Math.round(p*100)}</td>`;
+        });
+        const pm = e.resp ? e.ok/e.resp : null;
+        h += `<td style="font-weight:700">${pm==null?'—':Math.round(pm*100)+'%'}</td><td>${Math.min(e.fez,nDue)}/${nDue}</td>`;
+        tr.innerHTML = h; tb.appendChild(tr);
+      });
+    const tf = el('tr',{class:'foot'});
+    let fh = '<td>Média da turma</td>';
+    acts.forEach((a,i) => {
+      let R=0,K=0; a.students.forEach(s=>{R+=s.resp;K+=s.acertos;});
+      fh += `<td class="hm">${R?Math.round(100*K/R):'—'}</td>`;
+    });
+    let R=0,K=0; acts.forEach(a=>a.students.forEach(s=>{R+=s.resp;K+=s.acertos;}));
+    fh += `<td>${R?Math.round(100*K/R)+'%':'—'}</td><td></td>`;
+    tf.innerHTML = fh; tb.appendChild(tf);
+    tbl.appendChild(tb); panel.appendChild(tbl); root.appendChild(panel);
+  });
+}
+
+/* ---------- ENGAJAMENTO SEMANAL ---------- */
+function tabEngajamento(root) {
+  root.appendChild(el('h2',{}, `Engajamento semanal — atividades não feitas · ${serieLabel()}`));
+  root.appendChild(el('p',{class:'hint'}, 'Cada célula: <b>não feitas/atribuídas</b> na semana do prazo (só prazos encerrados). Vermelho: 3+ não feitas. O tooltip lista as atividades que faltaram.'));
+  if (state.serie==='Todas') { root.appendChild(el('div',{class:'notice'}, 'Selecione uma <b>série</b> no filtro.')); return; }
+  UNITS.filter(u=>unitsSel().includes(u)).forEach(u => {
+    const acts = DATA.gk_acts.filter(a=>a.unit===u && a.serie===state.serie && triMatch(a.tri) && isDue(a) && (state.disc==='Todas'||a.disc===state.disc));
+    if (!acts.length) return;
+    const weeks = weeksOf(acts);
+    const panel = el('div',{class:'panel'});
+    panel.appendChild(el('h3',{}, `${state.serie} ${u}`));
+    const tbl = el('table',{class:'grid'});
+    let head = '<thead><tr><th>Aluno</th>';
+    weeks.forEach(w => head += `<th class="hm">${brDate(w)}</th>`);
+    head += '<th>Total não feitas</th></tr></thead>';
+    tbl.innerHTML = head;
+    const tb = el('tbody');
+    const studs = {};
+    acts.forEach(a => a.students.forEach(s => {
+      const e = studs[s.m] = studs[s.m] || {nome:s.nome, weeks:{}, missed:0, total:0};
+      const w = e.weeks[a.monday] = e.weeks[a.monday] || {t:0, m:[], f:0};
+      w.t++; e.total++;
+      if (s.fez) w.f++; else { w.m.push(a); e.missed++; }
+    }));
+    Object.entries(studs).sort((a,b)=>b[1].missed-a[1].missed || a[1].nome.localeCompare(b[1].nome,'pt'))
+      .filter(([m,e]) => matchAluno(e.nome))
+      .forEach(([m,e]) => {
+        const tr = el('tr');
+        let h = `<td>${e.nome}</td>`;
+        weeks.forEach(wk => {
+          const w = e.weeks[wk];
+          if (!w) { h += '<td class="hm muted">·</td>'; return; }
+          const miss = w.m.length;
+          const style = miss>=3 ? 'background:var(--flag-bad-bg);color:var(--flag-bad);font-weight:700'
+                       : miss>0 ? `background:${heat(Math.min(miss/3,0.6))};color:${heatInk(Math.min(miss/3,0.6))}` : 'color:var(--ok)';
+          const tipTxt = miss ? `<b>${e.nome} — semana de ${brDate(wk)}</b>Não fez: ${w.m.map(x=>`${x.disc} (${x.title.slice(0,40).replace(/"/g,'&quot;')})`).join('; ')}` : `<b>${e.nome}</b>Semana de ${brDate(wk)}: tudo em dia (${w.t} atividades)`;
+          h += `<td class="hm" style="${style}" data-tip="${tipTxt}">${miss}/${w.t}</td>`;
+        });
+        h += `<td style="font-weight:700">${e.missed}/${e.total}</td>`;
+        tr.innerHTML = h; tb.appendChild(tr);
+      });
+    tbl.appendChild(tb); panel.appendChild(tbl); root.appendChild(panel);
+  });
+}
+
+/* ---------- SINALIZAÇÕES ---------- */
+function tabSinalizacoes(root) {
+  root.appendChild(el('h2',{}, `Quadros de sinalização · ${serieLabel()}`));
+  root.appendChild(el('p',{class:'hint'}, 'Baixo engajamento: 3+ atividades não feitas na mesma semana <i>ou</i> 2 seguidas da mesma disciplina. Baixo desempenho: rendimento ≤ 50% (disciplinas com 5+ questões respondidas no período).'));
+  const eng = lowEngagementFlags(), perf = lowPerformanceFlags();
+  root.appendChild(el('h3',{}, `🔻 Baixo engajamento <span class="badge bad">${eng.length} alunos</span>`));
+  const la = el('div',{class:'flaglist'});
+  eng.filter(f => matchAluno(f.nome)).forEach(f => {
+    const it = el('div',{class:'item flagcard'});
+    it.innerHTML = `<b>${f.nome} <span class="muted">· ${f.serie} ${f.unit}</span></b><div class="why">${f.reasons.slice(0,4).map(r=>'• '+r).join('<br>')}${f.reasons.length>4?`<br><span class="muted">+ ${f.reasons.length-4} ocorrências</span>`:''}</div>`;
+    la.appendChild(it);
+  });
+  if (!eng.length) la.appendChild(el('div',{class:'item'}, '<span class="badge ok">Nenhum aluno sinalizado no período</span>'));
+  root.appendChild(la);
+  root.appendChild(el('h3',{}, `📉 Baixo desempenho <span class="badge bad">${perf.length} alunos</span>`));
+  const lb = el('div',{class:'flaglist'});
+  perf.filter(f => matchAluno(f.nome)).forEach(f => {
+    const it = el('div',{class:'item flagcard'});
+    it.innerHTML = `<b>${f.nome} <span class="muted">· ${f.serie} ${f.unit}</span> — ${f.overall!=null?Math.round(f.overall*100)+'% geral':''}</b>
+      <div class="why">${f.discs.length? 'Disciplinas críticas: '+f.discs.join('; ') : 'Rendimento geral abaixo de 50%'}</div>`;
+    lb.appendChild(it);
+  });
+  if (!perf.length) lb.appendChild(el('div',{class:'item'}, '<span class="badge ok">Nenhum aluno sinalizado no período</span>'));
+  root.appendChild(lb);
+}
+
+/* ---------- AQ ---------- */
+function tabAQ(root) {
+  root.appendChild(el('h2',{}, `AQ calculada — engajamento por disciplina · ${serieLabel()}`));
+  root.appendChild(el('p',{class:'hint'}, 'AQ = % de atividades feitas na disciplina no trimestre × 10 (só prazos encerrados). Compare com a AQ lançada no ActiveSoft na aba Notas.'));
+  if (state.serie==='Todas') { root.appendChild(el('div',{class:'notice'}, 'Selecione uma <b>série</b> no filtro.')); return; }
+  const tri = state.tri===0 ? 2 : state.tri;
+  if (state.tri===0) root.appendChild(el('div',{class:'notice'}, 'Com o filtro "Ano", a AQ mostrada é a do <b>2º trimestre</b>.'));
+  UNITS.filter(u=>unitsSel().includes(u)).forEach(u => {
+    const acts = DATA.gk_acts.filter(a=>a.unit===u && a.serie===state.serie && a.tri===tri && isDue(a) && (state.disc==='Todas'||a.disc===state.disc));
+    if (!acts.length) return;
+    const discs = [...new Set(acts.map(a=>a.disc))].sort((a,b)=>a.localeCompare(b,'pt'));
+    const panel = el('div',{class:'panel'});
+    panel.appendChild(el('h3',{}, `${state.serie} ${u} — ${tri}º trimestre`));
+    const tbl = el('table',{class:'grid'});
+    let head = '<thead><tr><th>Aluno</th>';
+    discs.forEach(d => head += `<th class="hm" data-tip="${d}">${d.length>14? d.slice(0,13)+'…':d}</th>`);
+    head += '<th>AQ média</th></tr></thead>';
+    tbl.innerHTML = head;
+    const tb = el('tbody');
+    const studs = {};
+    acts.forEach(a => a.students.forEach(s => {
+      const e = studs[s.m] = studs[s.m] || {nome:s.nome, byDisc:{}};
+      const d = e.byDisc[a.disc] = e.byDisc[a.disc] || {t:0,f:0};
+      d.t++; if (s.fez) d.f++;
+    }));
+    Object.entries(studs).sort((a,b)=>a[1].nome.localeCompare(b[1].nome,'pt'))
+      .filter(([m,e]) => matchAluno(e.nome))
+      .forEach(([m,e]) => {
+        const tr = el('tr');
+        let h = `<td>${e.nome}</td>`;
+        const aqs = [];
+        discs.forEach(d => {
+          const x = e.byDisc[d];
+          if (!x) { h += '<td class="hm muted">·</td>'; return; }
+          const aq = 10*x.f/x.t; aqs.push(aq);
+          h += `<td class="hm" style="background:${heat(1-aq/10)};color:${heatInk(1-aq/10)}" data-tip="<b>${e.nome} — ${d}</b>fez ${x.f} de ${x.t} atividades → AQ ${fmt(aq)}">${fmt(aq)}</td>`;
+        });
+        h += `<td style="font-weight:700">${fmt(mean(aqs))}</td>`;
+        tr.innerHTML = h; tb.appendChild(tr);
+      });
+    const tf = el('tr',{class:'foot'});
+    let fh = '<td>Média da turma</td>';
+    discs.forEach(d => {
+      let T=0,F=0; acts.filter(a=>a.disc===d).forEach(a=>a.students.forEach(s=>{T++; if(s.fez)F++;}));
+      fh += `<td class="hm">${T?fmt(10*F/T):'—'}</td>`;
+    });
+    let T=0,F=0; acts.forEach(a=>a.students.forEach(s=>{T++; if(s.fez)F++;}));
+    fh += `<td>${T?fmt(10*F/T):'—'}</td>`;
+    tf.innerHTML = fh; tb.appendChild(tf);
+    tbl.appendChild(tb); panel.appendChild(tbl); root.appendChild(panel);
+  });
+}
+
+/* ---------- PROFESSORES ---------- */
+function tabProfessores(root) {
+  root.appendChild(el('h2',{}, `Envios de atividades pelos professores · ${serieLabel()}`));
+  root.appendChild(el('p',{class:'hint'}, 'Quadro diário por data de criação no GeekieOne. Amarelo: Bessa · Magenta: Sul. Abaixo, disciplinas sem envio nos últimos 14 dias.'));
+  const acts = DATA.gk_acts.filter(a => unitsSel().includes(a.unit) && serieMatch(a.serie) && triMatch(a.tri) && (state.disc==='Todas'||a.disc===state.disc));
+  const byDay = {};
+  acts.forEach(a => { (byDay[a.created] = byDay[a.created] || []).push(a); });
+  const days = Object.keys(byDay).sort().reverse().slice(0, 42);
+  const grid = el('div',{class:'daygrid'});
+  const todayIso = DATA.extraido_em;
+  days.forEach(d => {
+    const cell = el('div',{class:'daycell'+(d===todayIso?' today':'')});
+    const dt = new Date(d+'T12:00:00');
+    cell.appendChild(el('div',{class:'dt'}, dt.toLocaleDateString('pt-BR',{weekday:'short', day:'2-digit', month:'2-digit'})));
+    const seen = new Set();
+    byDay[d].forEach(a => {
+      const key = a.unit+'|'+(a.prof||'?')+'|'+a.disc+'|'+a.turma;
+      if (seen.has(key)) return; seen.add(key);
+      const c = el('span',{class:'chip '+a.unit.toLowerCase(), 'data-tip':`<b>${a.prof||'—'} — ${a.disc} (${a.serie} ${a.unit})</b>${byDay[d].filter(x=>x.unit===a.unit&&x.prof===a.prof&&x.disc===a.disc).map(x=>x.title.slice(0,50)).join('<br>')}`}, `${(a.prof||'—').split(' ')[0]} · ${a.disc.length>12?a.disc.slice(0,11)+'…':a.disc}${state.serie==='Todas'?' · '+a.serie.replace(' série','ª').replace(' ano','º'):''}`);
+      cell.appendChild(c);
+    });
+    grid.appendChild(cell);
+  });
+  root.appendChild(grid);
+
+  const cutoff = new Date(new Date(todayIso).getTime() - 14*86400000).toISOString().slice(0,10);
+  UNITS.filter(u=>unitsSel().includes(u)).forEach(u => {
+    const scope = DATA.gk_acts.filter(a=>a.unit===u && serieMatch(a.serie));
+    const allDiscs = [...new Set(scope.map(a=>a.serie+' · '+a.disc))];
+    const recent = new Set(scope.filter(a=>a.created>=cutoff).map(a=>a.serie+' · '+a.disc));
+    const missing = allDiscs.filter(d=>!recent.has(d)).sort();
+    const panel = el('div',{class:'panel'});
+    panel.appendChild(el('h3',{}, `Sem envio há 14+ dias — ${u}`));
+    panel.innerHTML += missing.length
+      ? missing.map(sd => { const [sr, d] = sd.split(' · '); const items = scope.filter(a=>a.serie===sr&&a.disc===d); const last = items.map(a=>a.created).sort().pop(); const prof = items[items.length-1]?.prof||'—'; return `<span class="chip ${u.toLowerCase()}" data-tip="<b>${d} — ${sr} ${u}</b>último envio em ${brDate(last)} · ${prof}">${d} (${sr}) <span class="muted">últ.: ${brDate(last)}</span></span>`; }).join(' ')
+      : '<span class="badge ok">Todas as disciplinas enviaram atividades no período</span>';
+    root.appendChild(panel);
+  });
+}
+
+/* ---------- render ---------- */
+function renderFilters() {
+  const ssel = $('#fSerie');
+  ssel.innerHTML = '<option>Todas</option>' + SERIES.map(s=>`<option${s===state.serie?' selected':''}>${s}</option>`).join('');
+  const dsel = $('#fDisc');
+  const source = ['desempenho','engajamento','aq','professores','sinalizacoes'].includes(state.tab) ? gkDiscsAll(state.serie) : (state.tab==='notas' ? asfDiscsAll(state.serie) : [...new Set([...asfDiscsAll(state.serie), ...gkDiscsAll(state.serie)])].sort((a,b)=>a.localeCompare(b,'pt')));
+  const cur = state.disc;
+  dsel.innerHTML = '<option>Todas</option>' + source.map(d=>`<option${d===cur?' selected':''}>${d}</option>`).join('');
+  if (!source.includes(cur)) state.disc = 'Todas';
+  /* lista suspensa de alunos, agrupada por turma (respeita unidade + série) */
+  const asel = $('#fAluno');
+  const turmas = Object.keys(ALUNOS_POR_TURMA)
+    .filter(t => unitsSel().some(u=>t.endsWith(' '+u)))
+    .filter(t => state.serie==='Todas' || DATA.gk_acts.some(a=>a.turma===t && a.serie===state.serie) || DATA.asf_rows.some(r=>r.turma===t && r.serie===state.serie))
+    .sort((a,b)=>a.localeCompare(b,'pt'));
+  let html = '<option value="">Todos</option>';
+  turmas.forEach(t => {
+    html += `<optgroup label="${t}">` + ALUNOS_POR_TURMA[t].map(n=>`<option value="${n.replace(/"/g,'&quot;')}"${n===state.aluno?' selected':''}>${n}</option>`).join('') + '</optgroup>';
+  });
+  asel.innerHTML = html;
+  if (state.aluno && !turmas.some(t=>ALUNOS_POR_TURMA[t].includes(state.aluno))) { state.aluno=''; asel.value=''; }
+}
+function render() {
+  renderTabs(); renderFilters();
+  const main = $('#main'); main.innerHTML='';
+  const sec = el('section',{class:'tab active', style:'display:block'});
+  ({visao:tabVisao, notas:tabNotas, desempenho:tabDesempenho, engajamento:tabEngajamento,
+    sinalizacoes:tabSinalizacoes, aq:tabAQ, professores:tabProfessores}[state.tab])(sec);
+  main.appendChild(sec);
+  bindTips(main);
+}
+$('#fUnit').onchange = e => { state.unit = e.target.value; render(); };
+$('#fSerie').onchange = e => { state.serie = e.target.value; render(); };
+$('#fTri').onchange = e => { state.tri = +e.target.value; render(); };
+$('#fDisc').onchange = e => { state.disc = e.target.value; render(); };
+$('#fAluno').onchange = e => { state.aluno = e.target.value; render(); };
+$('#themeBtn').onclick = () => {
+  const cur = document.documentElement.dataset.theme;
+  document.documentElement.dataset.theme = cur==='dark' ? 'light' : 'dark';
+  render();
+};
+(async () => {
+  try {
+    await loadData();
+    /* descompacta students: [idx, fez, resp, acertos] -> objetos */
+    const SLIST = DATA.students_list;
+    DATA.gk_acts.forEach(a => { a.students = a.students.map(r => ({m: SLIST[r[0]].id, nome: SLIST[r[0]].nome, fez: r[1], resp: r[2], acertos: r[3]})); });
+    DATA.gk_acts.sort((a,b)=> a.end.localeCompare(b.end));
+    buildAlunosIndex();
+    $('#extractedAt').textContent = new Date(DATA.extraido_em+'T12:00:00').toLocaleDateString('pt-BR');
+    render();
+    placeLogoDots();
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(placeLogoDots);
+  } catch (e) {
+    $('#main').innerHTML = '<div class="panel" style="text-align:center;padding:40px">Não foi possível carregar os dados (' + String(e) + ').<br>Verifique sua conexão e recarregue a página.</div>';
+  }
+})();
+</script>
+</body>
+</html>
