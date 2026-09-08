@@ -11,7 +11,7 @@
     --ink: #1c1c1c; --ink-2: #52514e; --ink-3: #8a897f;
     --brand-yellow: #f9b233; --brand-magenta: #a93a8d; --brand-teal: #52a8b0; --brand-dark: #262626;
     --s-bessa: #eda100; --s-sul: #a93a8d;
-    --flag-bad: #c92a3d; --flag-bad-bg: #fdeef0; --flag-warn-bg: #fdf6e4;
+    --flag-bad: #c92a3d; --flag-bad-bg: #fdeef0; --flag-warn-bg: #fdf6e4; --warn: #a86a00;
     --ok: #0b7a3e; --ok-bg: #eaf6ef;
     --line: #e6e4de; --radius: 12px;
     font-size: 15px;
@@ -22,7 +22,7 @@
     --ink: #f4f4f0; --ink-2: #c3c2b7; --ink-3: #8a897f;
     --brand-dark: #101014;
     --s-bessa: #c98500; --s-sul: #c355a5;
-    --flag-bad: #ff7b8a; --flag-bad-bg: #3a2027; --flag-warn-bg: #33301f;
+    --flag-bad: #ff7b8a; --flag-bad-bg: #3a2027; --flag-warn-bg: #33301f; --warn: #f0b95a;
     --ok: #58c98a; --ok-bg: #1d3226;
     --line: #34343c;
   }
@@ -32,21 +32,23 @@
   header h1 { font-size: 1.05rem; margin:0; font-weight:700; }
   header .sub { font-size:.8rem; color: var(--ink-2); }
   header .spacer { flex:1; }
-  header button.theme { background:transparent; border:1px solid var(--line); color:var(--ink-2); border-radius:8px; padding:5px 10px; cursor:pointer; }
+  header button.theme, button.ghost { background:transparent; border:1px solid var(--line); color:var(--ink-2); border-radius:8px; padding:5px 10px; cursor:pointer; font-size:.85rem; }
   .brandstripe { height:5px; display:flex; }
   .brandstripe span { flex:1; }
   .brandstripe span:nth-child(1){ background:var(--brand-yellow); }
   .brandstripe span:nth-child(2){ background:var(--brand-magenta); }
   .brandstripe span:nth-child(3){ background:var(--brand-teal); }
   nav.tabs { display:flex; gap:4px; padding: 10px 18px 0; background: var(--brand-dark); flex-wrap:wrap; }
-  nav.tabs button { border:none; background:rgba(255,255,255,.09); color:#e8e8e8; padding:9px 16px; border-radius: 10px 10px 0 0; cursor:pointer; font-size:.9rem; }
+  nav.tabs button { border:none; background:rgba(255,255,255,.09); color:#e8e8e8; padding:9px 14px; border-radius: 10px 10px 0 0; cursor:pointer; font-size:.86rem; }
   nav.tabs button.active { background: var(--surface); color: var(--ink); font-weight:600; box-shadow: inset 0 3px 0 var(--brand-yellow); }
   .filters { display:flex; gap:10px; padding: 14px 22px; flex-wrap: wrap; align-items:flex-end; background:var(--surface); position:sticky; top:0; z-index:20; border-bottom:1px solid var(--line); }
   .filters label { display:flex; flex-direction:column; font-size:.72rem; color:var(--ink-2); gap:4px; font-weight:600; text-transform:uppercase; letter-spacing:.4px; }
-  .filters select, .filters input { padding:7px 10px; border:1px solid var(--line); border-radius:8px; background:var(--card); color:var(--ink); font-size:.9rem; min-width:120px; }
+  .filters select, .filters input, select.inline, input.inline { padding:7px 10px; border:1px solid var(--line); border-radius:8px; background:var(--card); color:var(--ink); font-size:.9rem; min-width:120px; }
+  select.inline, input.inline { font-size:.82rem; padding:4px 8px; min-width:0; }
   main { padding: 18px 22px 60px; max-width: 1400px; margin: 0 auto; }
   h2 { font-size:1.15rem; margin: 18px 0 4px; }
   h3 { font-size:.98rem; margin: 20px 0 8px; }
+  h4 { font-size:.9rem; margin: 14px 0 6px; color: var(--ink-2); }
   p.hint { color: var(--ink-2); font-size:.85rem; margin: 2px 0 14px; }
   .cards { display:grid; grid-template-columns: repeat(auto-fit, minmax(170px,1fr)); gap:12px; margin: 14px 0; }
   .card { background:var(--card); border:1px solid var(--line); border-radius: var(--radius); padding: 14px 16px; border-top:3px solid var(--brand-yellow); }
@@ -56,24 +58,35 @@
   .card .d { font-size:.78rem; color:var(--ink-3); margin-top:2px; }
   .panel { background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:16px; margin: 12px 0; overflow-x:auto; }
   .legend { display:flex; gap:16px; align-items:center; font-size:.82rem; color:var(--ink-2); margin: 6px 0 10px; flex-wrap:wrap; }
-  .legend .sw { display:inline-block; width:11px; height:11px; border-radius:3px; margin-right:5px; vertical-align:-1px; }
+  .legend .sw, .sw { display:inline-block; width:11px; height:11px; border-radius:3px; margin-right:5px; vertical-align:-1px; }
   table.grid { border-collapse: separate; border-spacing:0; font-size:.85rem; min-width: 100%; }
   table.grid th, table.grid td { padding: 6px 9px; border-bottom: 1px solid var(--line); text-align:right; font-variant-numeric: tabular-nums; white-space:nowrap; }
   table.grid th { color: var(--ink-2); font-size:.74rem; text-transform:uppercase; letter-spacing:.3px; position:sticky; top:0; background:var(--card); z-index:3; }
-  table.grid th:first-child, table.grid td:first-child { text-align:left; position:sticky; left:0; background:var(--card); z-index:2; max-width:240px; overflow:hidden; text-overflow:ellipsis; }
+  table.grid th:first-child, table.grid td:first-child { text-align:left; position:sticky; left:0; background:var(--card); z-index:2; max-width:260px; overflow:hidden; text-overflow:ellipsis; }
   table.grid th:first-child { z-index:4; }
   table.grid tr:hover td { background: var(--surface-2); }
   table.grid td.hm { text-align:center; min-width:44px; }
   table.grid tr.foot td { font-weight:700; border-top:2px solid var(--line); }
+  table.grid td.wrap { white-space:normal; text-align:left; max-width:520px; }
+  .bad { color: var(--flag-bad); font-weight:700; }
+  .warnc { color: var(--warn); font-weight:700; }
   .badge { display:inline-block; border-radius: 20px; padding: 2px 10px; font-size:.75rem; font-weight:600; }
   .badge.bad { background:var(--flag-bad-bg); color:var(--flag-bad); }
   .badge.ok { background:var(--ok-bg); color:var(--ok); }
+  .badge.warn { background:var(--flag-warn-bg); color:var(--warn); }
+  .badge.neutral { background:var(--surface-2); color:var(--ink-2); }
   .flagcard { border-left: 4px solid var(--flag-bad); }
-  .flaglist { display:grid; grid-template-columns: repeat(auto-fill,minmax(320px,1fr)); gap:10px; }
+  .flagcard.sched { border-left-color: var(--brand-teal); opacity:.85; }
+  .flaglist { display:grid; grid-template-columns: repeat(auto-fill,minmax(330px,1fr)); gap:10px; }
   .flaglist .item { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:10px 14px; font-size:.86rem; }
   .flaglist .item b { display:block; margin-bottom:3px; }
   .flaglist .why { color:var(--ink-2); font-size:.8rem; }
-  .tooltip { position:fixed; pointer-events:none; background:var(--ink); color:var(--surface); padding:8px 11px; border-radius:8px; font-size:.8rem; z-index:99; max-width:340px; opacity:0; transition:opacity .08s; box-shadow: 0 4px 14px rgba(0,0,0,.25); }
+  .flaglist .actions { margin-top:8px; display:flex; gap:6px; flex-wrap:wrap; align-items:center; }
+  button.primary { background:var(--brand-yellow); color:#262626; border:none; border-radius:8px; padding:6px 12px; font-weight:700; cursor:pointer; font-size:.82rem; }
+  button.primary.teal { background:var(--brand-teal); color:#fff; }
+  button.primary.magenta { background:var(--brand-magenta); color:#fff; }
+  button.primary:disabled { opacity:.5; cursor:default; }
+  .tooltip { position:fixed; pointer-events:none; background:var(--ink); color:var(--surface); padding:8px 11px; border-radius:8px; font-size:.8rem; z-index:99; max-width:360px; opacity:0; transition:opacity .08s; box-shadow: 0 4px 14px rgba(0,0,0,.25); }
   .tooltip b { display:block; }
   svg.chart text { fill: var(--ink-2); font-size: 11px; }
   svg.chart .gridline { stroke: var(--line); stroke-dasharray: 2 3; }
@@ -85,9 +98,44 @@
   .chip { display:inline-block; font-size:.7rem; background:var(--surface-2); border:1px solid var(--line); border-radius:12px; padding:1px 8px; margin:1px 2px 1px 0; }
   .chip.bessa { border-left:3px solid var(--s-bessa); }
   .chip.sul { border-left:3px solid var(--s-sul); }
+  .chip.casa { border-right:3px solid var(--brand-teal); }
+  .chip.sala { border-right:3px solid var(--brand-magenta); }
   .muted { color: var(--ink-3); }
   .notice { background: var(--flag-warn-bg); border:1px solid var(--line); border-radius:10px; padding:10px 14px; font-size:.83rem; color:var(--ink-2); margin: 10px 0; }
   .statgrid td.big { font-weight: 750; }
+  .toolbar { display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin: 8px 0 12px; font-size:.85rem; }
+  .toolbar label { display:flex; gap:6px; align-items:center; color:var(--ink-2); font-size:.8rem; }
+  .oc-item { border-bottom:1px solid var(--line); padding:8px 0; font-size:.85rem; }
+  .oc-item .meta { color:var(--ink-2); font-size:.78rem; }
+  .oc-item .txt { white-space:pre-wrap; margin-top:4px; color:var(--ink); }
+  details summary { cursor:pointer; }
+  /* modal */
+  .modal-bg { position:fixed; inset:0; background:rgba(0,0,0,.45); display:flex; align-items:center; justify-content:center; z-index:150; }
+  .modal { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:22px 24px; width:min(460px, 92vw); box-shadow:0 12px 40px rgba(0,0,0,.25); }
+  .modal h3 { margin:0 0 10px; }
+  .modal label { display:block; font-size:.78rem; color:var(--ink-2); margin:10px 0 4px; font-weight:600; }
+  .modal input, .modal textarea, .modal select { width:100%; padding:8px 10px; border:1px solid var(--line); border-radius:8px; background:var(--surface); color:var(--ink); font-size:.9rem; font-family:inherit; }
+  .modal .row { display:flex; gap:8px; justify-content:flex-end; margin-top:14px; }
+  /* relatório */
+  .report { overflow-x:auto; background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:28px 32px; max-width:980px; margin:12px auto; }
+  .report .rhead { display:flex; align-items:center; gap:16px; border-bottom:3px solid var(--brand-yellow); padding-bottom:12px; margin-bottom:14px; }
+  .report .rhead h2 { margin:0; font-size:1.3rem; }
+  .report .rhead .sub { color:var(--ink-2); font-size:.85rem; }
+  .report h3 { border-left:4px solid var(--brand-magenta); padding-left:8px; margin-top:22px; }
+  .report table.grid { font-size:.82rem; }
+  .report .analysis { white-space:pre-wrap; font-size:.9rem; line-height:1.55; background:var(--surface-2); border-radius:10px; padding:14px 16px; }
+  .report .kpis { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; }
+  .report .kpi { border:1px solid var(--line); border-radius:10px; padding:10px 12px; }
+  .report .kpi .k { font-size:.7rem; text-transform:uppercase; color:var(--ink-2); font-weight:700; letter-spacing:.4px; }
+  .report .kpi .v { font-size:1.35rem; font-weight:750; }
+  @media print {
+    header, nav.tabs, .filters, .tooltip, .noprint, .brandstripe { display:none !important; }
+    main { padding:0; max-width:none; }
+    .report { border:none; box-shadow:none; padding:0; max-width:none; }
+    body { background:#fff; color:#000; }
+    table.grid th, table.grid td { padding:3px 6px; }
+    .panel { break-inside: avoid; }
+  }
   @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { color-scheme: dark; } }
 </style>
 </head>
@@ -117,13 +165,13 @@
     <select id="fSerie"></select>
   </label>
   <label>Trimestre
-    <select id="fTri"><option value="0">Ano (1º+2º)</option><option value="1">1º Trimestre</option><option value="2" selected>2º Trimestre</option></select>
+    <select id="fTri"><option value="0">Ano (1º+2º+3º)</option><option value="1">1º Trimestre</option><option value="2">2º Trimestre</option><option value="3" selected>3º Trimestre</option></select>
   </label>
   <label>Disciplina
     <select id="fDisc"></select>
   </label>
   <label>Aluno
-    <select id="fAluno" style="max-width:240px"><option value="">Todos</option></select>
+    <select id="fAluno" style="max-width:260px"><option value="">Todos</option></select>
   </label>
 </div>
 <main id="main"></main>
@@ -135,14 +183,18 @@
 const SB_URL = 'https://lnwkkomjfidfqqsxtznd.supabase.co';
 const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2trb21qZmlkZnFxc3h0em5kIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUyNDgwODcsImV4cCI6MjEwMDgyNDA4N30.pyIKIqe_VuJIjJ-eD_12ugAVygvALy21IA9f1GRwyso';
 let DATA = null;
+let PW = '';   // senha da sessão (usada também para cifrar observações da Busca Ativa)
 
 const ASF_TURMA = {230:['6º ano','6ºA','Sul'],231:['7º ano','7ºA','Sul'],232:['8º ano','8ºA','Sul'],218:['9º ano','9ºA','Bessa'],229:['9º ano','9ºA','Sul'],217:['1ª série','1ªA','Bessa'],233:['1ª série','1ªA','Sul'],219:['2ª série','2ªA','Bessa'],234:['2ª série','2ªA','Sul'],216:['3ª série','3ªA','Bessa'],228:['3ª série','3ªB','Bessa'],235:['3ª série','3ªA','Sul']};
 const GK_GROUP = {'75605':['6º ano','6ºA','Sul'],'75606':['7º ano','7ºA','Sul'],'75607':['8º ano','8ºA','Sul'],'75608':['9º ano','9ºA','Sul'],'75609':['1ª série','1ªA','Sul'],'75604':['2ª série','2ªA','Sul'],'75610':['3ª série','3ªA','Sul'],'75919':['9º ano','9ºA','Bessa'],'75921':['1ª série','1ªA','Bessa'],'75920':['2ª série','2ªA','Bessa'],'75922':['3ª série','3ªA','Bessa'],'75923':['3ª série','3ªB','Bessa']};
+/* limites dos trimestres (calendário do ActiveSoft, 2026). A 3ª série tem calendário próprio. */
+const TRI_BOUNDS = { default: ['2026-04-25','2026-08-29'], '3ª série': ['2026-04-11','2026-06-20'] };
+function triOfDate(serie, iso) { const b = TRI_BOUNDS[serie] || TRI_BOUNDS.default; return iso <= b[0] ? 1 : (iso <= b[1] ? 2 : 3); }
 const toTitle = s => String(s||'').toLowerCase().replace(/(^|[\s(])\p{L}/gu, c=>c.toUpperCase());
 function cleanDisc(n){
   n = String(n).replace(/\s+/g,' ').trim();
   n = toTitle(n);
-  const fix = {'Fisica':'Física','Matematica':'Matemática','Quimica':'Química','Historia':'História','Ingles':'Inglês','Redacao':'Redação','Ciencias':'Ciências','Educacao':'Educação'};
+  const fix = {'Fisica':'Física','Matematica':'Matemática','Quimica':'Química','Historia':'História','Ingles':'Inglês','Redacao':'Redação','Ciencias':'Ciências','Educacao':'Educação','Gramatica':'Gramática'};
   for (const [a,b] of Object.entries(fix)) n = n.split(a).join(b);
   return n;
 }
@@ -150,20 +202,38 @@ function transformRemote(rows) {
   const get = (src,key) => rows.find(r=>r.source===src && r.chunk_key===key)?.payload;
   const many = (src,prefix) => rows.filter(r=>r.source===src && r.chunk_key.startsWith(prefix)).sort((a,b)=>a.chunk_key.localeCompare(b.chunk_key)).map(r=>r.payload);
   const cfg = get('config','info') || {};
-  const T1_END = '2026-04-25';
   /* ActiveSoft */
   const am = get('activesoft_all','meta_v2');
   const discNames = {}; for (const [t,ds] of Object.entries(am.discs)) ds.forEach(d=>discNames[t+'|'+d.id] = cleanDisc(d.label));
-  const faseTri = {}; for (const [t,fs] of Object.entries(am.fases)) fs.forEach(f=>faseTri[t+'|'+f.id] = f.label.includes('1º') ? 1 : 2);
-  const asf_rows = [];
+  const faseTri = {}; for (const [t,fs] of Object.entries(am.fases)) fs.forEach(f=>{ const m = /^(\d)/.exec(f.label||''); faseTri[t+'|'+f.id] = m ? +m[1] : 2; });
+  const asf_rows = [], asf_alunos = {};
+  const alunoNome = id => toTitle((am.alunos[String(id)]||{}).n || ('Aluno '+id));
   many('activesoft_all','notas_v2').forEach(ch => ch.notas.forEach(n => {
     if (n.a==null || !ASF_TURMA[n.t]) return;
     const [serie, turma, unit] = ASF_TURMA[n.t];
     const v = x => { if (x==null) return null; const f = parseFloat(x); return f<0 ? null : f; };
-    asf_rows.push({unit, serie, turma: turma+' '+unit, tri: faseTri[n.t+'|'+n.f] ?? 2,
-      disc: discNames[n.t+'|'+n.d] || ('Disc '+n.d), aluno: toTitle(am.alunos[String(n.a)].n),
+    const aluno = alunoNome(n.a);
+    asf_alunos[n.a] = {id:n.a, aid:n.a, nome:aluno, unit, serie, turma: turma+' '+unit, matricula:(am.alunos[String(n.a)]||{}).m||''};
+    asf_rows.push({aid:n.a, unit, serie, turma: turma+' '+unit, tri: faseTri[n.t+'|'+n.f] ?? 2,
+      disc: discNames[n.t+'|'+n.d] || ('Disc '+n.d), aluno,
       ae1: v(n.n1), ae2: v(n.n2), aq: v(n.n3), media: v(n.nf), faltas: n.fal});
   }));
+  /* Frequência (diários) */
+  const freq = [];
+  many('activesoft_all','freq_v1').forEach(ch => (ch.diarios||[]).forEach(d => {
+    if (!ASF_TURMA[d.t]) return;
+    const [serie, turma, unit] = ASF_TURMA[d.t];
+    const m = /^(\d)/.exec(d.fl||''); const tri = m ? +m[1] : (faseTri[d.t+'|'+d.f] ?? 2);
+    const disc = discNames[d.t+'|'+d.d] || cleanDisc(d.dn||('Disc '+d.d));
+    freq.push({unit, serie, turma: turma+' '+unit, tri, disc, aulas: d.aulas||[], al: d.al||{}});
+  }));
+  /* Ocorrências */
+  const oc = get('activesoft_all','ocorr_v1');
+  const ocorrencias = ((oc&&oc.ocorrencias)||[]).map(o => {
+    const st = asf_alunos[o.a];
+    return {id:o.id, aid:o.a, nome: st ? st.nome : toTitle(o.an), unit: st?st.unit:null, serie: st?st.serie:null, turma: st?st.turma:(o.turma||'').split('/').pop().trim(),
+      dt:o.dt, tipo:o.tn, cat:o.cat, obs:o.obs||'', reg:o.reg, imp:!!o.imp, lib:o.lib, turmaRaw:o.turma};
+  }).sort((a,b)=>b.dt.localeCompare(a.dt));
   /* GeekieOne */
   const gm = get('geekieone_all','meta_v2');
   const slist = Object.entries(gm.students).map(([id,nome])=>({id, nome: toTitle(nome)})).sort((a,b)=>a.id.localeCompare(b.id));
@@ -172,15 +242,16 @@ function transformRemote(rows) {
   many('geekieone_all','acts_v2').forEach(ch => ch.acts.forEach(a => {
     if (!GK_GROUP[a.grp]) return;
     const [serie, turma, unit] = GK_GROUP[a.grp];
-    const end = (a.end || a.start || a.created).slice(0,10);
+    const endFull = a.end || a.start || a.created;
+    const end = endFull.slice(0,10);
     const d = new Date(end+'T12:00:00');
     const monday = new Date(d); monday.setDate(d.getDate() - ((d.getDay()+6)%7));
     gk_acts.push({id:a.id.slice(0,8), unit, serie, turma: turma+' '+unit, disc: String(a.disc).trim(), prof:a.prof,
-      title:a.title, type:a.type, end, created:(a.created||end).slice(0,10), monday: monday.toISOString().slice(0,10),
-      tri: end <= T1_END ? 1 : 2, tq: a.tq,
+      title:a.title, type:a.type, end, endTime: endFull.length>10 ? endFull.slice(11,16) : '', start:(a.start||'').slice(0,10), created:(a.created||end).slice(0,10), monday: monday.toISOString().slice(0,10),
+      tri: triOfDate(serie, end), tq: a.tq,
       students: (a.students||[]).filter(s=>sidx[s.m]!=null).map(s=>[sidx[s.m], s.d, s.a, s.k])});
   }));
-  return {asf_rows, gk_acts, students_list: slist, extraido_em: cfg.extraido_em || new Date().toISOString().slice(0,10)};
+  return {asf_rows, asf_alunos, freq, ocorrencias, gk_acts, students_list: slist, extraido_em: cfg.extraido_em || new Date().toISOString().slice(0,10)};
 }
 /* ---- senha + criptografia (modo remoto) ---- */
 function askPassword(showError) {
@@ -237,7 +308,7 @@ async function fetchAndDecrypt(pw) {
 async function loadData() {
   const inline = document.getElementById('DATA');
   const txt = inline ? inline.textContent.trim() : '';
-  if (txt.length > 20 && txt[0]==='{') { DATA = JSON.parse(txt); return; }
+  if (txt.length > 20 && txt[0]==='{') { const j = JSON.parse(txt); PW = j.pw || ''; DATA = j.rows ? transformRemote(j.rows) : j; return; }
   let pw = sessionStorage.getItem('hab_pw') || '';
   let showError = false;
   while (true) {
@@ -246,6 +317,7 @@ async function loadData() {
     try {
       const rows = await fetchAndDecrypt(pw);
       try { sessionStorage.setItem('hab_pw', pw); } catch(e) {}
+      PW = pw;
       DATA = transformRemote(rows);
       return;
     } catch (e) {
@@ -259,11 +331,15 @@ async function loadData() {
 
 const $ = sel => document.querySelector(sel);
 const el = (tag, attrs={}, html) => { const e = document.createElement(tag); for (const [k,v] of Object.entries(attrs)) e.setAttribute(k,v); if (html!==undefined) e.innerHTML = html; return e; };
+const esc = s => String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 const fmt = (x, d=1) => x==null || isNaN(x) ? '—' : x.toLocaleString('pt-BR', {minimumFractionDigits:d, maximumFractionDigits:d});
 const pct = x => x==null || isNaN(x) ? '—' : Math.round(x*100) + '%';
 const UNITS = ['Bessa','Sul'];
 const UCOLOR = { Bessa: 'var(--s-bessa)', Sul: 'var(--s-sul)' };
 const SERIES = ['6º ano','7º ano','8º ano','9º ano','1ª série','2ª série','3ª série'];
+const TRIS = [1,2,3];
+const triLabel = () => state.tri===0 ? 'ano' : state.tri+'º tri';
+const trisSel = () => state.tri===0 ? TRIS : [state.tri];
 
 /* ---------- estatística ---------- */
 const mean = a => a.length ? a.reduce((x,y)=>x+y,0)/a.length : null;
@@ -293,7 +369,7 @@ function bindTips(root) {
 }
 
 /* ---------- filtros globais ---------- */
-const state = { tab:'visao', unit:'Ambas', serie:'1ª série', tri:2, disc:'Todas', aluno:'' };
+const state = { tab:'visao', unit:'Ambas', serie:'1ª série', tri:3, disc:'Todas', aluno:'', week:'', report:{} };
 function unitsSel() { return state.unit==='Ambas' ? UNITS : [state.unit]; }
 /* comparação de nomes entre fontes (ActiveSoft × Geekie): normaliza e exige 2+ tokens em comum */
 const normName = s => String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/\s+/g,' ').trim();
@@ -312,10 +388,22 @@ function matchAluno(nome) { return !state.aluno || sameStudent(nome, state.aluno
 let ALUNOS_POR_TURMA = {};
 function buildAlunosIndex() {
   const byTurma = {};
-  DATA.gk_acts.forEach(a => { const s = byTurma[a.turma] = byTurma[a.turma] || []; a.students.forEach(st => { if (!s.some(x=>sameStudent(x, st.nome))) s.push(st.nome); }); });
   DATA.asf_rows.forEach(r => { const s = byTurma[r.turma] = byTurma[r.turma] || []; if (!s.some(x=>sameStudent(x, r.aluno))) s.push(r.aluno); });
+  DATA.gk_acts.forEach(a => { const s = byTurma[a.turma] = byTurma[a.turma] || []; a.students.forEach(st => { if (!s.some(x=>sameStudent(x, st.nome))) s.push(st.nome); }); });
   for (const t of Object.keys(byTurma)) byTurma[t].sort((a,b)=>a.localeCompare(b,'pt'));
   ALUNOS_POR_TURMA = byTurma;
+}
+/* aluno selecionado → registro ActiveSoft (id, turma…) */
+function selectedAsfAluno() {
+  if (!state.aluno) return null;
+  const t = selectedTurmaOf(state.aluno);
+  const list = Object.values(DATA.asf_alunos).filter(a => sameStudent(a.nome, state.aluno) && unitsSel().includes(a.unit))
+    .sort((a,b) => (b.turma===t) - (a.turma===t) || (normName(b.nome)===normName(state.aluno)) - (normName(a.nome)===normName(state.aluno)));
+  return list[0] || null;
+}
+function selectedTurmaOf(nome) {
+  for (const [t, names] of Object.entries(ALUNOS_POR_TURMA)) if (names.some(n=>sameStudent(n,nome))) return t;
+  return '';
 }
 /* posiciona os pontos coloridos da logo sobre a/ı/ı */
 function placeLogoDots() {
@@ -335,6 +423,11 @@ const asfDiscsAll = sr => [...new Set(DATA.asf_rows.filter(r=>sr==='Todas'||r.se
 const gkDiscsAll  = sr => [...new Set(DATA.gk_acts.filter(a=>sr==='Todas'||a.serie===sr).map(a=>a.disc))].sort((a,b)=>a.localeCompare(b,'pt'));
 
 const isDue = a => a.end <= DATA.extraido_em;
+const brDate = iso => { if(!iso) return '—'; const [y,m,d] = iso.split('-'); return `${d}/${m}`; };
+const brDateFull = iso => { if(!iso) return '—'; const [y,m,d] = iso.split('-'); return `${d}/${m}/${y}`; };
+const typeLabel = t => t==='homework' ? 'Para casa' : (t==='classwork' || t==='in_class' || t==='class') ? 'Em sala' : (t ? toTitle(String(t).replace(/_/g,' ')) : '—');
+const typeClass = t => t==='homework' ? 'casa' : 'sala';
+const actTip = a => `<b>${esc(a.title)}</b>${esc(a.prof||'—')} · ${esc(a.disc)}<br>${a.type==='homework'?'🏠 Para casa':'🏫 Em sala'} · ${a.tq} questões<br>Início ${brDate(a.start)} · <b style="display:inline">Prazo ${brDateFull(a.end)}${a.endTime?' às '+a.endTime:''}</b>`;
 
 /* ---------- SVG: barras horizontais agrupadas ---------- */
 function groupedBarChart(items, opts={}) {
@@ -354,7 +447,7 @@ function groupedBarChart(items, opts={}) {
     [['a','Bessa'],['b','Sul']].forEach(([k,u],j) => {
       const d = it[k]; if (!d || d.v==null) return;
       const w = Math.max(2, chartW*d.v/max), y2 = y + j*(barH+3);
-      s += `<rect x="${labelW}" y="${y2}" width="${w}" height="${barH}" rx="4" fill="${UCOLOR[u]}" data-tip="${d.tip||''}"></rect>`;
+      s += `<rect x="${labelW}" y="${y2}" width="${w}" height="${barH}" rx="4" fill="${d.color||UCOLOR[u]}" data-tip="${d.tip||''}"></rect>`;
       s += `<text class="val" x="${labelW+w+5}" y="${y2+barH-3}" style="font-size:10.5px">${opts.valFmt ? opts.valFmt(d.v) : fmt(d.v,1)}</text>`;
     });
   });
@@ -376,6 +469,7 @@ function heatInk(v01) {
   if (isDarkMode()) return v01>0.45 ? '#fff' : 'var(--ink)';
   return v01>0.55 ? '#fff' : 'var(--ink)';
 }
+const gradeCell = v => v==null ? '<td class="muted">—</td>' : `<td class="${v<7?'bad':''}">${fmt(v)}</td>`;
 
 /* ============================================================ dados derivados (Geekie) */
 function gkFiltered() {
@@ -391,61 +485,172 @@ function engagementByStudent(acts) {
   return m;
 }
 function weeksOf(acts) { return [...new Set(acts.map(a=>a.monday))].sort(); }
-const brDate = iso => { const [y,m,d] = iso.split('-'); return `${d}/${m}`; };
 
-function lowEngagementFlags() {
-  const acts = DATA.gk_acts.filter(a => unitsSel().includes(a.unit) && serieMatch(a.serie) && triMatch(a.tri) && isDue(a));
+/* ============================================================ dados derivados (Frequência) */
+/* resumo de presença por aluno × disciplina, respeitando série/unidade/trimestre e a data de extração */
+function freqSummary(opts={}) {
+  const out = {}; // aid -> {nome, unit, serie, turma, byDisc:{disc:{p,f,j,d,inf,datasF:[]}}, tot:{...}}
+  const today = DATA.extraido_em;
+  DATA.freq.forEach(fr => {
+    if (!unitsSel().includes(fr.unit) || !serieMatch(fr.serie) || !triMatch(fr.tri)) return;
+    if (opts.disc && opts.disc!=='Todas' && fr.disc!==opts.disc) return;
+    for (const [aid, st] of Object.entries(fr.al)) {
+      const al = DATA.asf_alunos[aid]; if (!al) continue;
+      if (opts.aid && String(opts.aid)!==String(aid)) continue;
+      const e = out[aid] = out[aid] || {aid, nome:al.nome, unit:al.unit, serie:al.serie, turma:al.turma, byDisc:{}, tot:{p:0,f:0,j:0,d:0,inf:0,datasF:[]}};
+      const d = e.byDisc[fr.disc] = e.byDisc[fr.disc] || {p:0,f:0,j:0,d:0,inf:0,datasF:[]};
+      for (let i=0;i<st.length;i++) {
+        const c = st[i], dt = fr.aulas[i];
+        if (dt && dt > today) continue;             // aula futura (criada mas não dada)
+        if (c==='P') { d.p++; d.inf++; e.tot.p++; e.tot.inf++; }
+        else if (c==='F') { d.f++; d.inf++; e.tot.f++; e.tot.inf++; d.datasF.push(dt); e.tot.datasF.push(dt); }
+        else if (c==='J') { d.j++; d.inf++; e.tot.j++; e.tot.inf++; d.datasF.push(dt+' (justificada)'); e.tot.datasF.push(dt+' (justificada)'); }
+        else if (c==='D') { d.d++; e.tot.d++; }
+      }
+    }
+  });
+  return out;
+}
+const faltaPct = d => d.inf ? (d.f + d.j)/d.inf : null;
+const faltaColor = p => p==null ? '' : p>=0.25 ? 'background:var(--flag-bad-bg);color:var(--flag-bad);font-weight:700' : p>=0.10 ? `background:${heat(0.35)};color:${heatInk(0.35)}` : 'color:var(--ok)';
+
+/* ============================================================ dados derivados (Ocorrências) */
+function ocorrFiltered(opts={}) {
+  return DATA.ocorrencias.filter(o => {
+    if (o.unit && !unitsSel().includes(o.unit)) return false;
+    if (o.serie && !serieMatch(o.serie)) return false;
+    if (!o.serie && state.serie!=='Todas') return false;
+    if (state.tri!==0 && o.serie && triOfDate(o.serie, o.dt)!==state.tri) return false;
+    if (opts.aid && String(o.aid)!==String(opts.aid)) return false;
+    return true;
+  });
+}
+/* ============================================================ sinalizações (Busca Ativa) */
+/* pendências acumuladas até a semana `uptoMonday` (inclusive), ignorando o que veio antes de `afterMonday` (exclusive) */
+function studentFlags(uptoMonday, afterMondayByName) {
+  const acts = DATA.gk_acts.filter(a => unitsSel().includes(a.unit) && serieMatch(a.serie) && triMatch(a.tri) && isDue(a) && (!uptoMonday || a.monday <= uptoMonday));
   const perStudent = {};
   acts.forEach(a => a.students.forEach(s => {
-    const e = perStudent[s.m] = perStudent[s.m] || {nome:s.nome, unit:a.unit, serie:a.serie, byWeek:{}, byDisc:{}};
+    const e = perStudent[s.m] = perStudent[s.m] || {m:s.m, nome:s.nome, unit:a.unit, serie:a.serie, turma:a.turma, byWeek:{}, byDisc:{}, total:0, missed:0, resp:0, ok:0, byDiscPerf:{}};
+    const after = afterMondayByName ? afterMondayByName(s.nome) : null;
+    if (after && a.monday <= after) return;      // já coberto por um atendimento agendado
+    e.total++; if (!s.fez) e.missed++;
     (e.byWeek[a.monday] = e.byWeek[a.monday] || []).push({a, fez:s.fez});
-    (e.byDisc[a.disc] = e.byDisc[a.disc] || []).push({end:a.end, fez:s.fez});
+    (e.byDisc[a.disc] = e.byDisc[a.disc] || []).push({end:a.end, fez:s.fez, title:a.title});
+    if (s.resp>0) { const d = e.byDiscPerf[a.disc] = e.byDiscPerf[a.disc] || {resp:0, ok:0, n:0}; d.resp+=s.resp; d.ok+=s.acertos; d.n++; e.resp+=s.resp; e.ok+=s.acertos; }
   }));
   const flags = [];
-  for (const [m,e] of Object.entries(perStudent)) {
+  for (const e of Object.values(perStudent)) {
     const reasons = [];
-    for (const [wk, list] of Object.entries(e.byWeek)) {
+    for (const [wk, list] of Object.entries(e.byWeek).sort()) {
       const missed = list.filter(x=>!x.fez);
-      if (missed.length>=3) reasons.push(`${missed.length} atividades não feitas na semana de ${brDate(wk)} (${[...new Set(missed.map(x=>x.a.disc))].join(', ')})`);
+      if (missed.length>=3) reasons.push({t:'eng', txt:`${missed.length} atividades não feitas na semana de ${brDate(wk)} (${[...new Set(missed.map(x=>x.a.disc))].join(', ')})`});
     }
     for (const [disc, list] of Object.entries(e.byDisc)) {
       list.sort((x,y)=>x.end.localeCompare(y.end));
       let run=0, best=0;
       list.forEach(x => { run = x.fez ? 0 : run+1; best = Math.max(best,run); });
-      if (best>=2) reasons.push(`${best} atividades seguidas de ${disc} sem fazer`);
+      if (best>=2) reasons.push({t:'eng', txt:`${best} atividades seguidas de ${disc} sem fazer`});
     }
-    if (reasons.length) flags.push({m, nome:e.nome, unit:e.unit, serie:e.serie, reasons});
+    const lowDiscs = [];
+    for (const [disc,d] of Object.entries(e.byDiscPerf)) if (d.resp>=5 && d.ok/d.resp <= 0.5) lowDiscs.push(`${disc} (${Math.round(100*d.ok/d.resp)}% em ${d.n} ativ.)`);
+    if (lowDiscs.length) reasons.push({t:'perf', txt:'Rendimento ≤ 50% em: '+lowDiscs.join('; ')});
+    const overall = e.resp>0 ? e.ok/e.resp : null;
+    if (!lowDiscs.length && overall!=null && overall<=0.5 && e.resp>=10) reasons.push({t:'perf', txt:`Rendimento geral de ${Math.round(overall*100)}% nas questões respondidas`});
+    flags.push({m:e.m, nome:e.nome, unit:e.unit, serie:e.serie, turma:e.turma, reasons, missed:e.missed, total:e.total, overall,
+      score: reasons.filter(r=>r.t==='eng').length*2 + reasons.filter(r=>r.t==='perf').length + (e.total? e.missed/e.total : 0)});
   }
-  return flags.sort((a,b)=> b.reasons.length - a.reasons.length || a.nome.localeCompare(b.nome,'pt'));
+  return flags;
 }
-function lowPerformanceFlags() {
-  const acts = DATA.gk_acts.filter(a => unitsSel().includes(a.unit) && serieMatch(a.serie) && triMatch(a.tri));
-  const per = {};
-  acts.forEach(a => a.students.forEach(s => {
-    if (s.resp===0) return;
-    const e = per[s.m] = per[s.m] || {nome:s.nome, unit:a.unit, serie:a.serie, byDisc:{}};
-    const d = e.byDisc[a.disc] = e.byDisc[a.disc] || {resp:0, ok:0, n:0};
-    d.resp += s.resp; d.ok += s.acertos; d.n++;
-  }));
-  const flags = [];
-  for (const [m,e] of Object.entries(per)) {
-    const discs = [];
-    let R=0, K=0;
-    for (const [disc,d] of Object.entries(e.byDisc)) {
-      R += d.resp; K += d.ok;
-      if (d.resp>=5 && d.ok/d.resp <= 0.5) discs.push(`${disc} (${Math.round(100*d.ok/d.resp)}% em ${d.n} ativ.)`);
-    }
-    const overall = R>0 ? K/R : null;
-    if (discs.length || (overall!=null && overall<=0.5 && R>=10))
-      flags.push({m, nome:e.nome, unit:e.unit, serie:e.serie, overall, discs});
-  }
-  return flags.sort((a,b)=> (a.overall??1)-(b.overall??1));
+
+/* ---------- agendamentos (Supabase: habilis_busca_ativa) ---------- */
+let AGENDA = [];           // linhas da tabela
+const HASHES = {};         // nome normalizado|turma -> hash
+async function sha256Hex(s) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s));
+  return [...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+async function alunoHash(nome, turma) {
+  const key = normName(nome)+'|'+turma;
+  if (!HASHES[key]) HASHES[key] = await sha256Hex('habilis:'+key);
+  return HASHES[key];
+}
+async function buildHashes() {
+  if (!window.crypto || !crypto.subtle) return;
+  const jobs = [];
+  for (const [t, names] of Object.entries(ALUNOS_POR_TURMA)) names.forEach(n => jobs.push(alunoHash(n, t)));
+  await Promise.all(jobs);
+}
+async function loadAgenda() {
+  try {
+    const r = await fetch(SB_URL+'/rest/v1/habilis_busca_ativa?select=id,aluno_hash,turma,semana_ref,agendado_para,agendado_em,status,obs_enc&order=agendado_em.desc', {headers:{apikey:SB_KEY, Authorization:'Bearer '+SB_KEY}});
+    if (r.ok) AGENDA = await r.json();
+  } catch(e) { AGENDA = []; }
+}
+async function encObs(txt) {
+  if (!txt) return null;
+  if (!window.openpgp || !PW) return null;
+  const msg = await openpgp.createMessage({text: txt});
+  const enc = await openpgp.encrypt({message: msg, passwords:[PW], format:'binary'});
+  return btoa(String.fromCharCode(...enc));
+}
+const OBS_CACHE = {};
+async function decObs(b64) {
+  if (!b64) return '';
+  if (OBS_CACHE[b64]!=null) return OBS_CACHE[b64];
+  try {
+    const bin = Uint8Array.from(atob(b64), c=>c.charCodeAt(0));
+    const msg = await openpgp.readMessage({binaryMessage: bin});
+    const dec = await openpgp.decrypt({message: msg, passwords:[PW], format:'utf8'});
+    return OBS_CACHE[b64] = dec.data;
+  } catch(e) { return OBS_CACHE[b64] = '(não foi possível abrir a observação)'; }
+}
+/* agendamento ativo (mais recente, não cancelado) de um aluno */
+function agendaOf(nome, turma) {
+  const h = HASHES[normName(nome)+'|'+turma];
+  if (!h) return null;
+  return AGENDA.filter(a => a.aluno_hash===h && a.status!=='cancelado').sort((a,b)=>b.agendado_em.localeCompare(a.agendado_em))[0] || null;
+}
+async function saveAgenda(row) {
+  const r = await fetch(SB_URL+'/rest/v1/habilis_busca_ativa', {method:'POST', headers:{apikey:SB_KEY, Authorization:'Bearer '+SB_KEY, 'Content-Type':'application/json', Prefer:'return=representation'}, body: JSON.stringify(row)});
+  if (!r.ok) throw new Error('HTTP '+r.status);
+  const [saved] = await r.json();
+  AGENDA.unshift(saved);
+}
+async function updateAgenda(id, patch) {
+  const r = await fetch(SB_URL+`/rest/v1/habilis_busca_ativa?id=eq.${id}`, {method:'PATCH', headers:{apikey:SB_KEY, Authorization:'Bearer '+SB_KEY, 'Content-Type':'application/json', Prefer:'return=minimal'}, body: JSON.stringify({...patch, updated_at:new Date().toISOString()})});
+  if (!r.ok) throw new Error('HTTP '+r.status);
+  const a = AGENDA.find(x=>x.id===id); if (a) Object.assign(a, patch);
+}
+function openScheduleModal(f, semanaRef) {
+  const bg = el('div',{class:'modal-bg'});
+  const today = new Date().toISOString().slice(0,10);
+  bg.innerHTML = `<div class="modal">
+    <h3>Agendar atendimento</h3>
+    <div style="font-size:.9rem"><b>${esc(f.nome)}</b> <span class="muted">· ${esc(f.turma)}</span></div>
+    <label>Data do atendimento</label><input type="date" id="agDate" value="${today}">
+    <label>Observação (fica cifrada com a senha do painel)</label><textarea id="agObs" rows="3" placeholder="motivo, responsável, combinados…"></textarea>
+    <div class="row"><button class="ghost" id="agCancel">Cancelar</button><button class="primary teal" id="agSave">Salvar agendamento</button></div>
+    <div id="agErr" style="color:var(--flag-bad);font-size:.8rem;margin-top:6px"></div>
+  </div>`;
+  document.body.appendChild(bg);
+  bg.querySelector('#agCancel').onclick = () => bg.remove();
+  bg.querySelector('#agSave').onclick = async () => {
+    const btn = bg.querySelector('#agSave'); btn.disabled = true;
+    try {
+      const h = await alunoHash(f.nome, f.turma);
+      const obs_enc = await encObs(bg.querySelector('#agObs').value.trim());
+      await saveAgenda({aluno_hash:h, turma:f.turma, semana_ref:semanaRef||null, agendado_para: bg.querySelector('#agDate').value || null, status:'agendado', obs_enc});
+      bg.remove(); render();
+    } catch(e) { bg.querySelector('#agErr').textContent = 'Não foi possível salvar ('+e+').'; btn.disabled = false; }
+  };
 }
 
 /* ============================================================ TABS */
 const TABS = [
-  ['visao','Visão geral'], ['notas','Notas (AE1/AE2)'], ['desempenho','Desempenho Geekie'],
-  ['engajamento','Engajamento semanal'], ['sinalizacoes','Sinalizações'], ['aq','AQ calculada'], ['professores','Envios dos professores']
+  ['visao','Visão geral'], ['notas','Notas'], ['desempenho','Desempenho Geekie'],
+  ['engajamento','Engajamento semanal'], ['busca','Busca Ativa'], ['aq','AQ calculada'], ['professores','Envios dos professores'],
+  ['presenca','Presença'], ['ocorrencias','Ocorrências'], ['relatorio','Exportar relatório']
 ];
 function renderTabs() {
   const nav = $('#tabs'); nav.innerHTML='';
@@ -457,6 +662,22 @@ function renderTabs() {
   });
 }
 const serieLabel = () => state.serie==='Todas' ? 'todas as séries' : state.serie;
+const NICE = {ae1:'AE1', ae2:'AE2', aq:'AQ lançada', media:'Nota da fase'};
+function statTable(rowsByLabel, metric) {
+  const tbl = el('table',{class:'grid statgrid'});
+  tbl.innerHTML = `<thead><tr><th>Turma</th><th>Notas</th><th>Média</th><th>Mediana</th><th>Moda</th><th>Desvio padrão</th><th>Mín</th><th>Máx</th><th>% ≥ 7</th></tr></thead>`;
+  const tb = el('tbody');
+  rowsByLabel.forEach(([label, color, vals]) => {
+    if (!vals.length) return;
+    const tr = el('tr');
+    tr.innerHTML = `<td><span class="sw" style="background:${color}"></span>${label}</td>
+      <td>${vals.length}</td><td class="big">${fmt(mean(vals))}</td><td class="big">${fmt(median(vals))}</td><td>${mode(vals)}</td>
+      <td class="big">${fmt(stdev(vals),2)}</td><td>${fmt(Math.min(...vals))}</td><td>${fmt(Math.max(...vals))}</td>
+      <td>${Math.round(100*vals.filter(v=>v>=7).length/vals.length)}%</td>`;
+    tb.appendChild(tr);
+  });
+  tbl.appendChild(tb); return tbl;
+}
 
 /* ---------- VISÃO GERAL ---------- */
 function tabVisao(root) {
@@ -468,9 +689,12 @@ function tabVisao(root) {
   const asfR = DATA.asf_rows.filter(r => serieMatch(r.serie) && triMatch(r.tri) && (state.disc==='Todas'||r.disc===state.disc));
   const mediaU = u => { const v = asfR.filter(r=>r.unit===u).flatMap(r=>[r.ae1, r.ae2]).filter(x=>x!=null); return mean(v); };
   const nAlunos = u => new Set(DATA.gk_acts.filter(a=>a.unit===u && serieMatch(a.serie)).flatMap(a=>a.students.map(s=>s.m))).size;
+  const fs = freqSummary({disc: state.disc});
+  const faltaU = u => { let f=0, inf=0; Object.values(fs).filter(e=>e.unit===u).forEach(e=>{ f+=e.tot.f+e.tot.j; inf+=e.tot.inf; }); return inf ? f/inf : null; };
+  const oc = ocorrFiltered();
 
-  root.appendChild(el('h2',{}, `Visão geral — ${serieLabel()}`));
-  root.appendChild(el('p',{class:'hint'}, 'Os números respeitam os filtros acima. Engajamento = atividades feitas ÷ atribuídas (prazo encerrado); desempenho = questões corretas ÷ respondidas.'));
+  root.appendChild(el('h2',{}, `Visão geral — ${serieLabel()} · ${triLabel()}`));
+  root.appendChild(el('p',{class:'hint'}, 'Os números respeitam os filtros acima. Engajamento = atividades feitas ÷ atribuídas (prazo encerrado); desempenho = questões corretas ÷ respondidas; faltas = % das aulas registradas no ActiveSoft.'));
   const cards = el('div',{class:'cards'});
   const mk = (k,v,d) => { const c = el('div',{class:'card'}); c.append(el('div',{class:'k'},k), el('div',{class:'v'},v), el('div',{class:'d'},d||'')); return c; };
   cards.append(
@@ -482,34 +706,24 @@ function tabVisao(root) {
     mk('Desempenho Sul', pct(perfPct('Sul')), 'acertos nas respondidas'),
     mk('Média provas Bessa', fmt(mediaU('Bessa')), 'AE1/AE2 digitadas'),
     mk('Média provas Sul', fmt(mediaU('Sul')), 'AE1/AE2 digitadas'),
+    mk('Faltas Bessa', pct(faltaU('Bessa')), 'das aulas registradas'),
+    mk('Faltas Sul', pct(faltaU('Sul')), 'das aulas registradas'),
+    mk('Ocorrências', String(oc.length), `${oc.filter(o=>o.unit==='Bessa').length} Bessa · ${oc.filter(o=>o.unit==='Sul').length} Sul`),
   );
   root.appendChild(cards);
 
   /* ---- ANÁLISE ESTATÍSTICA ---- */
   const pa = el('div',{class:'panel'});
   const metric = state.statMetric || 'ae1';
-  const nice = {ae1:'AE1', ae2:'AE2', aq:'AQ lançada', media:'Nota da fase'};
-  const h3 = el('h3',{}, `Análise estatística — ${nice[metric]} · ${serieLabel()} (${state.tri===0?'ano':state.tri+'º tri'}) `);
-  const msel = el('select',{style:'margin-left:10px;font-size:.8rem;padding:3px 6px;border-radius:6px;border:1px solid var(--line);background:var(--card);color:var(--ink)'});
-  msel.innerHTML = Object.entries(nice).map(([k,v])=>`<option value="${k}"${k===metric?' selected':''}>${v}</option>`).join('');
+  const h3 = el('h3',{}, `Análise estatística — ${NICE[metric]} · ${serieLabel()} (${triLabel()}) `);
+  const msel = el('select',{class:'inline', style:'margin-left:10px'});
+  msel.innerHTML = Object.entries(NICE).map(([k,v])=>`<option value="${k}"${k===metric?' selected':''}>${v}</option>`).join('');
   msel.onchange = e => { state.statMetric = e.target.value; render(); };
   h3.appendChild(msel);
   pa.appendChild(h3);
   pa.appendChild(el('p',{class:'hint'}, state.disc==='Todas' ? 'Todas as disciplinas agregadas — selecione uma disciplina no filtro para a análise específica.' : `Disciplina: ${state.disc}.`));
-  const tbl = el('table',{class:'grid statgrid'});
-  tbl.innerHTML = `<thead><tr><th>Turma</th><th>Notas</th><th>Média</th><th>Mediana</th><th>Moda</th><th>Desvio padrão</th><th>Mín</th><th>Máx</th><th>% ≥ 7</th></tr></thead>`;
-  const tb = el('tbody');
-  UNITS.filter(u=>unitsSel().includes(u)).forEach(u => {
-    const vals = asfR.filter(r=>r.unit===u).map(r=>r[metric]).filter(v=>v!=null);
-    const tr = el('tr');
-    tr.innerHTML = `<td><span class="sw" style="background:${UCOLOR[u]};display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px"></span>${state.serie==='Todas'?'':state.serie+' '}${u}</td>
-      <td>${vals.length}</td><td class="big">${fmt(mean(vals))}</td><td class="big">${fmt(median(vals))}</td><td>${mode(vals)}</td>
-      <td class="big">${fmt(stdev(vals),2)}</td><td>${vals.length?fmt(Math.min(...vals)):'—'}</td><td>${vals.length?fmt(Math.max(...vals)):'—'}</td>
-      <td>${vals.length?Math.round(100*vals.filter(v=>v>=7).length/vals.length)+'%':'—'}</td>`;
-    tb.appendChild(tr);
-  });
-  tbl.appendChild(tb); pa.appendChild(tbl);
-  if (!asfR.some(r=>r[metric]!=null)) pa.appendChild(el('div',{class:'notice'}, `Sem notas de <b>${nice[metric]}</b> digitadas no período/série selecionados.`));
+  pa.appendChild(statTable(UNITS.filter(u=>unitsSel().includes(u)).map(u => [`${state.serie==='Todas'?'':state.serie+' '}${u}`, UCOLOR[u], asfR.filter(r=>r.unit===u).map(r=>r[metric]).filter(v=>v!=null)]), metric));
+  if (!asfR.some(r=>r[metric]!=null)) pa.appendChild(el('div',{class:'notice'}, `Sem notas de <b>${NICE[metric]}</b> digitadas no período/série selecionados.`));
   root.appendChild(pa);
 
   /* engajamento semanal — linhas por unidade */
@@ -541,9 +755,9 @@ function tabVisao(root) {
   /* médias por disciplina — barras Bessa × Sul */
   const panel2 = el('div',{class:'panel'});
   const metric2 = state.visMetric || 'ae1';
-  const h32 = el('h3',{}, `Média por disciplina — ${nice[metric2]} · ${serieLabel()} (${state.tri===0?'ano':state.tri+'º tri'}) `);
-  const msel2 = el('select',{style:'margin-left:10px;font-size:.8rem;padding:3px 6px;border-radius:6px;border:1px solid var(--line);background:var(--card);color:var(--ink)'});
-  msel2.innerHTML = Object.entries(nice).map(([k,v])=>`<option value="${k}"${k===metric2?' selected':''}>${v}</option>`).join('');
+  const h32 = el('h3',{}, `Média por disciplina — ${NICE[metric2]} · ${serieLabel()} (${triLabel()}) `);
+  const msel2 = el('select',{class:'inline', style:'margin-left:10px'});
+  msel2.innerHTML = Object.entries(NICE).map(([k,v])=>`<option value="${k}"${k===metric2?' selected':''}>${v}</option>`).join('');
   msel2.onchange = e => { state.visMetric = e.target.value; render(); };
   h32.appendChild(msel2);
   panel2.appendChild(h32);
@@ -555,51 +769,140 @@ function tabVisao(root) {
       const it = {label:d};
       UNITS.forEach((u) => {
         const vals = DATA.asf_rows.filter(r=>r.disc===d && r.serie===state.serie && r.unit===u && triMatch(r.tri) && r[metric2]!=null).map(r=>r[metric2]);
-        if (vals.length) it[u==='Bessa'?'a':'b'] = {v: mean(vals), tip:`<b>${d} — ${u} (${nice[metric2]})</b>média ${fmt(mean(vals))} · mediana ${fmt(median(vals))}<br>desvio padrão ${fmt(stdev(vals),2)} · ${vals.length} alunos`};
+        if (vals.length) it[u==='Bessa'?'a':'b'] = {v: mean(vals), tip:`<b>${d} — ${u} (${NICE[metric2]})</b>média ${fmt(mean(vals))} · mediana ${fmt(median(vals))}<br>desvio padrão ${fmt(stdev(vals),2)} · ${vals.length} notas`};
       });
       return it;
     }).filter(it=>it.a||it.b);
-    if (!items.length) panel2.appendChild(el('div',{class:'notice'}, `Sem notas de <b>${nice[metric2]}</b> digitadas no período.`));
+    if (!items.length) panel2.appendChild(el('div',{class:'notice'}, `Sem notas de <b>${NICE[metric2]}</b> digitadas no período.`));
     else panel2.insertAdjacentHTML('beforeend', groupedBarChart(items, {max:10, labelW:210}));
   }
   root.appendChild(panel2);
 }
 
-/* ---------- NOTAS ---------- */
-function tabNotas(root) {
-  root.appendChild(el('h2',{}, `Notas de provas — ActiveSoft · ${serieLabel()}`));
-  root.appendChild(el('p',{class:'hint'}, 'AE1 e AE2 (peso 10 cada) e AQ lançada, com estatísticas da turma e da turma espelhada. Notas abaixo de 7 em vermelho.'));
-  if (state.serie==='Todas') { root.appendChild(el('div',{class:'notice'}, 'Selecione uma <b>série</b> no filtro para ver notas e estatísticas.')); return; }
-  const rows = DATA.asf_rows.filter(r => r.serie===state.serie && triMatch(r.tri) && (state.disc==='Todas'||r.disc===state.disc));
-  const t2 = DATA.asf_rows.filter(r=>r.serie===state.serie && r.tri===2);
-  if (state.tri!==1 && t2.length && !t2.some(r=>r.ae2!=null))
-    root.appendChild(el('div',{class:'notice'}, '⚠️ No <b>2º trimestre</b>, até a data da extração só a <b>AE1</b> havia sido digitada nesta série (AE2 e AQ pendentes) — a "nota da fase" ainda é parcial.'));
-
-  ['ae1','ae2','aq','media'].forEach(metric => {
-    const nice = {ae1:'AE1', ae2:'AE2', aq:'AQ (lançada)', media:'Nota da fase'}[metric];
-    if (!rows.some(r=>r[metric]!=null)) return;
-    const panel = el('div',{class:'panel'});
-    panel.appendChild(el('h3',{}, `${nice} — estatísticas por turma`));
-    const tbl = el('table',{class:'grid'});
-    tbl.innerHTML = `<thead><tr><th>Turma</th><th>Notas</th><th>Média</th><th>Mediana</th><th>Moda</th><th>Desvio padrão</th><th>Mín</th><th>Máx</th><th>% ≥ 7</th></tr></thead>`;
-    const tb = el('tbody');
-    UNITS.filter(u=>unitsSel().includes(u)).forEach(u => {
-      const vals = rows.filter(r=>r.unit===u).map(r=>r[metric]).filter(v=>v!=null);
-      if (!vals.length) return;
-      const tr = el('tr');
-      tr.innerHTML = `<td><span class="sw" style="background:${UCOLOR[u]};display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px"></span>${state.serie} ${u}</td>
-        <td>${vals.length}</td><td><b>${fmt(mean(vals))}</b></td><td>${fmt(median(vals))}</td><td>${mode(vals)}</td>
-        <td>${fmt(stdev(vals),2)}</td><td>${fmt(Math.min(...vals))}</td><td>${fmt(Math.max(...vals))}</td>
-        <td>${Math.round(100*vals.filter(v=>v>=7).length/vals.length)}%</td>`;
-      tb.appendChild(tr);
+/* ---------- NOTAS (boletim) ---------- */
+/* boletim de um aluno: tabela disciplina × (AE1 AE2 AQ Fase Faltas) por trimestre selecionado (ou os 3 + média anual) */
+function boletimTable(aid, tris, opts={}) {
+  const rows = DATA.asf_rows.filter(r => r.aid===aid);
+  const discs = [...new Set(rows.map(r=>r.disc))].sort((a,b)=>a.localeCompare(b,'pt'));
+  const tbl = el('table',{class:'grid'});
+  let head = '<thead><tr><th>Disciplina</th>';
+  tris.forEach(t => head += `<th>AE1 (${t}º)</th><th>AE2 (${t}º)</th><th>AQ (${t}º)</th><th>Fase (${t}º)</th>${opts.noFaltas?'':`<th>Faltas (${t}º)</th>`}`);
+  if (tris.length>1) head += '<th>Média anual</th>';
+  head += '</tr></thead>';
+  tbl.innerHTML = head;
+  const tb = el('tbody');
+  const avgByTri = {}; tris.forEach(t=>avgByTri[t]={s:[0,0,0,0],n:[0,0,0,0]});
+  discs.forEach(d => {
+    const tr = el('tr');
+    let h = `<td>${esc(d)}</td>`;
+    const fases = [];
+    tris.forEach(t => {
+      const r = rows.find(x=>x.disc===d && x.tri===t) || {};
+      h += gradeCell(r.ae1)+gradeCell(r.ae2)+gradeCell(r.aq)+gradeCell(r.media);
+      if (!opts.noFaltas) h += `<td>${r.faltas??'—'}</td>`;
+      ['ae1','ae2','aq','media'].forEach((k,i)=>{ if (r[k]!=null){ avgByTri[t].s[i]+=r[k]; avgByTri[t].n[i]++; } });
+      if (r.media!=null) fases.push(r.media);
     });
-    tbl.appendChild(tb); panel.appendChild(tbl); root.appendChild(panel);
+    if (tris.length>1) h += fases.length ? `<td class="${mean(fases)<7?'bad':''}"><b>${fmt(mean(fases))}</b></td>` : '<td class="muted">—</td>';
+    tr.innerHTML = h; tb.appendChild(tr);
   });
-
-  if (state.disc==='Todas') {
-    root.appendChild(el('div',{class:'notice'}, 'Escolha uma <b>disciplina</b> no filtro acima para ver a tabela de notas aluno a aluno.'));
+  const tf = el('tr',{class:'foot'});
+  let fh = '<td>Média do aluno</td>';
+  tris.forEach(t => { const a = avgByTri[t]; [0,1,2,3].forEach(i => { fh += a.n[i] ? `<td class="${a.s[i]/a.n[i]<7?'bad':''}">${fmt(a.s[i]/a.n[i])}</td>` : '<td class="muted">—</td>'; }); if (!opts.noFaltas) fh += `<td>${rows.filter(r=>r.tri===t).reduce((s,r)=>s+(r.faltas||0),0)}</td>`; });
+  if (tris.length>1) { const all = rows.filter(r=>r.media!=null).map(r=>r.media); fh += `<td><b>${fmt(mean(all))}</b></td>`; }
+  tf.innerHTML = fh; tb.appendChild(tf);
+  tbl.appendChild(tb);
+  return tbl;
+}
+function tabNotas(root) {
+  root.appendChild(el('h2',{}, `Notas — boletim ActiveSoft · ${serieLabel()} · ${triLabel()}`));
+  root.appendChild(el('p',{class:'hint'}, 'AE1 e AE2 (peso 10 cada), AQ lançada e nota da fase, com faltas por disciplina. Notas abaixo de 7 em vermelho. Selecione um <b>aluno</b> para abrir o boletim completo dele.'));
+  const tris = trisSel();
+  /* ---- aluno selecionado: boletim completo ---- */
+  const sel = selectedAsfAluno();
+  if (state.aluno) {
+    if (!sel) { root.appendChild(el('div',{class:'notice'}, `Não encontrei <b>${esc(state.aluno)}</b> nas notas do ActiveSoft (aluno só no Geekie ou nome divergente).`)); return; }
+    const panel = el('div',{class:'panel'});
+    panel.appendChild(el('h3',{}, `${esc(sel.nome)} <span class="muted">· ${esc(sel.turma)} · matrícula ${esc(sel.matricula)}</span>`));
+    panel.appendChild(boletimTable(sel.aid, tris));
+    /* comparação com a turma: média do aluno × média da turma por disciplina (nota da fase ou AE1 se fase vazia) */
+    const rowsT = DATA.asf_rows.filter(r => r.turma===sel.turma && triMatch(r.tri));
+    const discs = [...new Set(rowsT.map(r=>r.disc))].sort((a,b)=>a.localeCompare(b,'pt'));
+    const metricSel = state.notasMetric || 'ae1';
+    const h4 = el('h4',{}, `Aluno × turma — ${NICE[metricSel]} `);
+    const ms = el('select',{class:'inline'}); ms.innerHTML = Object.entries(NICE).map(([k,v])=>`<option value="${k}"${k===metricSel?' selected':''}>${v}</option>`).join('');
+    ms.onchange = e => { state.notasMetric = e.target.value; render(); }; h4.appendChild(ms);
+    panel.appendChild(h4);
+    const items = discs.map(d => {
+      const mine = rowsT.filter(r=>r.disc===d && r.aid===sel.aid && r[metricSel]!=null).map(r=>r[metricSel]);
+      const turma = rowsT.filter(r=>r.disc===d && r[metricSel]!=null).map(r=>r[metricSel]);
+      const it = {label:d};
+      if (mine.length) it.a = {v:mean(mine), color:'var(--brand-teal)', tip:`<b>${d} — ${esc(sel.nome)}</b>${fmt(mean(mine))}`};
+      if (turma.length) it.b = {v:mean(turma), color:'var(--ink-3)', tip:`<b>${d} — média da turma</b>${fmt(mean(turma))} (${turma.length} notas)`};
+      return it;
+    }).filter(it=>it.a||it.b);
+    panel.appendChild(el('div',{class:'legend'}, `<span><span class="sw" style="background:var(--brand-teal)"></span>Aluno</span><span><span class="sw" style="background:var(--ink-3)"></span>Média da turma</span>`));
+    if (items.length) panel.insertAdjacentHTML('beforeend', groupedBarChart(items, {max:10, labelW:210}));
+    else panel.appendChild(el('div',{class:'notice'}, 'Sem notas digitadas no período.'));
+    root.appendChild(panel);
     return;
   }
+  if (state.serie==='Todas') { root.appendChild(el('div',{class:'notice'}, 'Selecione uma <b>série</b> no filtro para ver notas e estatísticas — ou um <b>aluno</b> para abrir o boletim dele.')); return; }
+  const rows = DATA.asf_rows.filter(r => r.serie===state.serie && triMatch(r.tri) && (state.disc==='Todas'||r.disc===state.disc));
+  /* estatísticas por métrica */
+  ['ae1','ae2','aq','media'].forEach(metric => {
+    if (!rows.some(r=>r[metric]!=null)) return;
+    const panel = el('div',{class:'panel'});
+    panel.appendChild(el('h3',{}, `${NICE[metric]} — estatísticas por turma`));
+    panel.appendChild(statTable(UNITS.filter(u=>unitsSel().includes(u)).map(u=>[`${state.serie} ${u}`, UCOLOR[u], rows.filter(r=>r.unit===u).map(r=>r[metric]).filter(v=>v!=null)]), metric));
+    root.appendChild(panel);
+  });
+  const anyTri = trisSel().filter(t => rows.some(r=>r.tri===t && (r.ae1!=null||r.ae2!=null||r.aq!=null)));
+  if (!anyTri.length) root.appendChild(el('div',{class:'notice'}, `Nenhuma nota digitada ainda no <b>${triLabel()}</b> para ${state.serie}.`));
+
+  /* boletim da turma: alunos × disciplinas (métrica escolhida) quando disciplina = Todas */
+  if (state.disc==='Todas') {
+    const metricSel = state.notasMetric || 'media';
+    UNITS.filter(u=>unitsSel().includes(u)).forEach(u => {
+      const urows = rows.filter(r=>r.unit===u);
+      if (!urows.length) return;
+      const discs = [...new Set(urows.map(r=>r.disc))].sort((a,b)=>a.localeCompare(b,'pt'));
+      const panel = el('div',{class:'panel'});
+      const h3 = el('h3',{}, `Boletim da turma — ${state.serie} ${u} · ${NICE[metricSel]} `);
+      const ms = el('select',{class:'inline'}); ms.innerHTML = Object.entries(NICE).map(([k,v])=>`<option value="${k}"${k===metricSel?' selected':''}>${v}</option>`).join('');
+      ms.onchange = e => { state.notasMetric = e.target.value; render(); }; h3.appendChild(ms);
+      panel.appendChild(h3);
+      panel.appendChild(el('p',{class:'hint'}, state.tri===0 ? 'Com o filtro "Ano", cada célula é a média dos trimestres com nota.' : 'Clique no nome do aluno para abrir o boletim completo.'));
+      const tbl = el('table',{class:'grid'});
+      let head = '<thead><tr><th>Aluno</th>';
+      discs.forEach(d => head += `<th class="hm" data-tip="${esc(d)}">${d.length>12? esc(d.slice(0,11))+'…':esc(d)}</th>`);
+      head += '<th>Média</th></tr></thead>';
+      tbl.innerHTML = head;
+      const tb = el('tbody');
+      const alunos = {}; urows.forEach(r => { alunos[r.aid] = r.aluno; });
+      Object.entries(alunos).sort((a,b)=>a[1].localeCompare(b[1],'pt')).forEach(([aid, nome]) => {
+        const tr = el('tr');
+        let h = `<td><a href="#" data-aluno="${esc(nome)}" style="color:inherit;text-decoration:none">${esc(nome)}</a></td>`;
+        const vals = [];
+        discs.forEach(d => {
+          const vs = urows.filter(r=>String(r.aid)===aid && r.disc===d && r[metricSel]!=null).map(r=>r[metricSel]);
+          if (!vs.length) { h += '<td class="hm muted">·</td>'; return; }
+          const v = mean(vs); vals.push(v);
+          h += `<td class="hm" style="background:${heat(1-v/10)};color:${heatInk(1-v/10)}" data-tip="<b>${esc(nome)} — ${esc(d)}</b>${NICE[metricSel]}: ${fmt(v)}">${fmt(v)}</td>`;
+        });
+        h += vals.length ? `<td class="${mean(vals)<7?'bad':''}"><b>${fmt(mean(vals))}</b></td>` : '<td class="muted">—</td>';
+        tr.innerHTML = h; tb.appendChild(tr);
+      });
+      const tf = el('tr',{class:'foot'});
+      let fh = '<td>Média da turma</td>';
+      discs.forEach(d => { const vs = urows.filter(r=>r.disc===d && r[metricSel]!=null).map(r=>r[metricSel]); fh += `<td class="hm">${vs.length?fmt(mean(vs)):'—'}</td>`; });
+      const allv = urows.filter(r=>r[metricSel]!=null).map(r=>r[metricSel]); fh += `<td>${allv.length?fmt(mean(allv)):'—'}</td>`;
+      tf.innerHTML = fh; tb.appendChild(tf);
+      tbl.appendChild(tb); panel.appendChild(tbl); root.appendChild(panel);
+    });
+    return;
+  }
+  /* disciplina específica: tabela aluno a aluno */
   UNITS.filter(u=>unitsSel().includes(u)).forEach(u => {
     const urows = rows.filter(r=>r.unit===u);
     if (!urows.length) return;
@@ -607,34 +910,81 @@ function tabNotas(root) {
     const panel = el('div',{class:'panel'});
     panel.appendChild(el('h3',{}, `${state.disc} — ${state.serie} ${u}`));
     const tbl = el('table',{class:'grid'});
-    const tris = state.tri===0 ? [1,2] : [state.tri];
     let head = `<thead><tr><th>Aluno</th>${multiTurma?'<th>Turma</th>':''}`;
-    tris.forEach(t => head += `<th>AE1 (${t}º)</th><th>AE2 (${t}º)</th><th>AQ (${t}º)</th><th>Fase (${t}º)</th><th>Faltas</th>`);
+    tris.forEach(t => head += `<th>AE1 (${t}º)</th><th>AE2 (${t}º)</th><th>AQ (${t}º)</th><th>Fase (${t}º)</th><th>Faltas (${t}º)</th>`);
     head += '</tr></thead>';
     tbl.innerHTML = head;
     const tb = el('tbody');
-    const alunos = [...new Set(urows.map(r=>r.aluno))].sort((a,b)=>a.localeCompare(b,'pt'))
-      .filter(a => matchAluno(a));
-    alunos.forEach(al => {
+    const alunos = {}; urows.forEach(r => { alunos[r.aid] = r; });
+    Object.values(alunos).sort((a,b)=>a.aluno.localeCompare(b.aluno,'pt')).forEach(t0 => {
       const tr = el('tr');
-      const t0 = urows.find(x=>x.aluno===al);
-      let h = `<td>${al}</td>${multiTurma?`<td>${t0.turma}</td>`:''}`;
+      let h = `<td><a href="#" data-aluno="${esc(t0.aluno)}" style="color:inherit;text-decoration:none">${esc(t0.aluno)}</a></td>${multiTurma?`<td>${t0.turma}</td>`:''}`;
       tris.forEach(t => {
-        const r = urows.find(x=>x.aluno===al && x.tri===t) || {};
-        const cell = v => v==null ? '<td class="muted">—</td>' : `<td style="${v<7?'color:var(--flag-bad);font-weight:700':''}">${fmt(v)}</td>`;
-        h += cell(r.ae1)+cell(r.ae2)+cell(r.aq)+cell(r.media)+`<td>${r.faltas??'—'}</td>`;
+        const r = urows.find(x=>x.aid===t0.aid && x.tri===t) || {};
+        h += gradeCell(r.ae1)+gradeCell(r.ae2)+gradeCell(r.aq)+gradeCell(r.media)+`<td>${r.faltas??'—'}</td>`;
       });
       tr.innerHTML = h; tb.appendChild(tr);
     });
     tbl.appendChild(tb); panel.appendChild(tbl); root.appendChild(panel);
   });
 }
-
 /* ---------- DESEMPENHO GEEKIE ---------- */
+/* resumo por disciplina de um aluno (nome) nas atividades filtradas */
+function gkStudentSummary(nome, acts) {
+  const byDisc = {};
+  acts.forEach(a => a.students.forEach(s => {
+    if (!sameStudent(s.nome, nome)) return;
+    const d = byDisc[a.disc] = byDisc[a.disc] || {disc:a.disc, total:0, fez:0, resp:0, ok:0, acts:[]};
+    const due = isDue(a);
+    if (due) { d.total++; if (s.fez) d.fez++; }
+    d.resp += s.resp; d.ok += s.acertos;
+    d.acts.push({a, s});
+  }));
+  return Object.values(byDisc).sort((a,b)=>a.disc.localeCompare(b.disc,'pt'));
+}
 function tabDesempenho(root) {
-  root.appendChild(el('h2',{}, `Desempenho nas atividades — GeekieOne · ${serieLabel()}`));
-  root.appendChild(el('p',{class:'hint'}, '% de acertos nas questões respondidas. Célula cinza: não fez. ◌ = prazo ainda aberto.'));
-  if (state.serie==='Todas') { root.appendChild(el('div',{class:'notice'}, 'Selecione uma <b>série</b> no filtro.')); return; }
+  root.appendChild(el('h2',{}, `Desempenho nas atividades — GeekieOne · ${serieLabel()} · ${triLabel()}`));
+  root.appendChild(el('p',{class:'hint'}, '% de acertos nas questões respondidas. Célula cinza: não fez. ◌ = prazo ainda aberto. Selecione um <b>aluno</b> para ver o desempenho dele em todas as disciplinas.'));
+  /* ---- aluno selecionado ---- */
+  if (state.aluno) {
+    const turma = selectedTurmaOf(state.aluno);
+    const acts = DATA.gk_acts.filter(a => a.turma===turma && triMatch(a.tri) && (state.disc==='Todas'||a.disc===state.disc));
+    const sum = gkStudentSummary(state.aluno, acts);
+    if (!sum.length) { root.appendChild(el('div',{class:'notice'}, `Sem atividades do Geekie para <b>${esc(state.aluno)}</b> no período.`)); return; }
+    const panel = el('div',{class:'panel'});
+    panel.appendChild(el('h3',{}, `${esc(state.aluno)} <span class="muted">· ${esc(turma)}</span>`));
+    const tbl = el('table',{class:'grid'});
+    tbl.innerHTML = '<thead><tr><th>Disciplina</th><th>Atividades (prazo encerrado)</th><th>Feitas</th><th>Engajamento</th><th>Questões respondidas</th><th>Acertos</th><th>Desempenho</th><th>Turma</th></tr></thead>';
+    const tb = el('tbody');
+    let T=0,F=0,R=0,K=0;
+    sum.forEach(d => {
+      const perf = d.resp ? d.ok/d.resp : null;
+      const tActs = acts.filter(a=>a.disc===d.disc); let tr_=0,tk=0; tActs.forEach(a=>a.students.forEach(s=>{tr_+=s.resp; tk+=s.acertos;}));
+      const tp = tr_ ? tk/tr_ : null;
+      T+=d.total; F+=d.fez; R+=d.resp; K+=d.ok;
+      const tr = el('tr');
+      tr.innerHTML = `<td>${esc(d.disc)}</td><td>${d.total}</td><td>${d.fez}</td><td class="${d.total && d.fez/d.total<0.6?'bad':''}">${d.total?pct(d.fez/d.total):'—'}</td><td>${d.resp}</td><td>${d.ok}</td>
+        <td class="${perf!=null&&perf<=0.5?'bad':''}"><b>${pct(perf)}</b></td><td class="muted">${pct(tp)}</td>`;
+      tb.appendChild(tr);
+    });
+    const tf = el('tr',{class:'foot'}); tf.innerHTML = `<td>Total</td><td>${T}</td><td>${F}</td><td>${T?pct(F/T):'—'}</td><td>${R}</td><td>${K}</td><td>${R?pct(K/R):'—'}</td><td></td>`; tb.appendChild(tf);
+    tbl.appendChild(tb); panel.appendChild(tbl); root.appendChild(panel);
+    /* lista de atividades */
+    const p2 = el('div',{class:'panel'});
+    p2.appendChild(el('h3',{}, 'Atividade a atividade'));
+    const t2 = el('table',{class:'grid'});
+    t2.innerHTML = '<thead><tr><th>Atividade</th><th>Disciplina</th><th>Tipo</th><th>Prazo</th><th>Situação</th><th>Acertos</th><th>%</th></tr></thead>';
+    const tb2 = el('tbody');
+    sum.flatMap(d=>d.acts).sort((x,y)=>y.a.end.localeCompare(x.a.end)).forEach(({a,s}) => {
+      const p = s.resp ? s.acertos/s.resp : null;
+      const sit = !isDue(a) && !s.fez && s.resp===0 ? '<span class="badge neutral">prazo aberto</span>' : s.fez ? '<span class="badge ok">entregue</span>' : s.resp>0 ? '<span class="badge warn">respondeu sem entregar</span>' : '<span class="badge bad">não fez</span>';
+      const tr = el('tr'); tr.innerHTML = `<td data-tip="${actTip(a)}">${esc(a.title.slice(0,60))}</td><td>${esc(a.disc)}</td><td>${typeLabel(a.type)}</td><td>${brDate(a.end)}</td><td>${sit}</td><td>${s.resp?`${s.acertos}/${s.resp}`:'—'}</td><td class="${p!=null&&p<=0.5?'bad':''}">${pct(p)}</td>`;
+      tb2.appendChild(tr);
+    });
+    t2.appendChild(tb2); p2.appendChild(t2); root.appendChild(p2);
+    return;
+  }
+  if (state.serie==='Todas') { root.appendChild(el('div',{class:'notice'}, 'Selecione uma <b>série</b> no filtro (ou um aluno).')); return; }
   if (state.disc==='Todas') {
     const panel = el('div',{class:'panel'});
     panel.appendChild(el('h3',{}, 'Desempenho médio por disciplina'));
@@ -648,7 +998,8 @@ function tabDesempenho(root) {
       });
       return it;
     }).filter(it=>it.a||it.b);
-    panel.insertAdjacentHTML('beforeend', groupedBarChart(items, {max:1, labelW:200, valFmt:v=>Math.round(v*100)+'%', tickFmt:v=>Math.round(v*100)+'%'}));
+    if (!items.length) panel.appendChild(el('div',{class:'notice'}, 'Sem atividades respondidas no período.'));
+    else panel.insertAdjacentHTML('beforeend', groupedBarChart(items, {max:1, labelW:200, valFmt:v=>Math.round(v*100)+'%', tickFmt:v=>Math.round(v*100)+'%'}));
     panel.appendChild(el('p',{class:'hint'}, 'Selecione uma disciplina no filtro para abrir a matriz aluno × atividade.'));
     root.appendChild(panel);
     return;
@@ -660,7 +1011,7 @@ function tabDesempenho(root) {
     panel.appendChild(el('h3',{}, `${state.disc} — ${state.serie} ${u} <span class="muted">(${acts.length} atividades)</span>`));
     const tbl = el('table',{class:'grid'});
     let head = '<thead><tr><th>Aluno</th>';
-    acts.forEach((a,i) => head += `<th class="hm" data-tip="<b>${a.title.replace(/"/g,'&quot;')}</b>${a.prof??''}<br>prazo ${brDate(a.end)} · ${a.tq} questões">${brDate(a.end)}</th>`);
+    acts.forEach((a,i) => head += `<th class="hm" data-tip="${actTip(a)}">${brDate(a.end)}</th>`);
     head += '<th>Média</th><th>Fez</th></tr></thead>';
     tbl.innerHTML = head;
     const tb = el('tbody');
@@ -669,16 +1020,15 @@ function tabDesempenho(root) {
     acts.forEach((a,i) => a.students.forEach(s => { const e=studs[s.m]; e.cells[i]=s; e.resp+=s.resp; e.ok+=s.acertos; if(s.fez && isDue(a))e.fez++; }));
     const nDue = acts.filter(isDue).length;
     Object.entries(studs).sort((a,b)=>a[1].nome.localeCompare(b[1].nome,'pt'))
-      .filter(([m,e]) => matchAluno(e.nome))
       .forEach(([m,e]) => {
         const tr = el('tr');
-        let h = `<td>${e.nome}</td>`;
+        let h = `<td><a href="#" data-aluno="${esc(e.nome)}" style="color:inherit;text-decoration:none">${esc(e.nome)}</a></td>`;
         acts.forEach((a,i) => {
           const s = e.cells[i];
-          if ((!s || (!s.fez && s.resp===0)) && !isDue(a)) { h += `<td class="hm" data-tip="<b>${e.nome}</b>prazo aberto até ${brDate(a.end)} · ${a.title.replace(/"/g,'&quot;')}"><span class="muted">◌</span></td>`; return; }
-          if (!s || (!s.fez && s.resp===0)) { h += `<td class="hm" style="background:var(--surface-2)" data-tip="<b>${e.nome}</b>não fez · ${a.title.replace(/"/g,'&quot;')}"><span class="muted">·</span></td>`; return; }
+          if ((!s || (!s.fez && s.resp===0)) && !isDue(a)) { h += `<td class="hm" data-tip="<b>${esc(e.nome)}</b>prazo aberto até ${brDate(a.end)} · ${esc(a.title)}"><span class="muted">◌</span></td>`; return; }
+          if (!s || (!s.fez && s.resp===0)) { h += `<td class="hm" style="background:var(--surface-2)" data-tip="<b>${esc(e.nome)}</b>não fez · ${esc(a.title)}"><span class="muted">·</span></td>`; return; }
           const p = s.resp ? s.acertos/s.resp : null;
-          h += `<td class="hm" style="background:${heat(p==null?null:1-p)};color:${heatInk(p==null?null:1-p)}" data-tip="<b>${e.nome}</b>${a.title.replace(/"/g,'&quot;')}<br>${s.acertos}/${s.resp} corretas ${s.fez?'· entregue':'· respondeu sem entregar'}">${p==null?'—':Math.round(p*100)}</td>`;
+          h += `<td class="hm" style="background:${heat(p==null?null:1-p)};color:${heatInk(p==null?null:1-p)}" data-tip="<b>${esc(e.nome)}</b>${esc(a.title)}<br>${s.acertos}/${s.resp} corretas ${s.fez?'· entregue':'· respondeu sem entregar'}">${p==null?'—':Math.round(p*100)}</td>`;
         });
         const pm = e.resp ? e.ok/e.resp : null;
         h += `<td style="font-weight:700">${pm==null?'—':Math.round(pm*100)+'%'}</td><td>${Math.min(e.fez,nDue)}/${nDue}</td>`;
@@ -686,10 +1036,7 @@ function tabDesempenho(root) {
       });
     const tf = el('tr',{class:'foot'});
     let fh = '<td>Média da turma</td>';
-    acts.forEach((a,i) => {
-      let R=0,K=0; a.students.forEach(s=>{R+=s.resp;K+=s.acertos;});
-      fh += `<td class="hm">${R?Math.round(100*K/R):'—'}</td>`;
-    });
+    acts.forEach((a,i) => { let R=0,K=0; a.students.forEach(s=>{R+=s.resp;K+=s.acertos;}); fh += `<td class="hm">${R?Math.round(100*K/R):'—'}</td>`; });
     let R=0,K=0; acts.forEach(a=>a.students.forEach(s=>{R+=s.resp;K+=s.acertos;}));
     fh += `<td>${R?Math.round(100*K/R)+'%':'—'}</td><td></td>`;
     tf.innerHTML = fh; tb.appendChild(tf);
@@ -699,9 +1046,46 @@ function tabDesempenho(root) {
 
 /* ---------- ENGAJAMENTO SEMANAL ---------- */
 function tabEngajamento(root) {
-  root.appendChild(el('h2',{}, `Engajamento semanal — atividades não feitas · ${serieLabel()}`));
-  root.appendChild(el('p',{class:'hint'}, 'Cada célula: <b>não feitas/atribuídas</b> na semana do prazo (só prazos encerrados). Vermelho: 3+ não feitas. O tooltip lista as atividades que faltaram.'));
-  if (state.serie==='Todas') { root.appendChild(el('div',{class:'notice'}, 'Selecione uma <b>série</b> no filtro.')); return; }
+  root.appendChild(el('h2',{}, `Engajamento semanal — atividades não feitas · ${serieLabel()} · ${triLabel()}`));
+  root.appendChild(el('p',{class:'hint'}, 'Cada célula: <b>não feitas/atribuídas</b> na semana do prazo (só prazos encerrados). Vermelho: 3+ não feitas. O tooltip lista as atividades que faltaram. Selecione um <b>aluno</b> para ver a semana a semana dele por disciplina.'));
+  /* ---- aluno selecionado ---- */
+  if (state.aluno) {
+    const turma = selectedTurmaOf(state.aluno);
+    const acts = DATA.gk_acts.filter(a => a.turma===turma && triMatch(a.tri) && isDue(a) && (state.disc==='Todas'||a.disc===state.disc));
+    const mine = []; acts.forEach(a => a.students.forEach(s => { if (sameStudent(s.nome, state.aluno)) mine.push({a, s}); }));
+    if (!mine.length) { root.appendChild(el('div',{class:'notice'}, `Sem atividades com prazo encerrado para <b>${esc(state.aluno)}</b> no período.`)); return; }
+    const weeks = weeksOf(mine.map(x=>x.a));
+    const discs = [...new Set(mine.map(x=>x.a.disc))].sort((a,b)=>a.localeCompare(b,'pt'));
+    const panel = el('div',{class:'panel'});
+    panel.appendChild(el('h3',{}, `${esc(state.aluno)} <span class="muted">· ${esc(turma)}</span>`));
+    const tbl = el('table',{class:'grid'});
+    let head = '<thead><tr><th>Disciplina</th>';
+    weeks.forEach(w => head += `<th class="hm">${brDate(w)}</th>`);
+    head += '<th>Não feitas</th></tr></thead>';
+    tbl.innerHTML = head;
+    const tb = el('tbody');
+    const colTot = {}; weeks.forEach(w=>colTot[w]={t:0,m:0});
+    discs.forEach(d => {
+      const tr = el('tr'); let h = `<td>${esc(d)}</td>`; let M=0,T=0;
+      weeks.forEach(w => {
+        const list = mine.filter(x=>x.a.disc===d && x.a.monday===w);
+        if (!list.length) { h += '<td class="hm muted">·</td>'; return; }
+        const miss = list.filter(x=>!x.s.fez); M+=miss.length; T+=list.length; colTot[w].t+=list.length; colTot[w].m+=miss.length;
+        const style = miss.length>=2 ? 'background:var(--flag-bad-bg);color:var(--flag-bad);font-weight:700' : miss.length ? `background:${heat(0.35)};color:${heatInk(0.35)}` : 'color:var(--ok)';
+        const tipTxt = miss.length ? `<b>${esc(d)} — semana de ${brDate(w)}</b>Não fez: ${miss.map(x=>esc(x.a.title.slice(0,40))).join('; ')}` : `<b>${esc(d)}</b>Semana de ${brDate(w)}: tudo em dia (${list.length})`;
+        h += `<td class="hm" style="${style}" data-tip="${tipTxt}">${miss.length}/${list.length}</td>`;
+      });
+      h += `<td class="${T&&M/T>=0.4?'bad':''}"><b>${M}/${T}</b></td>`;
+      tr.innerHTML = h; tb.appendChild(tr);
+    });
+    const tf = el('tr',{class:'foot'}); let fh = '<td>Total da semana</td>';
+    weeks.forEach(w => fh += `<td class="hm ${colTot[w].m>=3?'bad':''}">${colTot[w].m}/${colTot[w].t}</td>`);
+    const M=mine.filter(x=>!x.s.fez).length; fh += `<td>${M}/${mine.length} (${pct(1-M/mine.length)} feitas)</td>`;
+    tf.innerHTML = fh; tb.appendChild(tf);
+    tbl.appendChild(tb); panel.appendChild(tbl); root.appendChild(panel);
+    return;
+  }
+  if (state.serie==='Todas') { root.appendChild(el('div',{class:'notice'}, 'Selecione uma <b>série</b> no filtro (ou um aluno).')); return; }
   UNITS.filter(u=>unitsSel().includes(u)).forEach(u => {
     const acts = DATA.gk_acts.filter(a=>a.unit===u && a.serie===state.serie && triMatch(a.tri) && isDue(a) && (state.disc==='Todas'||a.disc===state.disc));
     if (!acts.length) return;
@@ -722,17 +1106,16 @@ function tabEngajamento(root) {
       if (s.fez) w.f++; else { w.m.push(a); e.missed++; }
     }));
     Object.entries(studs).sort((a,b)=>b[1].missed-a[1].missed || a[1].nome.localeCompare(b[1].nome,'pt'))
-      .filter(([m,e]) => matchAluno(e.nome))
       .forEach(([m,e]) => {
         const tr = el('tr');
-        let h = `<td>${e.nome}</td>`;
+        let h = `<td><a href="#" data-aluno="${esc(e.nome)}" style="color:inherit;text-decoration:none">${esc(e.nome)}</a></td>`;
         weeks.forEach(wk => {
           const w = e.weeks[wk];
           if (!w) { h += '<td class="hm muted">·</td>'; return; }
           const miss = w.m.length;
           const style = miss>=3 ? 'background:var(--flag-bad-bg);color:var(--flag-bad);font-weight:700'
                        : miss>0 ? `background:${heat(Math.min(miss/3,0.6))};color:${heatInk(Math.min(miss/3,0.6))}` : 'color:var(--ok)';
-          const tipTxt = miss ? `<b>${e.nome} — semana de ${brDate(wk)}</b>Não fez: ${w.m.map(x=>`${x.disc} (${x.title.slice(0,40).replace(/"/g,'&quot;')})`).join('; ')}` : `<b>${e.nome}</b>Semana de ${brDate(wk)}: tudo em dia (${w.t} atividades)`;
+          const tipTxt = miss ? `<b>${esc(e.nome)} — semana de ${brDate(wk)}</b>Não fez: ${w.m.map(x=>`${esc(x.disc)} (${esc(x.title.slice(0,40))})`).join('; ')}` : `<b>${esc(e.nome)}</b>Semana de ${brDate(wk)}: tudo em dia (${w.t} atividades)`;
           h += `<td class="hm" style="${style}" data-tip="${tipTxt}">${miss}/${w.t}</td>`;
         });
         h += `<td style="font-weight:700">${e.missed}/${e.total}</td>`;
@@ -742,30 +1125,84 @@ function tabEngajamento(root) {
   });
 }
 
-/* ---------- SINALIZAÇÕES ---------- */
-function tabSinalizacoes(root) {
-  root.appendChild(el('h2',{}, `Quadros de sinalização · ${serieLabel()}`));
-  root.appendChild(el('p',{class:'hint'}, 'Baixo engajamento: 3+ atividades não feitas na mesma semana <i>ou</i> 2 seguidas da mesma disciplina. Baixo desempenho: rendimento ≤ 50% (disciplinas com 5+ questões respondidas no período).'));
-  const eng = lowEngagementFlags(), perf = lowPerformanceFlags();
-  root.appendChild(el('h3',{}, `🔻 Baixo engajamento <span class="badge bad">${eng.length} alunos</span>`));
+/* ---------- BUSCA ATIVA ---------- */
+function tabBusca(root) {
+  root.appendChild(el('h2',{}, `Busca Ativa · ${serieLabel()} · ${triLabel()}`));
+  root.appendChild(el('p',{class:'hint'}, 'Fila de alunos a acompanhar, com pendências <b>acumuladas</b> do início do período até a semana escolhida. Critérios: 3+ atividades não feitas na mesma semana, 2 seguidas da mesma disciplina, ou rendimento ≤ 50%. Ao <b>agendar atendimento</b>, as pendências até aquela semana são zeradas e o aluno vai para o fim da fila — só volta se acumular novas.'));
+  const dueActs = DATA.gk_acts.filter(a => unitsSel().includes(a.unit) && serieMatch(a.serie) && triMatch(a.tri) && isDue(a));
+  const weeks = weeksOf(dueActs);
+  if (!weeks.length) { root.appendChild(el('div',{class:'notice'}, 'Sem atividades com prazo encerrado no período selecionado.')); return; }
+  if (!state.week || !weeks.includes(state.week)) state.week = weeks[weeks.length-1];
+  const tbar = el('div',{class:'toolbar'});
+  const wsel = el('select',{class:'inline'});
+  wsel.innerHTML = weeks.map(w => { const end = new Date(w+'T12:00:00'); end.setDate(end.getDate()+6); return `<option value="${w}"${w===state.week?' selected':''}>Semana de ${brDate(w)} a ${brDate(end.toISOString().slice(0,10))}</option>`; }).join('');
+  wsel.onchange = e => { state.week = e.target.value; render(); };
+  tbar.append(el('label',{}, 'Até a semana: '), wsel);
+  const prevBtn = el('button',{class:'ghost'}, '← anterior'), nextBtn = el('button',{class:'ghost'}, 'próxima →');
+  prevBtn.onclick = () => { const i = weeks.indexOf(state.week); if (i>0) { state.week = weeks[i-1]; render(); } };
+  nextBtn.onclick = () => { const i = weeks.indexOf(state.week); if (i<weeks.length-1) { state.week = weeks[i+1]; render(); } };
+  tbar.append(prevBtn, nextBtn);
+  root.appendChild(tbar);
+
+  /* semana de referência do agendamento ativo de cada aluno */
+  const afterOf = nome => { const t = selectedTurmaOf(nome); const ag = agendaOf(nome, t); return ag && ag.semana_ref ? ag.semana_ref : null; };
+  const flagsAll = studentFlags(state.week, afterOf).filter(f => matchAluno(f.nome));
+  const fs = freqSummary({});
+  const faltasOf = (nome, turma) => { const e = Object.values(fs).find(x => x.turma===turma && sameStudent(x.nome, nome)); return e ? e.tot : null; };
+  const ocOf = (nome, turma) => ocorrFiltered().filter(o => sameStudent(o.nome, nome) && (!o.serie || o.turma===turma)).length;
+
+  const fila = flagsAll.filter(f => f.reasons.length).sort((a,b)=> b.score - a.score || a.nome.localeCompare(b.nome,'pt'));
+  const agendados = flagsAll.filter(f => !f.reasons.length && agendaOf(f.nome, f.turma)).sort((a,b)=>a.nome.localeCompare(b.nome,'pt'));
+
+  const card = (f, sched) => {
+    const it = el('div',{class:'item flagcard'+(sched?' sched':'')});
+    const ag = agendaOf(f.nome, f.turma);
+    const fal = faltasOf(f.nome, f.turma); const nOc = ocOf(f.nome, f.turma);
+    const ctx = [];
+    if (fal && fal.inf) ctx.push(`<span class="badge ${faltaPct(fal)>=0.25?'bad':faltaPct(fal)>=0.1?'warn':'neutral'}" data-tip="Faltas no período (ActiveSoft)">${fal.f+fal.j} faltas · ${pct(faltaPct(fal))}</span>`);
+    if (nOc) ctx.push(`<span class="badge warn" data-tip="Ocorrências disciplinares no período">${nOc} ocorrência${nOc>1?'s':''}</span>`);
+    ctx.push(`<span class="badge neutral">${f.missed}/${f.total} não feitas</span>`);
+    let agHtml = '';
+    if (ag) agHtml = `<div style="margin-top:6px;font-size:.8rem;color:var(--brand-teal)"><b style="display:inline">📅 Atendimento ${ag.status==='realizado'?'realizado':'agendado'}${ag.agendado_para?' para '+brDateFull(ag.agendado_para):''}</b> · zera pendências até ${ag.semana_ref?brDate(ag.semana_ref):'—'} <span class="obs muted" data-obs="${esc(ag.obs_enc||'')}"></span></div>`;
+    it.innerHTML = `<b><a href="#" data-aluno="${esc(f.nome)}" style="color:inherit;text-decoration:none">${esc(f.nome)}</a> <span class="muted">· ${esc(f.turma)}</span></b>
+      <div class="why">${f.reasons.length ? f.reasons.slice(0,4).map(r=>'• '+esc(r.txt)).join('<br>') : '<span class="muted">Sem novas pendências desde o atendimento.</span>'}${f.reasons.length>4?`<br><span class="muted">+ ${f.reasons.length-4} sinais</span>`:''}</div>
+      <div class="actions">${ctx.join(' ')}</div>${agHtml}<div class="actions"></div>`;
+    const act = it.querySelectorAll('.actions')[1];
+    const b1 = el('button',{class:'primary teal'}, ag && ag.status==='agendado' ? 'Reagendar' : 'Agendar atendimento');
+    b1.onclick = () => openScheduleModal(f, state.week);
+    act.appendChild(b1);
+    if (ag && ag.status==='agendado') {
+      const b2 = el('button',{class:'ghost'}, 'Marcar realizado'); b2.onclick = async () => { try { await updateAgenda(ag.id, {status:'realizado'}); render(); } catch(e) { alert('Não foi possível atualizar: '+e); } };
+      const b3 = el('button',{class:'ghost'}, 'Cancelar'); b3.onclick = async () => { try { await updateAgenda(ag.id, {status:'cancelado'}); render(); } catch(e) { alert('Não foi possível atualizar: '+e); } };
+      act.append(b2, b3);
+    }
+    if (ag && ag.obs_enc && window.openpgp) decObs(ag.obs_enc).then(t => { const o = it.querySelector('.obs'); if (o && t) o.textContent = ' · "'+t+'"'; });
+    return it;
+  };
+
+  root.appendChild(el('h3',{}, `🔻 Fila de busca ativa <span class="badge bad">${fila.length} alunos</span>`));
   const la = el('div',{class:'flaglist'});
-  eng.filter(f => matchAluno(f.nome)).forEach(f => {
-    const it = el('div',{class:'item flagcard'});
-    it.innerHTML = `<b>${f.nome} <span class="muted">· ${f.serie} ${f.unit}</span></b><div class="why">${f.reasons.slice(0,4).map(r=>'• '+r).join('<br>')}${f.reasons.length>4?`<br><span class="muted">+ ${f.reasons.length-4} ocorrências</span>`:''}</div>`;
-    la.appendChild(it);
-  });
-  if (!eng.length) la.appendChild(el('div',{class:'item'}, '<span class="badge ok">Nenhum aluno sinalizado no período</span>'));
+  fila.forEach(f => la.appendChild(card(f, false)));
+  if (!fila.length) la.appendChild(el('div',{class:'item'}, '<span class="badge ok">Nenhum aluno sinalizado até esta semana</span>'));
   root.appendChild(la);
-  root.appendChild(el('h3',{}, `📉 Baixo desempenho <span class="badge bad">${perf.length} alunos</span>`));
-  const lb = el('div',{class:'flaglist'});
-  perf.filter(f => matchAluno(f.nome)).forEach(f => {
-    const it = el('div',{class:'item flagcard'});
-    it.innerHTML = `<b>${f.nome} <span class="muted">· ${f.serie} ${f.unit}</span> — ${f.overall!=null?Math.round(f.overall*100)+'% geral':''}</b>
-      <div class="why">${f.discs.length? 'Disciplinas críticas: '+f.discs.join('; ') : 'Rendimento geral abaixo de 50%'}</div>`;
-    lb.appendChild(it);
-  });
-  if (!perf.length) lb.appendChild(el('div',{class:'item'}, '<span class="badge ok">Nenhum aluno sinalizado no período</span>'));
-  root.appendChild(lb);
+  if (agendados.length) {
+    root.appendChild(el('h3',{}, `📅 Atendidos / agendados sem novas pendências <span class="badge neutral">${agendados.length}</span>`));
+    const lb = el('div',{class:'flaglist'});
+    agendados.forEach(f => lb.appendChild(card(f, true)));
+    root.appendChild(lb);
+  }
+  /* histórico de agendamentos no filtro */
+  const hist = AGENDA.filter(a => Object.keys(ALUNOS_POR_TURMA).some(t => unitsSel().some(u=>t.endsWith(' '+u)) && (state.serie==='Todas' || DATA.asf_rows.some(r=>r.turma===t && r.serie===state.serie)) && t===a.turma));
+  if (hist.length) {
+    const p = el('div',{class:'panel'});
+    p.appendChild(el('h3',{}, `Histórico de atendimentos <span class="muted">(${hist.length})</span>`));
+    const tbl = el('table',{class:'grid'}); tbl.innerHTML = '<thead><tr><th>Aluno</th><th>Turma</th><th>Semana ref.</th><th>Atendimento</th><th>Registrado em</th><th>Situação</th><th>Observação</th></tr></thead>';
+    const tb = el('tbody');
+    const nameOfHash = h => { for (const [t,names] of Object.entries(ALUNOS_POR_TURMA)) for (const n of names) if (HASHES[normName(n)+'|'+t]===h) return n; return '(aluno não identificado)'; };
+    hist.forEach(a => { const tr = el('tr'); tr.innerHTML = `<td>${esc(nameOfHash(a.aluno_hash))}</td><td>${esc(a.turma||'')}</td><td>${brDate(a.semana_ref)}</td><td>${brDateFull(a.agendado_para)}</td><td>${brDateFull((a.agendado_em||'').slice(0,10))}</td><td><span class="badge ${a.status==='realizado'?'ok':a.status==='cancelado'?'neutral':'warn'}">${a.status}</span></td><td class="wrap obs" data-obs="${esc(a.obs_enc||'')}"></td>`; tb.appendChild(tr);
+      if (a.obs_enc && window.openpgp) decObs(a.obs_enc).then(t => { tr.querySelector('.obs').textContent = t; }); });
+    tbl.appendChild(tb); p.appendChild(tbl); root.appendChild(p);
+  }
 }
 
 /* ---------- AQ ---------- */
@@ -773,8 +1210,8 @@ function tabAQ(root) {
   root.appendChild(el('h2',{}, `AQ calculada — engajamento por disciplina · ${serieLabel()}`));
   root.appendChild(el('p',{class:'hint'}, 'AQ = % de atividades feitas na disciplina no trimestre × 10 (só prazos encerrados). Compare com a AQ lançada no ActiveSoft na aba Notas.'));
   if (state.serie==='Todas') { root.appendChild(el('div',{class:'notice'}, 'Selecione uma <b>série</b> no filtro.')); return; }
-  const tri = state.tri===0 ? 2 : state.tri;
-  if (state.tri===0) root.appendChild(el('div',{class:'notice'}, 'Com o filtro "Ano", a AQ mostrada é a do <b>2º trimestre</b>.'));
+  const tri = state.tri===0 ? 3 : state.tri;
+  if (state.tri===0) root.appendChild(el('div',{class:'notice'}, 'Com o filtro "Ano", a AQ mostrada é a do <b>3º trimestre</b>.'));
   UNITS.filter(u=>unitsSel().includes(u)).forEach(u => {
     const acts = DATA.gk_acts.filter(a=>a.unit===u && a.serie===state.serie && a.tri===tri && isDue(a) && (state.disc==='Todas'||a.disc===state.disc));
     if (!acts.length) return;
@@ -783,7 +1220,7 @@ function tabAQ(root) {
     panel.appendChild(el('h3',{}, `${state.serie} ${u} — ${tri}º trimestre`));
     const tbl = el('table',{class:'grid'});
     let head = '<thead><tr><th>Aluno</th>';
-    discs.forEach(d => head += `<th class="hm" data-tip="${d}">${d.length>14? d.slice(0,13)+'…':d}</th>`);
+    discs.forEach(d => head += `<th class="hm" data-tip="${esc(d)}">${d.length>14? esc(d.slice(0,13))+'…':esc(d)}</th>`);
     head += '<th>AQ média</th></tr></thead>';
     tbl.innerHTML = head;
     const tb = el('tbody');
@@ -797,23 +1234,20 @@ function tabAQ(root) {
       .filter(([m,e]) => matchAluno(e.nome))
       .forEach(([m,e]) => {
         const tr = el('tr');
-        let h = `<td>${e.nome}</td>`;
+        let h = `<td>${esc(e.nome)}</td>`;
         const aqs = [];
         discs.forEach(d => {
           const x = e.byDisc[d];
           if (!x) { h += '<td class="hm muted">·</td>'; return; }
           const aq = 10*x.f/x.t; aqs.push(aq);
-          h += `<td class="hm" style="background:${heat(1-aq/10)};color:${heatInk(1-aq/10)}" data-tip="<b>${e.nome} — ${d}</b>fez ${x.f} de ${x.t} atividades → AQ ${fmt(aq)}">${fmt(aq)}</td>`;
+          h += `<td class="hm" style="background:${heat(1-aq/10)};color:${heatInk(1-aq/10)}" data-tip="<b>${esc(e.nome)} — ${esc(d)}</b>fez ${x.f} de ${x.t} atividades → AQ ${fmt(aq)}">${fmt(aq)}</td>`;
         });
         h += `<td style="font-weight:700">${fmt(mean(aqs))}</td>`;
         tr.innerHTML = h; tb.appendChild(tr);
       });
     const tf = el('tr',{class:'foot'});
     let fh = '<td>Média da turma</td>';
-    discs.forEach(d => {
-      let T=0,F=0; acts.filter(a=>a.disc===d).forEach(a=>a.students.forEach(s=>{T++; if(s.fez)F++;}));
-      fh += `<td class="hm">${T?fmt(10*F/T):'—'}</td>`;
-    });
+    discs.forEach(d => { let T=0,F=0; acts.filter(a=>a.disc===d).forEach(a=>a.students.forEach(s=>{T++; if(s.fez)F++;})); fh += `<td class="hm">${T?fmt(10*F/T):'—'}</td>`; });
     let T=0,F=0; acts.forEach(a=>a.students.forEach(s=>{T++; if(s.fez)F++;}));
     fh += `<td>${T?fmt(10*F/T):'—'}</td>`;
     tf.innerHTML = fh; tb.appendChild(tf);
@@ -823,8 +1257,8 @@ function tabAQ(root) {
 
 /* ---------- PROFESSORES ---------- */
 function tabProfessores(root) {
-  root.appendChild(el('h2',{}, `Envios de atividades pelos professores · ${serieLabel()}`));
-  root.appendChild(el('p',{class:'hint'}, 'Quadro diário por data de criação no GeekieOne. Amarelo: Bessa · Magenta: Sul. Abaixo, disciplinas sem envio nos últimos 14 dias.'));
+  root.appendChild(el('h2',{}, `Envios de atividades pelos professores · ${serieLabel()} · ${triLabel()}`));
+  root.appendChild(el('p',{class:'hint'}, 'Quadro diário por data de criação no GeekieOne. Amarelo: Bessa · Magenta: Sul. Borda direita do chip: <span class="chip casa">teal = para casa</span> <span class="chip sala">magenta = em sala</span>. Passe o cursor para ver tipo e prazo de cada atividade. Abaixo, disciplinas sem envio nos últimos 14 dias.'));
   const acts = DATA.gk_acts.filter(a => unitsSel().includes(a.unit) && serieMatch(a.serie) && triMatch(a.tri) && (state.disc==='Todas'||a.disc===state.disc));
   const byDay = {};
   acts.forEach(a => { (byDay[a.created] = byDay[a.created] || []).push(a); });
@@ -837,9 +1271,11 @@ function tabProfessores(root) {
     cell.appendChild(el('div',{class:'dt'}, dt.toLocaleDateString('pt-BR',{weekday:'short', day:'2-digit', month:'2-digit'})));
     const seen = new Set();
     byDay[d].forEach(a => {
-      const key = a.unit+'|'+(a.prof||'?')+'|'+a.disc+'|'+a.turma;
+      const key = a.unit+'|'+(a.prof||'?')+'|'+a.disc+'|'+a.turma+'|'+typeClass(a.type);
       if (seen.has(key)) return; seen.add(key);
-      const c = el('span',{class:'chip '+a.unit.toLowerCase(), 'data-tip':`<b>${a.prof||'—'} — ${a.disc} (${a.serie} ${a.unit})</b>${byDay[d].filter(x=>x.unit===a.unit&&x.prof===a.prof&&x.disc===a.disc).map(x=>x.title.slice(0,50)).join('<br>')}`}, `${(a.prof||'—').split(' ')[0]} · ${a.disc.length>12?a.disc.slice(0,11)+'…':a.disc}${state.serie==='Todas'?' · '+a.serie.replace(' série','ª').replace(' ano','º'):''}`);
+      const group = byDay[d].filter(x=>x.unit===a.unit&&x.prof===a.prof&&x.disc===a.disc&&x.turma===a.turma&&typeClass(x.type)===typeClass(a.type));
+      const tipTxt = `<b>${esc(a.prof||'—')} — ${esc(a.disc)} (${a.serie} ${a.unit})</b>${group.map(x=>`${x.type==='homework'?'🏠 Para casa':'🏫 Em sala'} · ${esc(x.title.slice(0,50))}<br>&nbsp;&nbsp;prazo ${brDateFull(x.end)}${x.endTime?' às '+x.endTime:''} · ${x.tq} questões`).join('<br>')}`;
+      const c = el('span',{class:'chip '+a.unit.toLowerCase()+' '+typeClass(a.type), 'data-tip':tipTxt}, `${a.type==='homework'?'🏠':'🏫'} ${(a.prof||'—').split(' ')[0]} · ${a.disc.length>12?a.disc.slice(0,11)+'…':a.disc}${state.serie==='Todas'?' · '+a.serie.replace(' série','ª').replace(' ano','º'):''}${group.length>1?' ×'+group.length:''}`);
       cell.appendChild(c);
     });
     grid.appendChild(cell);
@@ -855,20 +1291,304 @@ function tabProfessores(root) {
     const panel = el('div',{class:'panel'});
     panel.appendChild(el('h3',{}, `Sem envio há 14+ dias — ${u}`));
     panel.innerHTML += missing.length
-      ? missing.map(sd => { const [sr, d] = sd.split(' · '); const items = scope.filter(a=>a.serie===sr&&a.disc===d); const last = items.map(a=>a.created).sort().pop(); const prof = items[items.length-1]?.prof||'—'; return `<span class="chip ${u.toLowerCase()}" data-tip="<b>${d} — ${sr} ${u}</b>último envio em ${brDate(last)} · ${prof}">${d} (${sr}) <span class="muted">últ.: ${brDate(last)}</span></span>`; }).join(' ')
+      ? missing.map(sd => { const [sr, d] = sd.split(' · '); const items = scope.filter(a=>a.serie===sr&&a.disc===d); const last = items.map(a=>a.created).sort().pop(); const prof = items[items.length-1]?.prof||'—'; return `<span class="chip ${u.toLowerCase()}" data-tip="<b>${esc(d)} — ${sr} ${u}</b>último envio em ${brDate(last)} · ${esc(prof)}">${esc(d)} (${sr}) <span class="muted">últ.: ${brDate(last)}</span></span>`; }).join(' ')
       : '<span class="badge ok">Todas as disciplinas enviaram atividades no período</span>';
     root.appendChild(panel);
   });
+}
+/* ---------- PRESENÇA ---------- */
+function tabPresenca(root) {
+  root.appendChild(el('h2',{}, `Presença — faltas por disciplina · ${serieLabel()} · ${triLabel()}`));
+  root.appendChild(el('p',{class:'hint'}, 'Faltas registradas nos diários do ActiveSoft, sobre as aulas já dadas e com frequência informada (aulas futuras ou não lançadas não contam). Justificadas contam como falta, mas aparecem no tooltip. Vermelho: ≥ 25% de faltas · sombreado: ≥ 10%. Selecione um <b>aluno</b> para ver as datas.'));
+  const sel = selectedAsfAluno();
+  if (state.aluno) {
+    if (!sel) { root.appendChild(el('div',{class:'notice'}, `Não encontrei <b>${esc(state.aluno)}</b> nos diários do ActiveSoft.`)); return; }
+    const fs = freqSummary({aid: sel.aid, disc: state.disc});
+    const e = fs[sel.aid];
+    if (!e) { root.appendChild(el('div',{class:'notice'}, 'Sem aulas com frequência lançada para este aluno no período.')); return; }
+    const panel = el('div',{class:'panel'});
+    panel.appendChild(el('h3',{}, `${esc(sel.nome)} <span class="muted">· ${esc(sel.turma)}</span> — ${e.tot.f+e.tot.j} faltas em ${e.tot.inf} aulas (${pct(faltaPct(e.tot))})`));
+    const tbl = el('table',{class:'grid'});
+    tbl.innerHTML = '<thead><tr><th>Disciplina</th><th>Aulas dadas</th><th>Presenças</th><th>Faltas</th><th>Justificadas</th><th>% faltas</th><th>Datas das faltas</th></tr></thead>';
+    const tb = el('tbody');
+    Object.entries(e.byDisc).sort((a,b)=>a[0].localeCompare(b[0],'pt')).forEach(([d,x]) => {
+      const tr = el('tr'); const p = faltaPct(x);
+      tr.innerHTML = `<td>${esc(d)}</td><td>${x.inf}</td><td>${x.p}</td><td>${x.f}</td><td>${x.j}</td><td style="${faltaColor(p)}">${pct(p)}</td><td class="wrap muted">${x.datasF.map(s=>s.replace(/^(\d{4})-(\d{2})-(\d{2})/, '$3/$2')).join(', ')||'—'}</td>`;
+      tb.appendChild(tr);
+    });
+    tbl.appendChild(tb); panel.appendChild(tbl); root.appendChild(panel);
+    return;
+  }
+  if (state.serie==='Todas') { root.appendChild(el('div',{class:'notice'}, 'Selecione uma <b>série</b> no filtro (ou um aluno).')); return; }
+  const fs = freqSummary({disc: state.disc});
+  UNITS.filter(u=>unitsSel().includes(u)).forEach(u => {
+    const studs = Object.values(fs).filter(e => e.unit===u && e.serie===state.serie);
+    if (!studs.length) return;
+    const discs = [...new Set(studs.flatMap(e=>Object.keys(e.byDisc)))].sort((a,b)=>a.localeCompare(b,'pt'));
+    const panel = el('div',{class:'panel'});
+    panel.appendChild(el('h3',{}, `${state.serie} ${u}`));
+    const tbl = el('table',{class:'grid'});
+    let head = '<thead><tr><th>Aluno</th>';
+    discs.forEach(d => head += `<th class="hm" data-tip="${esc(d)}">${d.length>12? esc(d.slice(0,11))+'…':esc(d)}</th>`);
+    head += '<th>Faltas</th><th>Aulas</th><th>% faltas</th></tr></thead>';
+    tbl.innerHTML = head;
+    const tb = el('tbody');
+    studs.sort((a,b)=>(faltaPct(b.tot)||0)-(faltaPct(a.tot)||0) || a.nome.localeCompare(b.nome,'pt')).forEach(e => {
+      const tr = el('tr');
+      let h = `<td><a href="#" data-aluno="${esc(e.nome)}" style="color:inherit;text-decoration:none">${esc(e.nome)}</a></td>`;
+      discs.forEach(d => {
+        const x = e.byDisc[d];
+        if (!x || !x.inf) { h += '<td class="hm muted">·</td>'; return; }
+        const p = faltaPct(x);
+        h += `<td class="hm" style="${faltaColor(p)}" data-tip="<b>${esc(e.nome)} — ${esc(d)}</b>${x.f} faltas${x.j?' + '+x.j+' justificadas':''} em ${x.inf} aulas (${pct(p)})${x.datasF.length?'<br>'+x.datasF.map(s=>s.replace(/^(\d{4})-(\d{2})-(\d{2})/, '$3/$2')).join(', '):''}">${x.f+x.j}</td>`;
+      });
+      const p = faltaPct(e.tot);
+      h += `<td><b>${e.tot.f+e.tot.j}</b></td><td>${e.tot.inf}</td><td style="${faltaColor(p)}">${pct(p)}</td>`;
+      tr.innerHTML = h; tb.appendChild(tr);
+    });
+    const tf = el('tr',{class:'foot'});
+    let fh = '<td>Turma (% faltas)</td>';
+    discs.forEach(d => { let f=0,inf=0; studs.forEach(e=>{ const x=e.byDisc[d]; if(x){ f+=x.f+x.j; inf+=x.inf; } }); fh += `<td class="hm">${inf?pct(f/inf):'—'}</td>`; });
+    let f=0,inf=0; studs.forEach(e=>{ f+=e.tot.f+e.tot.j; inf+=e.tot.inf; });
+    fh += `<td>${f}</td><td>${inf}</td><td>${inf?pct(f/inf):'—'}</td>`;
+    tf.innerHTML = fh; tb.appendChild(tf);
+    tbl.appendChild(tb); panel.appendChild(tbl); root.appendChild(panel);
+  });
+}
+
+/* ---------- OCORRÊNCIAS ---------- */
+function ocorrList(list) {
+  const wrap = el('div');
+  list.forEach(o => {
+    const it = el('div',{class:'oc-item'});
+    it.innerHTML = `<div><b>${brDateFull(o.dt)}</b> · ${esc(o.tipo)} ${o.imp?'<span class="badge bad">impedimento</span>':''}</div>
+      <div class="meta">${esc(o.nome)} · ${esc(o.turma||'')} · registrado por ${esc(o.reg||'—')}${o.lib?' · liberado em '+brDateFull(o.lib):''}</div>
+      <details><summary class="meta">${esc(o.obs.slice(0,120))}${o.obs.length>120?'…':''}</summary><div class="txt">${esc(o.obs)}</div></details>`;
+    wrap.appendChild(it);
+  });
+  return wrap;
+}
+function tabOcorrencias(root) {
+  root.appendChild(el('h2',{}, `Ocorrências disciplinares — ActiveSoft · ${serieLabel()} · ${triLabel()}`));
+  root.appendChild(el('p',{class:'hint'}, 'Todas as ocorrências registradas no ActiveSoft em 2026 para os alunos das turmas escolares, agrupadas por aluno. O trimestre é atribuído pela data da ocorrência. Clique na ocorrência para ler o registro completo.'));
+  const sel = selectedAsfAluno();
+  let list = ocorrFiltered(sel ? {aid: sel.aid} : {});
+  if (state.aluno && !sel) list = list.filter(o => sameStudent(o.nome, state.aluno));
+  if (!list.length) { root.appendChild(el('div',{class:'notice'}, '<span class="badge ok">Nenhuma ocorrência no período/filtro selecionado.</span>')); return; }
+  /* resumo por tipo */
+  const byTipo = {}; list.forEach(o => { byTipo[o.tipo] = (byTipo[o.tipo]||0)+1; });
+  const cards = el('div',{class:'cards'});
+  const mk = (k,v,d) => { const c = el('div',{class:'card'}); c.append(el('div',{class:'k'},k), el('div',{class:'v'},v), el('div',{class:'d'},d||'')); return c; };
+  cards.append(mk('Ocorrências', String(list.length), `${new Set(list.map(o=>o.aid)).size} alunos`), mk('Bessa', String(list.filter(o=>o.unit==='Bessa').length), ''), mk('Sul', String(list.filter(o=>o.unit==='Sul').length), ''), mk('Com impedimento', String(list.filter(o=>o.imp).length), ''));
+  root.appendChild(cards);
+  const pt = el('div',{class:'panel'});
+  pt.appendChild(el('h3',{}, 'Por tipo'));
+  pt.innerHTML += Object.entries(byTipo).sort((a,b)=>b[1]-a[1]).map(([t,n])=>`<span class="chip">${esc(t)} <b>${n}</b></span>`).join(' ');
+  root.appendChild(pt);
+  /* por aluno */
+  const byAluno = {}; list.forEach(o => { (byAluno[o.aid+'|'+o.nome] = byAluno[o.aid+'|'+o.nome] || []).push(o); });
+  const panel = el('div',{class:'panel'});
+  panel.appendChild(el('h3',{}, 'Por aluno'));
+  Object.entries(byAluno).sort((a,b)=>b[1].length-a[1].length || a[1][0].nome.localeCompare(b[1][0].nome,'pt')).forEach(([k, ocs]) => {
+    const o0 = ocs[0];
+    const d = el('details',{style:'margin:6px 0', ...(sel?{open:''}:{})});
+    d.innerHTML = `<summary><b>${esc(o0.nome)}</b> <span class="muted">· ${esc(o0.turma||'')}</span> <span class="badge ${ocs.length>=3?'bad':'warn'}">${ocs.length}</span> <span class="muted" style="font-size:.8rem">última: ${brDate(ocs[0].dt)} · ${esc(ocs[0].tipo.slice(0,50))}</span></summary>`;
+    d.appendChild(ocorrList(ocs));
+    panel.appendChild(d);
+  });
+  root.appendChild(panel);
+}
+
+/* ---------- RELATÓRIO DO ALUNO ---------- */
+function studentDossier() {
+  const sel = selectedAsfAluno();
+  const nome = sel ? sel.nome : state.aluno;
+  const turma = sel ? sel.turma : selectedTurmaOf(state.aluno);
+  const tris = trisSel();
+  const notas = sel ? DATA.asf_rows.filter(r => r.aid===sel.aid && triMatch(r.tri)) : [];
+  const notasTurma = DATA.asf_rows.filter(r => r.turma===turma && triMatch(r.tri));
+  const fs = sel ? (freqSummary({aid: sel.aid})[sel.aid] || null) : null;
+  const oc = sel ? ocorrFiltered({aid: sel.aid}) : [];
+  const gacts = DATA.gk_acts.filter(a => a.turma===turma && triMatch(a.tri));
+  const gk = gkStudentSummary(nome, gacts);
+  const due = gacts.filter(isDue);
+  let T=0,F=0,R=0,K=0; gk.forEach(d=>{T+=d.total;F+=d.fez;R+=d.resp;K+=d.ok;});
+  let TT=0,TF=0,TR=0,TK=0; due.forEach(a=>a.students.forEach(s=>{TT++; if(s.fez)TF++;})); gacts.forEach(a=>a.students.forEach(s=>{TR+=s.resp;TK+=s.acertos;}));
+  /* semanas com 3+ não feitas */
+  const byWeek = {}; due.forEach(a => a.students.forEach(s => { if (sameStudent(s.nome,nome)) { const w = byWeek[a.monday] = byWeek[a.monday] || {t:0,m:0}; w.t++; if(!s.fez) w.m++; } }));
+  const badWeeks = Object.entries(byWeek).filter(([w,x])=>x.m>=3).map(([w])=>w).sort();
+  const mediaAluno = k => mean(notas.filter(r=>r[k]!=null).map(r=>r[k]));
+  const mediaTurma = k => mean(notasTurma.filter(r=>r[k]!=null).map(r=>r[k]));
+  const discsBaixas = [...new Set(notas.filter(r => (r.media!=null ? r.media : (r.ae1!=null||r.ae2!=null ? mean([r.ae1,r.ae2].filter(x=>x!=null)) : null)) < 7).map(r=>r.disc))];
+  const gkFracos = gk.filter(d=>d.resp>=5 && d.ok/d.resp<=0.5).map(d=>`${d.disc} (${pct(d.ok/d.resp)})`);
+  const gkBaixoEng = gk.filter(d=>d.total>=3 && d.fez/d.total<0.6).map(d=>`${d.disc} (${d.fez}/${d.total})`);
+  const faltasDiscs = fs ? Object.entries(fs.byDisc).filter(([d,x])=>faltaPct(x)!=null && faltaPct(x)>=0.25).map(([d,x])=>`${d} (${pct(faltaPct(x))})`) : [];
+  const ag = agendaOf(nome, turma);
+  return {sel, nome, turma, tris, notas, notasTurma, fs, oc, gk, eng:{T,F,R,K}, engTurma:{TT,TF,TR,TK}, badWeeks, mediaAluno, mediaTurma, discsBaixas, gkFracos, gkBaixoEng, faltasDiscs, ag};
+}
+function ruleAnalysis(d) {
+  const p = [];
+  const periodo = state.tri===0 ? 'no ano letivo (1º ao 3º trimestre)' : `no ${state.tri}º trimestre`;
+  const mA = d.mediaAluno('media') ?? d.mediaAluno('ae1'), mT = d.mediaTurma('media') ?? d.mediaTurma('ae1');
+  /* 1. desempenho nas provas */
+  if (mA!=null) {
+    const diff = mT!=null ? mA-mT : null;
+    p.push(`DESEMPENHO ACADÊMICO. ${periodo.charAt(0).toUpperCase()+periodo.slice(1)}, ${d.nome} obteve média ${fmt(mA)} nas avaliações registradas no ActiveSoft${mT!=null?`, contra ${fmt(mT)} da turma (${diff>=0?'+':''}${fmt(diff)} ponto${Math.abs(diff)>=1.5?'s':''})`:''}. ` +
+      (d.discsBaixas.length ? `Está abaixo da média 7 em ${d.discsBaixas.length} disciplina${d.discsBaixas.length>1?'s':''}: ${d.discsBaixas.join(', ')}. ` : 'Não há disciplina com nota abaixo de 7 no período, o que indica consistência. ') +
+      (mA<5 ? 'O quadro é de risco de reprovação e exige plano de recuperação imediato. ' : mA<7 ? 'O aluno está na faixa de atenção: precisa de recuperação dirigida nas disciplinas críticas. ' : mA>=8.5 ? 'Rendimento de destaque; o foco pode ser aprofundamento e monitoria de colegas. ' : ''));
+  } else p.push(`DESEMPENHO ACADÊMICO. Ainda não há notas de prova digitadas ${periodo} para ${d.nome}; a leitura abaixo se apoia no Geekie, na frequência e nas ocorrências.`);
+  /* 2. geekie */
+  const eng = d.eng.T ? d.eng.F/d.eng.T : null, engT = d.engTurma.TT ? d.engTurma.TF/d.engTurma.TT : null;
+  const perf = d.eng.R ? d.eng.K/d.eng.R : null, perfT = d.engTurma.TR ? d.engTurma.TK/d.engTurma.TR : null;
+  if (eng!=null || perf!=null) {
+    p.push(`ENGAJAMENTO E DESEMPENHO NO GEEKIEONE. ` +
+      (eng!=null ? `Fez ${d.eng.F} de ${d.eng.T} atividades com prazo encerrado (${pct(eng)}${engT!=null?`; turma: ${pct(engT)}`:''}). ` : '') +
+      (perf!=null ? `Acertou ${pct(perf)} das ${d.eng.R} questões respondidas${perfT!=null?` (turma: ${pct(perfT)})`:''}. ` : '') +
+      (d.badWeeks.length ? `Houve ${d.badWeeks.length} semana${d.badWeeks.length>1?'s':''} com 3 ou mais atividades não feitas (${d.badWeeks.map(brDate).join(', ')}), sinal de desorganização de rotina ou desmotivação. ` : '') +
+      (d.gkBaixoEng.length ? `Engajamento abaixo de 60% em: ${d.gkBaixoEng.join('; ')}. ` : '') +
+      (d.gkFracos.length ? `Rendimento igual ou inferior a 50% em: ${d.gkFracos.join('; ')} — nessas disciplinas o problema não é só de entrega, mas de compreensão do conteúdo. ` : '') +
+      (eng!=null && eng>=0.85 && perf!=null && perf>=0.7 ? 'O padrão de entregas e acertos é sólido e sustenta a AQ. ' : ''));
+  }
+  /* 3. presença */
+  if (d.fs && d.fs.tot.inf) {
+    const fp = faltaPct(d.fs.tot);
+    p.push(`FREQUÊNCIA. ${d.fs.tot.f+d.fs.tot.j} faltas em ${d.fs.tot.inf} aulas registradas (${pct(fp)})${d.fs.tot.j?`, ${d.fs.tot.j} justificada${d.fs.tot.j>1?'s':''}`:''}. ` +
+      (fp>=0.25 ? 'A frequência está em nível crítico (limite legal de 25% de faltas) e precisa de contato imediato com a família. ' : fp>=0.10 ? 'A frequência merece monitoramento: acima de 10% já compromete a continuidade do conteúdo. ' : 'A frequência está adequada. ') +
+      (d.faltasDiscs.length ? `Disciplinas com faltas ≥ 25%: ${d.faltasDiscs.join(', ')} — verificar se há padrão de horário (primeiros/últimos tempos) ou evitação da disciplina. ` : ''));
+  }
+  /* 4. ocorrências */
+  if (d.oc.length) {
+    const tipos = {}; d.oc.forEach(o=>{tipos[o.tipo]=(tipos[o.tipo]||0)+1;});
+    p.push(`CONVIVÊNCIA. ${d.oc.length} ocorrência${d.oc.length>1?'s':''} disciplinar${d.oc.length>1?'es':''} no período (${Object.entries(tipos).sort((a,b)=>b[1]-a[1]).map(([t,n])=>`${t.replace(/^\d+\.\s*/,'')}${n>1?' ×'+n:''}`).join('; ')}). ` +
+      (d.oc.length>=3 ? 'A recorrência indica que as intervenções pontuais não estão surtindo efeito; recomenda-se acompanhamento com a coordenação e a família, com combinados registrados. ' : 'Acompanhar para evitar reincidência. '));
+  } else p.push('CONVIVÊNCIA. Nenhuma ocorrência disciplinar registrada no período.');
+  /* 5. síntese e propostas */
+  const acoes = [];
+  if (d.discsBaixas.length) acoes.push(`plano de recuperação com lista dirigida em ${d.discsBaixas.slice(0,3).join(', ')} e reavaliação em até 3 semanas`);
+  if (d.gkFracos.length) acoes.push(`monitoria ou reforço de conteúdo em ${d.gkFracos.map(s=>s.replace(/\s\(.*\)/,'')).slice(0,2).join(' e ')}, com refazimento das atividades do Geekie de menor acerto`);
+  if (eng!=null && eng<0.6) acoes.push('rotina semanal de estudo com checagem das atividades do Geekie pela coordenação (metas de entrega por semana)');
+  if (d.badWeeks.length>=2) acoes.push('conversa com o aluno e a família sobre organização do tempo e uso da plataforma');
+  if (d.fs && faltaPct(d.fs.tot)>=0.10) acoes.push('contato com a família sobre as faltas e verificação das justificativas');
+  if (d.oc.length>=2) acoes.push('acordo de convivência formal com o aluno, com acompanhamento quinzenal');
+  if (!acoes.length) acoes.push('manter o acompanhamento regular e oferecer desafios adicionais (aprofundamento, olimpíadas, monitoria) para sustentar a motivação');
+  const nivel = (mA!=null && mA<5) || (d.fs && faltaPct(d.fs.tot)>=0.25) || d.oc.length>=3 ? 'ALTA' : (d.discsBaixas.length || d.gkFracos.length || (eng!=null && eng<0.6) || d.oc.length) ? 'MÉDIA' : 'BAIXA';
+  p.push(`SÍNTESE E PROPOSTAS. Prioridade de intervenção: ${nivel}. Ações sugeridas: ${acoes.map((a,i)=>`(${i+1}) ${a}`).join('; ')}.` + (d.ag ? ` Já existe atendimento ${d.ag.status}${d.ag.agendado_para?' para '+brDateFull(d.ag.agendado_para):''} registrado na Busca Ativa.` : ''));
+  return p.join('\n\n');
+}
+function dossierText(d) {
+  /* texto compacto com os dados do aluno para o modelo de IA */
+  const L = [];
+  L.push(`Aluno: ${d.nome} · Turma: ${d.turma} · Período: ${state.tri===0?'ano letivo (1º-3º tri)':state.tri+'º trimestre'} · Dados extraídos em ${brDateFull(DATA.extraido_em)}`);
+  L.push('NOTAS (ActiveSoft; AE1/AE2 peso 10, AQ = engajamento no Geekie; nota da fase = média):');
+  const discs = [...new Set(d.notas.map(r=>r.disc))].sort((a,b)=>a.localeCompare(b,'pt'));
+  discs.forEach(disc => { d.tris.forEach(t => { const r = d.notas.find(x=>x.disc===disc && x.tri===t); if (!r) return; const tm = d.notasTurma.filter(x=>x.disc===disc && x.tri===t && x.media!=null).map(x=>x.media); L.push(`- ${disc} (${t}º): AE1 ${fmt(r.ae1)} · AE2 ${fmt(r.ae2)} · AQ ${fmt(r.aq)} · fase ${fmt(r.media)} · faltas ${r.faltas??'—'}${tm.length?` · média turma ${fmt(mean(tm))}`:''}`); }); });
+  L.push(`GEEKIE (atividades): fez ${d.eng.F}/${d.eng.T} com prazo encerrado (turma ${d.engTurma.TT?pct(d.engTurma.TF/d.engTurma.TT):'—'}); acertos ${d.eng.R?pct(d.eng.K/d.eng.R):'—'} em ${d.eng.R} questões (turma ${d.engTurma.TR?pct(d.engTurma.TK/d.engTurma.TR):'—'}).`);
+  d.gk.forEach(x => L.push(`- ${x.disc}: ${x.fez}/${x.total} feitas · ${x.resp?pct(x.ok/x.resp):'—'} de acerto (${x.resp} questões)`));
+  if (d.badWeeks.length) L.push(`Semanas com 3+ atividades não feitas: ${d.badWeeks.map(brDate).join(', ')}`);
+  if (d.fs) { L.push(`FREQUÊNCIA: ${d.fs.tot.f+d.fs.tot.j} faltas em ${d.fs.tot.inf} aulas (${pct(faltaPct(d.fs.tot))}), ${d.fs.tot.j} justificadas.`); Object.entries(d.fs.byDisc).forEach(([disc,x]) => { if (x.f+x.j) L.push(`- ${disc}: ${x.f+x.j}/${x.inf} (${pct(faltaPct(x))}) em ${x.datasF.map(s=>s.slice(5)).join(', ')}`); }); }
+  L.push(`OCORRÊNCIAS DISCIPLINARES: ${d.oc.length}`);
+  d.oc.forEach(o => L.push(`- ${brDateFull(o.dt)} · ${o.tipo}${o.imp?' (impedimento)':''}: ${o.obs.replace(/\s+/g,' ').slice(0,400)}`));
+  if (d.ag) L.push(`Busca Ativa: atendimento ${d.ag.status}${d.ag.agendado_para?' para '+brDateFull(d.ag.agendado_para):''}.`);
+  return L.join('\n');
+}
+async function aiAnalysis(d) {
+  const key = localStorage.getItem('hab_ai_key') || '';
+  const model = localStorage.getItem('hab_ai_model') || 'claude-sonnet-5';
+  if (!key) throw new Error('Informe a chave da API da Anthropic nas configurações do relatório.');
+  const system = 'Você é assessor pedagógico da Direção de Desempenho da Escola Habilis (João Pessoa, PB). Escreva em português do Brasil, tom técnico e humano, sem jargão vazio. Analise os dados do aluno de forma integrada (notas, Geekie, frequência, ocorrências), aponte causas prováveis, relacione os indicadores entre si e proponha ações concretas, com responsável e prazo, para coordenação, professores e família. Não invente dados; quando faltar informação, diga o que verificar. Formato: 4 a 6 parágrafos curtos com títulos em maiúsculas (DESEMPENHO ACADÊMICO, ENGAJAMENTO NO GEEKIE, FREQUÊNCIA, CONVIVÊNCIA, SÍNTESE E PROPOSTAS), sem markdown, sem listas com asteriscos. Termine com uma linha "Prioridade de intervenção: ALTA/MÉDIA/BAIXA".';
+  const r = await fetch('https://api.anthropic.com/v1/messages', {method:'POST', headers:{'content-type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+    body: JSON.stringify({model, max_tokens: 1800, system, messages:[{role:'user', content:'Dados do aluno:\n\n'+dossierText(d)+'\n\nEscreva a análise técnica e as propostas.'}]})});
+  if (!r.ok) { let m = 'HTTP '+r.status; try { const j = await r.json(); m += ' — '+(j.error?.message||''); } catch(e){} throw new Error(m); }
+  const j = await r.json();
+  return (j.content||[]).filter(c=>c.type==='text').map(c=>c.text).join('\n').trim();
+}
+function tabRelatorio(root) {
+  root.appendChild(el('h2',{class:'noprint'}, 'Exportar relatório do aluno'));
+  root.appendChild(el('p',{class:'hint noprint'}, 'Selecione um <b>aluno</b> no filtro. O relatório compila notas, presença, ocorrências, desempenho e engajamento no Geekie para o trimestre escolhido (ou o ano) e gera a análise técnica. Use <b>Imprimir / salvar PDF</b> para exportar.'));
+  if (!state.aluno) { root.appendChild(el('div',{class:'notice noprint'}, 'Escolha um aluno no filtro acima para montar o relatório.')); return; }
+  const d = studentDossier();
+  const key = d.nome+'|'+state.tri+'|'+state.unit;
+  if (!state.report || state.report.key!==key) state.report = {key, text: ruleAnalysis(d), source:'regras'};
+  /* toolbar */
+  const tb = el('div',{class:'toolbar noprint'});
+  const bPrint = el('button',{class:'primary'}, '🖨️ Imprimir / salvar PDF'); bPrint.onclick = () => window.print();
+  const bAI = el('button',{class:'primary magenta'}, '✨ Gerar análise com IA');
+  const bRules = el('button',{class:'ghost'}, 'Refazer análise automática');
+  const bCfg = el('button',{class:'ghost'}, '⚙️ Configurar IA');
+  const status = el('span',{class:'muted', style:'font-size:.8rem'}, `Análise atual: ${state.report.source}`);
+  bRules.onclick = () => { state.report = {key, text: ruleAnalysis(d), source:'regras'}; render(); };
+  bAI.onclick = async () => { bAI.disabled = true; status.textContent = 'Gerando com IA…'; try { const t = await aiAnalysis(d); state.report = {key, text:t, source:'IA ('+(localStorage.getItem('hab_ai_model')||'claude-sonnet-5')+')'}; render(); } catch(e) { status.textContent = 'Erro: '+e.message; bAI.disabled = false; } };
+  bCfg.onclick = () => {
+    const bg = el('div',{class:'modal-bg'});
+    bg.innerHTML = `<div class="modal"><h3>Configurar análise por IA</h3>
+      <p class="hint">A chave fica salva só neste navegador (localStorage) e é enviada diretamente à API da Anthropic. Cada análise consome créditos da sua conta.</p>
+      <label>Chave da API (sk-ant-…)</label><input type="password" id="aiKey" value="${esc(localStorage.getItem('hab_ai_key')||'')}" placeholder="sk-ant-api03-…">
+      <label>Modelo</label><select id="aiModel">${['claude-sonnet-5','claude-opus-5','claude-haiku-4-5-20251001'].map(m=>`<option${(localStorage.getItem('hab_ai_model')||'claude-sonnet-5')===m?' selected':''}>${m}</option>`).join('')}</select>
+      <div class="row"><button class="ghost" id="aiClear">Apagar chave</button><button class="ghost" id="aiCancel">Fechar</button><button class="primary" id="aiSave">Salvar</button></div></div>`;
+    document.body.appendChild(bg);
+    bg.querySelector('#aiCancel').onclick = () => bg.remove();
+    bg.querySelector('#aiClear').onclick = () => { localStorage.removeItem('hab_ai_key'); bg.remove(); };
+    bg.querySelector('#aiSave').onclick = () => { localStorage.setItem('hab_ai_key', bg.querySelector('#aiKey').value.trim()); localStorage.setItem('hab_ai_model', bg.querySelector('#aiModel').value); bg.remove(); };
+  };
+  tb.append(bPrint, bAI, bRules, bCfg, status);
+  root.appendChild(tb);
+
+  /* relatório */
+  const rep = el('div',{class:'report'});
+  const per = state.tri===0 ? 'Ano letivo 2026 (1º ao 3º trimestre)' : `${state.tri}º trimestre de 2026`;
+  rep.innerHTML = `<div class="rhead"><svg width="120" height="31" viewBox="0 0 220 56"><path fill="#f9b233" d="M 8 10 Q 8 5.5 12.5 6 L 20.5 7 L 20.5 22 L 33.5 22 L 33.5 7 L 41.5 6 Q 46 5.5 46 10 L 46 46 Q 46 50.5 41.5 50 L 33.5 49 L 33.5 34 L 20.5 34 L 20.5 49 L 12.5 50 Q 8 50.5 8 46 Z"/><text x="56" y="44" font-family="'Segoe UI', system-ui, sans-serif" font-size="33" font-weight="800" fill="currentColor">habilis</text></svg>
+    <div><h2>Relatório de acompanhamento — ${esc(d.nome)}</h2><div class="sub">${esc(d.turma)}${d.sel?' · matrícula '+esc(d.sel.matricula):''} · ${per} · Direção de Desempenho · dados de ${brDateFull(DATA.extraido_em)}</div></div></div>`;
+  /* KPIs */
+  const mA = d.mediaAluno('media') ?? d.mediaAluno('ae1'), mT = d.mediaTurma('media') ?? d.mediaTurma('ae1');
+  const eng = d.eng.T ? d.eng.F/d.eng.T : null, perf = d.eng.R ? d.eng.K/d.eng.R : null;
+  const kp = el('div',{class:'kpis'});
+  const kpi = (k,v,s) => `<div class="kpi"><div class="k">${k}</div><div class="v">${v}</div><div class="muted" style="font-size:.75rem">${s||''}</div></div>`;
+  kp.innerHTML = kpi('Média das provas', fmt(mA), mT!=null?`turma ${fmt(mT)}`:'') + kpi('Disciplinas < 7', String(d.discsBaixas.length), d.discsBaixas.slice(0,3).join(', ')) +
+    kpi('Engajamento Geekie', pct(eng), `${d.eng.F}/${d.eng.T} atividades`) + kpi('Desempenho Geekie', pct(perf), `${d.eng.K}/${d.eng.R} questões`) +
+    kpi('Faltas', d.fs? `${d.fs.tot.f+d.fs.tot.j}` : '—', d.fs? `${pct(faltaPct(d.fs.tot))} de ${d.fs.tot.inf} aulas` : 'sem diário') + kpi('Ocorrências', String(d.oc.length), d.oc.length?`última ${brDate(d.oc[0].dt)}`:'');
+  rep.appendChild(kp);
+  /* notas */
+  rep.appendChild(el('h3',{}, '1. Notas (ActiveSoft)'));
+  if (d.sel && d.notas.length) rep.appendChild(boletimTable(d.sel.aid, d.tris, {noFaltas: d.tris.length>1}));
+  else rep.appendChild(el('p',{class:'muted'}, 'Sem notas no período.'));
+  /* presença */
+  rep.appendChild(el('h3',{}, '2. Presença'));
+  if (d.fs && d.fs.tot.inf) {
+    const t = el('table',{class:'grid'}); t.innerHTML = '<thead><tr><th>Disciplina</th><th>Aulas</th><th>Faltas</th><th>Justif.</th><th>%</th><th>Datas</th></tr></thead>';
+    const b = el('tbody');
+    Object.entries(d.fs.byDisc).sort((a,b)=>a[0].localeCompare(b[0],'pt')).forEach(([disc,x]) => { if (!x.inf) return; const tr = el('tr'); const p=faltaPct(x); tr.innerHTML = `<td>${esc(disc)}</td><td>${x.inf}</td><td>${x.f}</td><td>${x.j}</td><td style="${faltaColor(p)}">${pct(p)}</td><td class="wrap muted">${x.datasF.map(s=>s.replace(/^(\d{4})-(\d{2})-(\d{2})/, '$3/$2')).join(', ')||'—'}</td>`; b.appendChild(tr); });
+    const tf = el('tr',{class:'foot'}); tf.innerHTML = `<td>Total</td><td>${d.fs.tot.inf}</td><td>${d.fs.tot.f}</td><td>${d.fs.tot.j}</td><td style="${faltaColor(faltaPct(d.fs.tot))}">${pct(faltaPct(d.fs.tot))}</td><td></td>`; b.appendChild(tf);
+    t.appendChild(b); rep.appendChild(t);
+  } else rep.appendChild(el('p',{class:'muted'}, 'Sem aulas com frequência lançada no período.'));
+  /* ocorrências */
+  rep.appendChild(el('h3',{}, `3. Ocorrências disciplinares (${d.oc.length})`));
+  if (d.oc.length) rep.appendChild(ocorrList(d.oc)); else rep.appendChild(el('p',{class:'muted'}, 'Nenhuma ocorrência registrada no período.'));
+  /* geekie */
+  rep.appendChild(el('h3',{}, '4. GeekieOne — desempenho e engajamento'));
+  if (d.gk.length) {
+    const t = el('table',{class:'grid'}); t.innerHTML = '<thead><tr><th>Disciplina</th><th>Atividades</th><th>Feitas</th><th>Engaj.</th><th>Questões</th><th>Acertos</th><th>Desemp.</th></tr></thead>';
+    const b = el('tbody');
+    d.gk.forEach(x => { const tr = el('tr'); const p = x.resp?x.ok/x.resp:null; tr.innerHTML = `<td>${esc(x.disc)}</td><td>${x.total}</td><td>${x.fez}</td><td class="${x.total&&x.fez/x.total<0.6?'bad':''}">${x.total?pct(x.fez/x.total):'—'}</td><td>${x.resp}</td><td>${x.ok}</td><td class="${p!=null&&p<=0.5?'bad':''}">${pct(p)}</td>`; b.appendChild(tr); });
+    const tf = el('tr',{class:'foot'}); tf.innerHTML = `<td>Total</td><td>${d.eng.T}</td><td>${d.eng.F}</td><td>${pct(eng)}</td><td>${d.eng.R}</td><td>${d.eng.K}</td><td>${pct(perf)}</td>`; b.appendChild(tf);
+    t.appendChild(b); rep.appendChild(t);
+    if (d.badWeeks.length) rep.appendChild(el('p',{class:'muted', style:'font-size:.82rem'}, `Semanas com 3+ atividades não feitas: ${d.badWeeks.map(brDate).join(', ')}.`));
+  } else rep.appendChild(el('p',{class:'muted'}, 'Sem atividades do Geekie no período.'));
+  /* análise */
+  rep.appendChild(el('h3',{}, `5. Análise técnica e propostas <span class="muted" style="font-size:.75rem;font-weight:400">(${esc(state.report.source)})</span>`));
+  rep.appendChild(el('div',{class:'analysis'}, esc(state.report.text)));
+  rep.appendChild(el('p',{class:'muted', style:'font-size:.75rem;margin-top:18px'}, `Gerado pelo Painel de Desempenho Habilis em ${new Date().toLocaleDateString('pt-BR')}. Fontes: ActiveSoft (notas, frequência, ocorrências) e GeekieOne (atividades).`));
+  root.appendChild(rep);
 }
 
 /* ---------- render ---------- */
 function renderFilters() {
   const ssel = $('#fSerie');
   ssel.innerHTML = '<option>Todas</option>' + SERIES.map(s=>`<option${s===state.serie?' selected':''}>${s}</option>`).join('');
+  $('#fTri').value = String(state.tri); $('#fUnit').value = state.unit;
   const dsel = $('#fDisc');
-  const source = ['desempenho','engajamento','aq','professores','sinalizacoes'].includes(state.tab) ? gkDiscsAll(state.serie) : (state.tab==='notas' ? asfDiscsAll(state.serie) : [...new Set([...asfDiscsAll(state.serie), ...gkDiscsAll(state.serie)])].sort((a,b)=>a.localeCompare(b,'pt')));
+  const source = ['desempenho','engajamento','aq','professores','busca'].includes(state.tab) ? gkDiscsAll(state.serie) : (['notas','presenca'].includes(state.tab) ? asfDiscsAll(state.serie) : [...new Set([...asfDiscsAll(state.serie), ...gkDiscsAll(state.serie)])].sort((a,b)=>a.localeCompare(b,'pt')));
   const cur = state.disc;
-  dsel.innerHTML = '<option>Todas</option>' + source.map(d=>`<option${d===cur?' selected':''}>${d}</option>`).join('');
+  dsel.innerHTML = '<option>Todas</option>' + source.map(d=>`<option${d===cur?' selected':''}>${esc(d)}</option>`).join('');
   if (!source.includes(cur)) state.disc = 'Todas';
   /* lista suspensa de alunos, agrupada por turma (respeita unidade + série) */
   const asel = $('#fAluno');
@@ -878,7 +1598,7 @@ function renderFilters() {
     .sort((a,b)=>a.localeCompare(b,'pt'));
   let html = '<option value="">Todos</option>';
   turmas.forEach(t => {
-    html += `<optgroup label="${t}">` + ALUNOS_POR_TURMA[t].map(n=>`<option value="${n.replace(/"/g,'&quot;')}"${n===state.aluno?' selected':''}>${n}</option>`).join('') + '</optgroup>';
+    html += `<optgroup label="${esc(t)}">` + ALUNOS_POR_TURMA[t].map(n=>`<option value="${esc(n)}"${n===state.aluno?' selected':''}>${esc(n)}</option>`).join('') + '</optgroup>';
   });
   asel.innerHTML = html;
   if (state.aluno && !turmas.some(t=>ALUNOS_POR_TURMA[t].includes(state.aluno))) { state.aluno=''; asel.value=''; }
@@ -887,10 +1607,14 @@ function render() {
   renderTabs(); renderFilters();
   const main = $('#main'); main.innerHTML='';
   const sec = el('section',{class:'tab active', style:'display:block'});
-  ({visao:tabVisao, notas:tabNotas, desempenho:tabDesempenho, engajamento:tabEngajamento,
-    sinalizacoes:tabSinalizacoes, aq:tabAQ, professores:tabProfessores}[state.tab])(sec);
+  try {
+    ({visao:tabVisao, notas:tabNotas, desempenho:tabDesempenho, engajamento:tabEngajamento,
+      busca:tabBusca, aq:tabAQ, professores:tabProfessores, presenca:tabPresenca, ocorrencias:tabOcorrencias, relatorio:tabRelatorio}[state.tab])(sec);
+  } catch (e) { sec.appendChild(el('div',{class:'notice'}, 'Erro ao montar a aba: '+esc(String(e)))); console.error(e); }
   main.appendChild(sec);
   bindTips(main);
+  /* clique no nome de um aluno → seleciona o aluno no filtro */
+  main.querySelectorAll('a[data-aluno]').forEach(a => a.addEventListener('click', ev => { ev.preventDefault(); state.aluno = a.dataset.aluno; const t = selectedTurmaOf(state.aluno); const sr = SERIES.find(s => DATA.asf_rows.some(r=>r.turma===t && r.serie===s) || DATA.gk_acts.some(x=>x.turma===t && x.serie===s)); if (sr) state.serie = sr; render(); }));
 }
 $('#fUnit').onchange = e => { state.unit = e.target.value; render(); };
 $('#fSerie').onchange = e => { state.serie = e.target.value; render(); };
@@ -914,8 +1638,12 @@ $('#themeBtn').onclick = () => {
     render();
     placeLogoDots();
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(placeLogoDots);
+    await buildHashes();
+    await loadAgenda();
+    if (state.tab==='busca') render();
   } catch (e) {
     $('#main').innerHTML = '<div class="panel" style="text-align:center;padding:40px">Não foi possível carregar os dados (' + String(e) + ').<br>Verifique sua conexão e recarregue a página.</div>';
+    console.error(e);
   }
 })();
 </script>
