@@ -33,6 +33,20 @@
   header .sub { font-size:.8rem; color: var(--ink-2); }
   header .spacer { flex:1; }
   header button.theme, button.ghost { background:transparent; border:1px solid var(--line); color:var(--ink-2); border-radius:8px; padding:5px 10px; cursor:pointer; font-size:.85rem; }
+  /* botões de atualização do retrato */
+  header button.upd { border:0; color:#fff; border-radius:8px; padding:6px 12px; cursor:pointer; font-size:.85rem; font-weight:600; display:inline-flex; align-items:center; gap:6px; }
+  header button.upd:hover { filter:brightness(1.08); }
+  header button.upd .dot { width:7px; height:7px; border-radius:50%; background:rgba(255,255,255,.55); }
+  header button.upd .dot.old { background:#ffd84d; box-shadow:0 0 0 3px rgba(255,216,77,.25); }
+  header button.updGeekie { background:#c0392b; }
+  header button.updActive { background:#2563eb; }
+  .steps { counter-reset:st; margin:14px 0 0; padding:0; list-style:none; }
+  .steps li { counter-increment:st; position:relative; padding:0 0 12px 30px; font-size:.9rem; }
+  .steps li::before { content:counter(st); position:absolute; left:0; top:0; width:20px; height:20px; border-radius:50%; background:var(--surface); border:1px solid var(--line); color:var(--ink-2); font-size:.72rem; font-weight:700; display:flex; align-items:center; justify-content:center; }
+  a.bmk { display:inline-block; background:#11161d; color:#e7edf5; text-decoration:none; font-weight:700; font-size:.85rem; padding:7px 13px; border-radius:8px; cursor:grab; border:1px dashed #52a8b0; }
+  .updStatus { margin-top:14px; padding:10px 12px; border-radius:9px; background:var(--surface); border:1px solid var(--line); font-size:.85rem; display:flex; align-items:center; gap:9px; }
+  .updStatus .spin { width:13px; height:13px; border:2px solid var(--line); border-top-color:#52a8b0; border-radius:50%; animation:spin 1s linear infinite; flex:none; }
+  @keyframes spin { to { transform:rotate(360deg); } }
   .brandstripe { height:5px; display:flex; }
   .brandstripe span { flex:1; }
   .brandstripe span:nth-child(1){ background:var(--brand-yellow); }
@@ -153,6 +167,8 @@
     <div class="sub">Unidades Bessa e Sul (Bancários) · ActiveSoft + GeekieOne · dados de <span id="extractedAt"></span></div>
   </div>
   <div class="spacer"></div>
+  <button class="upd updGeekie noprint" id="updGeekieBtn" title="Atualizar os dados do GeekieOne"><span class="dot" id="dotGeekie"></span>Atualizar Painel Geekie</button>
+  <button class="upd updActive noprint" id="updActiveBtn" title="Atualizar notas, faltas e ocorrências do ActiveSoft"><span class="dot" id="dotActive"></span>Atualizar Painel Active</button>
   <button class="theme" id="themeBtn">◐ Tema</button>
 </header>
 <div class="brandstripe"><span></span><span></span><span></span></div>
@@ -1626,6 +1642,120 @@ $('#themeBtn').onclick = () => {
   document.documentElement.dataset.theme = cur==='dark' ? 'light' : 'dark';
   render();
 };
+/* ============================================================ ATUALIZAÇÃO DO RETRATO
+   Os dois sistemas só respondem a chamadas feitas de dentro deles (o ActiveSoft exige o
+   cookie de sessão da própria origem; o Geekie, um token que só existe no app logado).
+   Por isso o botão não extrai nada sozinho: ele abre o sistema e o favorito
+   "⚡ Atualizar Habilis" (abaixo) faz a extração lá dentro, envia ao Supabase e chama a
+   função habilis_promover_retrato, que promove e criptografa. O painel fica observando
+   o retrato e recarrega quando ele muda. */
+const BOOKMARKLET = "javascript:!function()%7B%22use%20strict%22%3Bvar%20a%3D%22https%3A%2F%2Flnwkkomjfidfqqsxtznd.supabase.co%22%2Ct%3D%22eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2trb21qZmlkZnFxc3h0em5kIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUyNDgwODcsImV4cCI6MjEwMDgyNDA4N30.pyIKIqe_VuJIjJ-eD_12ugAVygvALy21IA9f1GRwyso%22%2Ce%3D%227e259352a8cfc7b16d3e9e520cdc4cf5b40f8ba76f362ddc%22%3Bif(window.__habilisRodando)alert(%22A%20atualizacao%20ja%20esta%20rodando%20nesta%20aba.%22)%3Belse%7Bwindow.__habilisRodando%3D!0%3Bvar%20i%3Ddocument.createElement(%22div%22)%3Bi.setAttribute(%22style%22%2C%22position%3Afixed%3Bright%3A16px%3Bbottom%3A16px%3Bz-index%3A2147483647%3Bwidth%3A330px%3Bbackground%3A%2311161d%3Bcolor%3A%23e7edf5%3Bfont%3A13px%2F1.45%20system-ui%2Csans-serif%3Bborder-radius%3A12px%3Bbox-shadow%3A0%2010px%2040px%20rgba(0%2C0%2C0%2C.45)%3Boverflow%3Ahidden%22)%2Ci.innerHTML%3D'%3Cdiv%20style%3D%22padding%3A10px%2014px%3Bbackground%3A%231b2430%3Bfont-weight%3A700%3Bdisplay%3Aflex%3Balign-items%3Acenter%3Bgap%3A8px%22%3E%3Cspan%20style%3D%22width%3A9px%3Bheight%3A9px%3Bborder-radius%3A50%25%3Bbackground%3A%23f9b233%3Bdisplay%3Ainline-block%22%3E%3C%2Fspan%3EAtualizando%20o%20Painel%20Habilis%3C%2Fdiv%3E%3Cdiv%20id%3D%22hbFase%22%20style%3D%22padding%3A10px%2014px%204px%3Bfont-weight%3A600%22%3E%3C%2Fdiv%3E%3Cdiv%20style%3D%22padding%3A0%2014px%208px%22%3E%3Cdiv%20style%3D%22height%3A6px%3Bbackground%3A%23263041%3Bborder-radius%3A99px%3Boverflow%3Ahidden%22%3E%3Cdiv%20id%3D%22hbBar%22%20style%3D%22height%3A100%25%3Bwidth%3A0%25%3Bbackground%3A%2352a8b0%3Btransition%3Awidth%20.3s%22%3E%3C%2Fdiv%3E%3C%2Fdiv%3E%3C%2Fdiv%3E%3Cdiv%20id%3D%22hbLog%22%20style%3D%22padding%3A0%2014px%2012px%3Bmax-height%3A190px%3Boverflow%3Aauto%3Bcolor%3A%239fb0c4%3Bfont-size%3A12px%22%3E%3C%2Fdiv%3E'%2Cdocument.documentElement.appendChild(i)%3Bvar%20n%3Di.querySelector(%22%23hbFase%22)%2Co%3Di.querySelector(%22%23hbBar%22)%2Cr%3Di.querySelector(%22%23hbLog%22)%2Cs%3Dlocation.hostname%2Cc%3D%2Fgeekie%2Fi.test(s)%3Fasync%20function()%7Bd(%22Capturando%20a%20sess%C3%A3o%20do%20Geekie%E2%80%A6%22)%3Bvar%20a%3D%22https%3A%2F%2Fplatform.api.geekielab.com.br%22%2Ct%3Dnull%2Ci%3Dwindow.fetch%3Bwindow.fetch%3Dfunction(a%2Ce)%7Btry%7Bvar%20n%3Dnull%3Bif(a%26%26a.headers%26%26a.headers.get%26%26(n%3Da.headers.get(%22Authorization%22))%2C!n%26%26e%26%26e.headers)%7Bvar%20o%3De.headers%3Bn%3Do.get%3Fo.get(%22Authorization%22)%3Ao.Authorization%7C%7Co.authorization%7Dn%26%26(t%3Dn)%7Dcatch(a)%7B%7Dreturn%20i.apply(this%2Carguments)%7D%3Bvar%20n%3DXMLHttpRequest.prototype.setRequestHeader%3Bfunction%20o(a)%7Bvar%20t%3D%5B%5D.slice.call(document.querySelectorAll(%22button%2Cdiv%2Cspan%2Cli%2Ca%22)).filter(function(t)%7Breturn%200%3D%3D%3Dt.children.length%26%26t.textContent.trim()%3D%3D%3Da%7D)%5B0%5D%3Breturn!!t%26%26(t.click()%2C!0)%7DXMLHttpRequest.prototype.setRequestHeader%3Dfunction(a%2Ce)%7Breturn%2F%5Eauthorization%24%2Fi.test(a)%26%26(t%3De)%2Cn.apply(this%2Carguments)%7D%3Bfor(var%20r%3D%5B%22Turmas%22%2C%22In%C3%ADcio%22%2C%22Conte%C3%BAdos%22%2C%22Atividades%22%2C%22Relat%C3%B3rios%22%5D%2Cs%3D0%3Bs%3C24%26%26!t%3Bs%2B%2B)o(r%5Bs%25r.length%5D)%2Cawait%20h(1e3)%2C11%3D%3D%3Ds%26%26u('Se%20nada%20acontecer%2C%20clique%20em%20%22Turmas%22%20no%20menu%20do%20Geekie.')%3Bif(!t)throw%20new%20Error(%22N%C3%A3o%20consegui%20ler%20a%20sess%C3%A3o%20do%20Geekie.%20Recarregue%20a%20p%C3%A1gina%20(F5)%2C%20espere%20carregar%20e%20clique%20de%20novo%20no%20favorito.%22)%3Bvar%20c%3D%7BAuthorization%3At%7D%3Basync%20function%20v(a%2Ct)%7Bt%3Dt%7C%7C4%3Bfor(var%20e%3Dnull%2Ci%3D0%3Bi%3Ct%3Bi%2B%2B)%7Btry%7Bvar%20n%3Dawait%20fetch(a%2C%7Bheaders%3Ac%7D)%3Bif(n.ok)return%20await%20n.json()%3Be%3D%22http%20%22%2Bn.status%7Dcatch(a)%7Be%3DString(a).slice(0%2C60)%7Dawait%20h(800*(i%2B1))%7Dthrow%20new%20Error(e)%7Du(%22Sess%C3%A3o%20do%20Geekie%20reconhecida.%22)%2Cd(%22Lendo%20turmas%20e%20disciplinas%E2%80%A6%22)%2Cl(4)%3Bvar%20m%3D(await%20v(a%2B%22%2Fstudent_groups%22)).filter(function(a)%7Breturn!a.deleted%26%262026%3D%3D%3Da.calendar_year%26%26!a.is_special_group%7D)%2Cb%3Dnew%20Set(m.map(function(a)%7Breturn%20a.id%7D))%2Ck%3D(await%20v(a%2B%22%2Fsyllabi%22)).filter(function(a)%7Breturn(a.student_group_ids%7C%7C%5B%5D).some(function(a)%7Breturn%20b.has(a)%7D)%7D)%3Bu(k.length%2B%22%20disciplinas%20em%20%22%2Bm.length%2B%22%20turmas.%22)%3Bvar%20x%3D%7B%7D%2CS%3D%5B%5D%2CE%3D%5B%5D%2CA%3D0%3Bif(d(%22Baixando%20atividades%20(leva%20alguns%20minutos)%E2%80%A6%22)%2Cawait%20p(k%2C3%2Casync%20function(t)%7Bvar%20e%3Dawait%20v(a%2B%22%2Fsyllabi%2F%22%2Bt.id%2B%22%2Factivities%3Finclude%3Dassigned_students_by_delivery_info%22)%2Ci%3D%7B%7D%3B((e._embedded%7C%7C%7B%7D).authors%7C%7C%5B%5D).forEach(function(a)%7Bi%5Ba.member_id%5D%3Da.full_name%7D)%3Bvar%20n%3D(e.results%7C%7C%5B%5D).filter(function(a)%7Breturn!a.is_draft%26%26b.has(a.student_group_id)%7D)%3Bawait%20p(n%2C2%2Casync%20function(e)%7Bvar%20n%3Dnull%3Btry%7Bn%3Dawait%20v(a%2B%22%2Factivities%2F%22%2Be.id%2B%22%2Freport%22)%7Dcatch(a)%7BE.push(%22rep%20%22%2Be.id)%7Dvar%20o%3Dn%26%26n.statistics%26%26n.statistics.statistics_by_student%7C%7C%7B%7D%2Cr%3Dn%26%26n.participation_status_by_membership_id%7C%7C%7B%7D%3B(((n%7C%7C%7B%7D)._embedded%7C%7C%7B%7D).students%7C%7C%5B%5D).forEach(function(a)%7Bx%5Ba.member_id%5D%3Da.full_name%7D)%2CS.push(%7Bid%3Ae.id%2Ctq%3A(e.exercise_ids%7C%7C%5B%5D).length%2Cend%3Ae.end_date%2Cgrp%3Ae.student_group_id%2Csyl%3At.id%2Cdisc%3At.display_name%2Cprof%3Ai%5Be.author_id%5D%7C%7Cnull%2Ctype%3Ae.type%2Cstart%3Ae.start_date%2Ctitle%3Ae.title%2Ccreated%3Ae.created_at%2Cstudents%3A(e.assigned_students%7C%7C%5B%5D).map(function(a)%7Bvar%20t%3Do%5Ba%5D%7C%7C%7B%7D%2Ce%3D%2F%5Edelivered%2F.test(r%5Ba%5D%7C%7C%22%22)%3F1%3A0%2Ci%3DObject.entries(t).find(function(a)%7Breturn%2Fgrade_sum%2F.test(a%5B0%5D)%7D)%3Breturn%7Ba%3At.graded_question_count%7C%7C0%2Cd%3Ae%2Ck%3Ai%26%26i%5B1%5D%7C%7C0%2Cm%3Aa%7D%7D)%7D)%7D%2CE)%2Cl(4%2B76*%2B%2BA%2Fk.length)%2Cd(%22Baixando%20atividades%E2%80%A6%20%22%2BA%2B%22%2F%22%2Bk.length)%7D%2CE)%2C!S.length)throw%20new%20Error(%22Nenhuma%20atividade%20encontrada%20%E2%80%94%20nada%20foi%20gravado.%22)%3Bu(S.length%2B%22%20atividades%20%C2%B7%20%22%2BObject.keys(x).length%2B%22%20alunos%22%2B(E.length%3F%22%20%C2%B7%20%22%2BE.length%2B%22%20falhas%22%3A%22%22))%2Cd(%22Enviando%20para%20o%20painel%E2%80%A6%22)%2Cawait%20g(%22habilis_preparar_staging%22%2C%7Bp_source%3A%22geekieone_all%22%2Cp_token%3Ae%7D)%3Bvar%20I%3D_(S)%2Cq%3D%5B%7Bsource%3A%22geekieone_all%22%2Cchunk_key%3A%22meta_v2%22%2Cpayload%3A%7Bgroups%3Am.map(function(a)%7Breturn%7Bn%3Aa.name%2Cu%3Aa.school_unit%2Cid%3Aa.id%7D%7D)%2Cstudents%3Ax%7D%7D%5D%3BI.forEach(function(a%2Ct)%7Bq.push(%7Bsource%3A%22geekieone_all%22%2Cchunk_key%3A%22acts_v2_%22%2BString(t).padStart(2%2C%220%22)%2Cpayload%3A%7Bacts%3Aa%7D%7D)%7D)%2Cawait%20y(q%2C80%2C15)%2Cd(%22Criptografando%E2%80%A6%22)%3Bvar%20j%3Dawait%20g(%22habilis_promover_retrato%22%2C%7Bp_source%3A%22geekieone_all%22%2Cp_data%3Aw()%2Cp_token%3Ae%7D)%3Bu(%22Retrato%20de%20%22%2B(j.extraido_em%7C%7Cw())%2B%22%20gravado%20(%22%2Bj.chunks%2B%22%20blocos).%22)%2Cf(!0%2C%22Geekie%20atualizado%3A%20%22%2BS.length%2B%22%20atividades.%22)%7D%3A%2Factivesoft%2Fi.test(s)%3Fasync%20function()%7Bvar%20a%3D%7Bheaders%3A%7BAccept%3A%22application%2Fjson%22%7D%2Ccredentials%3A%22include%22%7D%3Bd(%22Conferindo%20a%20sess%C3%A3o%20do%20ActiveSoft%E2%80%A6%22)%3Bvar%20t%3Dawait%20fetch(%22%2Fapi%2Fv1%2Ffase_nota%2F%3Flimit%3D1%22%2Ca)%3Bif(!t.ok%7C%7C!%2Fjson%2F.test(t.headers.get(%22content-type%22)%7C%7C%22%22))throw%20new%20Error(%22Sess%C3%A3o%20do%20ActiveSoft%20expirada.%20Fa%C3%A7a%20login%20no%20siga02%20e%20clique%20no%20favorito%20de%20novo.%22)%3Bvar%20i%3D%7B216%3A%5B28%2C29%2C79%2C26%2C27%2C8%2C94%2C77%2C35%2C50%2C20%2C22%2C23%2C131%2C37%2C24%2C25%2C3%5D%2C228%3A%5B28%2C29%2C79%2C26%2C27%2C8%2C94%2C77%2C35%2C50%2C20%2C22%2C23%2C131%2C37%2C24%2C25%2C3%5D%2C235%3A%5B28%2C29%2C79%2C26%2C27%2C8%2C94%2C77%2C35%2C50%2C20%2C22%2C23%2C131%2C37%2C24%2C25%2C3%5D%2C217%3A%5B28%2C29%2C12%2C79%2C26%2C27%2C8%2C7%2C128%2C50%2C20%2C22%2C23%2C37%2C24%2C25%2C3%5D%2C233%3A%5B28%2C29%2C12%2C79%2C26%2C27%2C8%2C7%2C128%2C50%2C20%2C22%2C23%2C37%2C24%2C25%2C3%5D%2C234%3A%5B28%2C29%2C12%2C79%2C26%2C27%2C8%2C7%2C128%2C50%2C20%2C22%2C23%2C37%2C24%2C25%2C3%5D%2C219%3A%5B28%2C29%2C12%2C79%2C26%2C27%2C8%2C7%2C128%2C50%2C20%2C22%2C23%2C37%2C24%2C25%2C3%5D%2C218%3A%5B125%2C12%2C79%2C126%2C8%2C18%2C7%2C128%2C50%2C20%2C22%2C23%2C37%2C127%2C3%2C124%5D%2C229%3A%5B125%2C12%2C79%2C126%2C8%2C18%2C7%2C128%2C50%2C20%2C22%2C23%2C37%2C127%2C3%2C124%5D%2C230%3A%5B13%2C143%2C144%2C95%2C12%2C38%2C16%2C8%2C18%2C7%2C5%2C4%2C3%2C62%5D%2C231%3A%5B13%2C132%2C133%2C95%2C12%2C38%2C16%2C8%2C18%2C7%2C5%2C4%2C3%2C62%5D%2C232%3A%5B13%2C132%2C133%2C95%2C12%2C38%2C16%2C8%2C18%2C7%2C5%2C4%2C3%2C62%5D%7D%2Cn%3D%7B230%3A%5B505%2C508%2C511%5D%2C231%3A%5B518%2C521%2C524%5D%2C232%3A%5B531%2C534%2C537%5D%2C218%3A%5B557%2C560%2C563%5D%2C229%3A%5B557%2C560%2C563%5D%2C217%3A%5B570%2C573%2C576%5D%2C233%3A%5B570%2C573%2C576%5D%2C219%3A%5B583%2C586%2C589%5D%2C234%3A%5B583%2C586%2C589%5D%2C216%3A%5B544%2C547%2C550%5D%2C228%3A%5B544%2C547%2C550%5D%2C235%3A%5B544%2C547%2C550%5D%7D%2Co%3D%5B%5D%3Bd(%22Baixando%20notas%E2%80%A6%22)%2Cl(3)%3Bvar%20r%3D%7B%7D%3BObject.keys(n).forEach(function(a)%7Br%5Ba%5D%3D%7B%7D%2Cn%5Ba%5D.forEach(function(t%2Ce)%7Br%5Ba%5D%5Bt%5D%3De%2B1%2B%22%C2%BA%20TRIMESTRE%22%7D)%7D)%3Bvar%20s%3D%5B%5D%3B%5B%5B11%2C230%5D%2C%5B12%2C231%5D%2C%5B13%2C232%5D%2C%5B30%2C218%5D%2C%5B30%2C229%5D%2C%5B31%2C217%5D%2C%5B31%2C233%5D%2C%5B32%2C219%5D%2C%5B32%2C234%5D%2C%5B26%2C216%5D%2C%5B26%2C228%5D%2C%5B26%2C235%5D%5D.forEach(function(a)%7Bi%5Ba%5B1%5D%5D.forEach(function(t)%7Bn%5Ba%5B1%5D%5D.forEach(function(e)%7Bs.push(%7Bserie%3Aa%5B0%5D%2Cturma%3Aa%5B1%5D%2Cdisc%3At%2Cfase%3Ae%7D)%7D)%7D)%7D)%3Bvar%20c%3D%5B%5D%2Cv%3D%7B%7D%2Cm%3D0%2Cb%3Dfunction(a)%7Bif(null%3D%3Da)return%20null%3Bvar%20t%3DparseFloat(a)%3Breturn%20isNaN(t)%7C%7Ct%3C0%3Fnull%3At%7D%3Bif(await%20p(s%2C6%2Casync%20function(t)%7Bfor(var%20e%3Dnull%2Ci%3D0%3Bi%3C2%3Bi%2B%2B)%7Btry%7Be%3Dawait%20fetch(%22%2Fapi%2Fv1%2Ffasenotaaluno%2F%3Fserie%3D%22%2Bt.serie%2B%22%26turma%3D%22%2Bt.turma%2B%22%26fase_nota%3D%22%2Bt.fase%2B%22%26disciplina%3D%22%2Bt.disc%2Ca)%7Dcatch(a)%7Be%3Dnull%7Dif(e%26%26e.ok)break%3Bawait%20h(1500)%7De%26%26e.ok%3F(await%20e.json()).forEach(function(a)%7Bvar%20e%3Da.aluno%7C%7C%7B%7D%3Be.id%26%26(v%5Be.id%5D%3D%7Bm%3AString(e.matricula%7C%7C%22%22)%2Cn%3Ae.nome%7C%7C%22%22%7D)%2Cc.push(%7Ba%3Ae.id%2Cd%3At.disc%2Cf%3At.fase%2Ct%3At.turma%2Cfl%3A(r%5Bt.turma%5D%7C%7C%7B%7D)%5Bt.fase%5D%7C%7C%22%22%2Cn1%3Ab(a.nota01)%2Cn2%3Ab(a.nota02)%2Cn3%3Ab(a.nota03)%2Cnf%3Ab(a.nota_fase)%2Cfal%3Aa.faltas%7C%7C0%7D)%7D)%3Ao.push(%22nota%20%22%2Bt.turma%2B%22%2F%22%2Bt.disc)%2C%2B%2Bm%2520%3D%3D0%26%26(l(3%2B37*m%2Fs.length)%2Cd(%22Baixando%20notas%E2%80%A6%20%22%2Bm%2B%22%2F%22%2Bs.length))%7D%2Co)%2C!c.length)throw%20new%20Error(%22Nenhuma%20nota%20lida%20%E2%80%94%20nada%20foi%20gravado.%22)%3Bu(c.length%2B%22%20notas%20%C2%B7%20%22%2BObject.keys(v).length%2B%22%20alunos.%22)%2Cd(%22Baixando%20frequ%C3%AAncia%E2%80%A6%22)%2Cl(42)%3Bfor(var%20k%3Dnew%20Set(%5B230%2C231%2C232%2C218%2C229%2C217%2C233%2C219%2C234%2C216%2C228%2C235%5D)%2Cx%3D%5B%5D%2CS%3D0%3B%3B)%7Bvar%20E%3Dawait%20fetch(%22%2Fapi%2Fv1%2Fdiario%2Fdiario%2Flista%2F%3Flimit%3D200%26offset%3D%22%2BS%2B%22%26periodo%3D9%22%2Ca)%2CA%3Dawait%20E.json()%3Bif(x%3Dx.concat(A.results)%2C!A.next%7C%7C!A.results.length)break%3BS%2B%3D200%7Dvar%20I%3Dx.filter(function(a)%7Breturn%20k.has(a.turma)%7D)%2Cq%3D%5B%5D%2Cj%3D0%3Bawait%20p(I%2C4%2Casync%20function(t)%7Bif(j%2B%2B%2Ct.qtd_aula_registradas)%7Bfor(var%20e%3Dnull%2Ci%3D0%3Bi%3C2%3Bi%2B%2B)%7Btry%7Be%3Dawait%20fetch(%22%2Fapi%2Fv1%2Fdiario%2Fdiario_frequencia%2Fmontar%2F%3Fdiario%3D%22%2Bt.id%2Ca)%7Dcatch(a)%7Be%3Dnull%7Dif(e%26%26e.ok)break%3Bawait%20h(1500)%7Dif(e%26%26e.ok)%7Bvar%20n%3Dawait%20e.json()%2Cr%3D%7B%7D%2Cs%3D%7B%7D%3Bfor(var%20c%20in%20n)n%5Bc%5D.forEach(function(a)%7Br%5Ba.id_diario_aula%5D%3D%7Bi%3Aa.id_diario_aula%2Cn%3Aa.numero_aula%2Cdt%3AString(a.data_aula%7C%7C%22%22).slice(0%2C10)%7D%7D)%3Bvar%20u%3DObject.keys(r).map(function(a)%7Breturn%20r%5Ba%5D%7D).sort(function(a%2Ct)%7Breturn%20a.dt.localeCompare(t.dt)%7C%7Ca.n-t.n%7D)%2Cf%3D%7B%7D%3Bfor(var%20p%20in%20u.forEach(function(a%2Ct)%7Bf%5Ba.i%5D%3Dt%7D)%2Cn)%7Bvar%20_%3Dn%5Bp%5D%3Bif(_.length)%7Bvar%20v%3Dnew%20Array(u.length).fill(%22.%22)%3B_.forEach(function(a)%7Bvar%20t%3Da.st_presenca_falta%3Bv%5Bf%5Ba.id_diario_aula%5D%5D%3Dnull%3D%3Dt%3F%22.%22%3AString(t)%5B0%5D%7D)%2Cs%5B_%5B0%5D.id_aluno%5D%3Dv.join(%22%22)%7D%7Dq.push(%7Bid%3At.id%2Ct%3At.turma%2Cd%3At.disciplina%2Cdn%3At.disciplina_nome%2Cf%3At.fase_nota%2Cfl%3At.fase_nota_nome%2Cfi%3AString(t.data_inicial_fase_nota%7C%7C%22%22).slice(0%2C10)%2Cff%3AString(t.data_final_fase_nota%7C%7C%22%22).slice(0%2C10)%2Caulas%3Au.map(function(a)%7Breturn%20a.dt%7D)%2Cal%3As%7D)%2Cj%2540%3D%3D0%26%26(l(42%2B25*j%2FI.length)%2Cd(%22Baixando%20frequ%C3%AAncia%E2%80%A6%20%22%2Bj%2B%22%2F%22%2BI.length))%7Delse%20o.push(%22diario%20%22%2Bt.id)%7D%7D%2Co)%2Cu(q.length%2B%22%20di%C3%A1rios%20com%20aulas.%22)%2Cd(%22Baixando%20ocorr%C3%AAncias%E2%80%A6%22)%2Cl(70)%3Bfor(var%20O%3D%5B%5D%2Cz%3D0%3B%3B)%7Bvar%20R%3Dawait%20fetch(%22%2Fapi%2Fv1%2Faluno_observacao%2F%3Flimit%3D200%26offset%3D%22%2Bz%2B%22%26data_inicial_ocorrencia%3D2026-01-01%22%2Ca)%2CC%3Dawait%20R.json()%3Bif(O%3DO.concat(C.results)%2C!C.next%7C%7C!C.results.length)break%3Bz%2B%3D200%7Dvar%20N%3DO.map(function(a)%7Breturn%7Bid%3Aa.id%2Ca%3Aa.aluno%2Can%3Aa.aluno_nome%2Ctipo%3Aa.tipo_ocorrencia%2Ctn%3Aa.tipo_ocorrencia_nome%2Ccat%3Aa.tipo_ocorrencia_novo%2Cturma%3Aa.nome_turma_completo%2Cobs%3Aa.nome%2Cdt%3AString(a.data_ocorrencia%7C%7C%22%22).slice(0%2C10)%2Cinc%3AString(a.data_inclusao%7C%7C%22%22).slice(0%2C10)%2Creg%3Aa.usuario_registro_nome%7C%7Ca.professor_registro_nome%7C%7Cnull%2Cimp%3A!!a.impedimento%2Clib%3AString(a.data_liberacao%7C%7C%22%22).slice(0%2C10)%7C%7Cnull%7D%7D)%3Bu(N.length%2B%22%20ocorr%C3%AAncias%20em%202026.%22)%2Cd(%22Enviando%20para%20o%20painel%E2%80%A6%22)%2Cl(74)%2Cawait%20g(%22habilis_preparar_staging%22%2C%7Bp_source%3A%22activesoft_all%22%2Cp_token%3Ae%7D)%3Bvar%20J%3D%5B%5D%3B_(c).forEach(function(a%2Ct)%7BJ.push(%7Bsource%3A%22activesoft_all%22%2Cchunk_key%3A%22notas_v2_%22%2Bt%2Cpayload%3A%7Bnotas%3Aa%7D%7D)%7D)%2CJ.push(%7Bsource%3A%22activesoft_all%22%2Cchunk_key%3A%22alunos_new%22%2Cpayload%3A%7Balunos%3Av%7D%7D)%3Bvar%20T%3D%7B%7D%3BObject.keys(n).forEach(function(a)%7BT%5Ba%5D%3Dn%5Ba%5D.map(function(a%2Ct)%7Breturn%7Bid%3Aa%2Clabel%3At%2B1%2B%22%C2%BA%20TRIMESTRE%22%7D%7D)%7D)%2CJ.push(%7Bsource%3A%22activesoft_all%22%2Cchunk_key%3A%22fases_new%22%2Cpayload%3A%7Bfases%3AT%7D%7D)%2C_(q).forEach(function(a%2Ct)%7BJ.push(%7Bsource%3A%22activesoft_all%22%2Cchunk_key%3A%22freq_v1_%22%2Bt%2Cpayload%3A%7Bdiarios%3Aa%7D%7D)%7D)%2CJ.push(%7Bsource%3A%22activesoft_all%22%2Cchunk_key%3A%22ocorr_v1%22%2Cpayload%3A%7Bocorrencias%3AN%7D%7D)%2Cawait%20y(J%2C74%2C20)%2Cd(%22Criptografando%E2%80%A6%22)%3Bvar%20B%3Dawait%20g(%22habilis_promover_retrato%22%2C%7Bp_source%3A%22activesoft_all%22%2Cp_data%3Aw()%2Cp_token%3Ae%7D)%3Bu(%22Retrato%20de%20%22%2B(B.extraido_em%7C%7Cw())%2B%22%20gravado%20(%22%2BB.chunks%2B%22%20blocos).%22)%2Co.length%26%26u(%22Avisos%3A%20%22%2Bo.length%2B%22%20consultas%20falharam.%22)%2Cf(!0%2C%22ActiveSoft%20atualizado%3A%20%22%2Bc.length%2B%22%20notas.%22)%7D%3Anull%3Bif(!c)return%20f(!1%2C%22Abra%20o%20GeekieOne%20ou%20o%20ActiveSoft%20primeiro.%22)%2Cvoid%20u(%22Este%20favorito%20s%C3%B3%20funciona%20dentro%20de%20one.geekie.com.br%20ou%20siga02.activesoft.com.br.%22)%3Bc().catch(function(a)%7Bf(!1%2C%22N%C3%A3o%20deu%20certo.%22)%2Cu(String(a%26%26a.message%3Fa.message%3Aa).slice(0%2C300))%7D)%7Dfunction%20d(a)%7Bn.textContent%3Da%7Dfunction%20l(a)%7Bo.style.width%3DMath.max(0%2CMath.min(100%2Ca))%2B%22%25%22%7Dfunction%20u(a)%7Bvar%20t%3Ddocument.createElement(%22div%22)%3Bt.textContent%3Da%2Cr.appendChild(t)%2Cr.scrollTop%3Dr.scrollHeight%7Dfunction%20f(a%2Ct)%7Bd(t)%2Co.style.background%3Da%3F%22%233fa96b%22%3A%22%23d64545%22%2Cl(100)%2Cwindow.__habilisRodando%3D!1%2Ca%26%26(u(%22Pode%20voltar%20para%20o%20painel%20%E2%80%94%20ele%20recarrega%20sozinho.%22)%2CsetTimeout(function()%7Bi.remove()%7D%2C3e4))%7Dfunction%20h(a)%7Breturn%20new%20Promise(function(t)%7BsetTimeout(t%2Ca)%7D)%7Dasync%20function%20p(a%2Ct%2Ce%2Ci)%7Bvar%20n%3D0%3Bawait%20Promise.all(Array.from(%7Blength%3At%7D%2Casync%20function()%7Bfor(%3Bn%3Ca.length%3B)%7Bvar%20t%3Dn%2B%2B%3Btry%7Bawait%20e(a%5Bt%5D)%7Dcatch(a)%7Bi.push(String(a).slice(0%2C100))%7D%7D%7D))%7Dfunction%20_(a)%7Bfor(var%20t%3D%5B%5D%2Ce%3D%5B%5D%2Ci%3D2%2Cn%3D0%3Bn%3Ca.length%3Bn%2B%2B)%7Bvar%20o%3DJSON.stringify(a%5Bn%5D).length%2B1%3Bi%2Bo%3E185e3%26%26e.length%26%26(t.push(e)%2Ce%3D%5B%5D%2Ci%3D2)%2Ce.push(a%5Bn%5D)%2Ci%2B%3Do%7Dreturn%20e.length%26%26t.push(e)%2Ct%7Dfunction%20v(a)%7Bvar%20e%3D%7Bapikey%3At%2CAuthorization%3A%22Bearer%20%22%2Bt%2C%22Content-Type%22%3A%22application%2Fjson%22%7D%3Bfor(var%20i%20in%20a%7C%7C%7B%7D)e%5Bi%5D%3Da%5Bi%5D%3Breturn%20e%7Dasync%20function%20g(t%2Ce)%7Bvar%20i%3Dawait%20fetch(a%2B%22%2Frest%2Fv1%2Frpc%2F%22%2Bt%2C%7Bmethod%3A%22POST%22%2Cheaders%3Av()%2Cbody%3AJSON.stringify(e)%7D)%2Cn%3Dawait%20i.text()%3Bif(!i.ok)throw%20new%20Error(t%2B%22%3A%20%22%2Bn.slice(0%2C160))%3Btry%7Breturn%20JSON.parse(n)%7Dcatch(a)%7Breturn%20n%7D%7Dasync%20function%20m(t)%7Bfor(var%20e%3D0%3Be%3C3%3Be%2B%2B)%7Btry%7Bif((await%20fetch(a%2B%22%2Frest%2Fv1%2Fhabilis_staging%22%2C%7Bmethod%3A%22POST%22%2Cheaders%3Av(%7BPrefer%3A%22return%3Dminimal%22%7D)%2Cbody%3AJSON.stringify(t)%7D)).ok)return!0%7Dcatch(a)%7B%7Dawait%20h(1e3)%7Dthrow%20new%20Error(%22falha%20ao%20enviar%20%22%2Bt.chunk_key)%7Dasync%20function%20y(a%2Ct%2Ce)%7Bfor(var%20i%3D0%3Bi%3Ca.length%3Bi%2B%2B)await%20m(a%5Bi%5D)%2Cl(t%2Be*(i%2B1)%2Fa.length)%3Bu(%22Enviados%20%22%2Ba.length%2B%22%20blocos.%22)%7Dfunction%20w()%7Breturn%20new%20Date(Date.now()-108e5).toISOString().slice(0%2C10)%7D%7D()%3B";
+
+const FONTES = {
+  geekie: { nome:'GeekieOne', source:'geekieone_all', url:'https://one.geekie.com.br/',
+            cor:'#c0392b', botao:'Atualizar Painel Geekie', minutos:'8 a 10 minutos',
+            aviso:'Reescreve as atividades, o desempenho e o engajamento do Geekie.' },
+  active: { nome:'ActiveSoft', source:'activesoft_all', url:'https://siga02.activesoft.com.br/info/',
+            cor:'#2563eb', botao:'Atualizar Painel Active', minutos:'2 a 4 minutos',
+            aviso:'Reescreve as notas (AE1/AE2/AQ), as faltas e as ocorrências disciplinares do painel.' }
+};
+
+async function retratoDe(source) {
+  try {
+    const r = await fetch(SB_URL+'/rest/v1/habilis_painel_cripto?select=updated_at&source=eq.'+source+'&order=updated_at.desc&limit=1',
+      {headers:{apikey:SB_KEY, Authorization:'Bearer '+SB_KEY}, cache:'no-store'});
+    const j = await r.json();
+    return (j[0] && j[0].updated_at) || null;
+  } catch(e) { return null; }
+}
+
+function desdeTexto(iso) {
+  if (!iso) return 'sem registro';
+  const h = (Date.now() - new Date(iso).getTime()) / 36e5;
+  const d = new Date(iso).toLocaleDateString('pt-BR') + ' às ' + new Date(iso).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+  if (h < 1) return 'há poucos minutos (' + d + ')';
+  if (h < 24) return 'há ' + Math.round(h) + 'h (' + d + ')';
+  return 'há ' + Math.round(h/24) + ' dia(s) — ' + d;
+}
+
+async function marcarRetratos() {
+  for (const [k, f] of Object.entries(FONTES)) {
+    const iso = await retratoDe(f.source);
+    const dot = $(k==='geekie' ? '#dotGeekie' : '#dotActive');
+    const btn = $(k==='geekie' ? '#updGeekieBtn' : '#updActiveBtn');
+    if (!dot || !btn) continue;
+    const velho = !iso || (Date.now() - new Date(iso).getTime()) > 36*36e5;
+    dot.classList.toggle('old', velho);
+    btn.title = f.nome + ' — última atualização ' + desdeTexto(iso) + (velho ? ' · vale atualizar' : '');
+  }
+}
+
+function openUpdateModal(chave) {
+  const f = FONTES[chave];
+  const bg = el('div',{class:'modal-bg'});
+  bg.innerHTML = `<div class="modal" style="width:min(540px,94vw)">
+    <h3 style="color:${f.cor}">${f.botao}</h3>
+    <div class="muted" style="font-size:.85rem">${esc(f.aviso)} Leva ${f.minutos}.</div>
+    <ol class="steps">
+      <li><b>Só na primeira vez:</b> arraste este botão para a sua barra de favoritos do Chrome.<br>
+        <a class="bmk" id="bmkLink" href="${BOOKMARKLET}" draggable="true">⚡ Atualizar Habilis</a>
+        <div class="muted" style="font-size:.75rem;margin-top:5px" id="bmkDica">Se a barra estiver escondida: Ctrl/⌘ + Shift + B. · <a href="#" id="bmkCopy">copiar o endereço do favorito</a></div></li>
+      <li>Abra o ${f.nome} <b>já logado</b>:
+        <div style="margin-top:6px"><button class="primary" id="abrirSistema" style="background:${f.cor};border-color:${f.cor}">Abrir o ${f.nome}</button></div></li>
+      <li>Lá dentro, clique no favorito <b>⚡ Atualizar Habilis</b> e acompanhe a janelinha no canto.</li>
+      <li>Volte para cá — este painel recarrega sozinho quando o retrato novo chegar.</li>
+    </ol>
+    <div class="updStatus" id="updStatus"><span class="spin"></span><span id="updStatusTxt">Último retrato do ${f.nome}: carregando…</span></div>
+    <div class="row"><button class="ghost" id="updFechar">Fechar</button></div>
+  </div>`;
+  document.body.appendChild(bg);
+
+  const txt = bg.querySelector('#updStatusTxt');
+  let inicial = null, timer = null, tentativas = 0;
+
+  retratoDe(f.source).then(iso => {
+    inicial = iso;
+    txt.textContent = 'Último retrato do ' + f.nome + ': ' + desdeTexto(iso) + '. Aguardando a atualização…';
+  });
+
+  bg.querySelector('#abrirSistema').onclick = () => window.open(f.url, '_blank', 'noopener');
+
+  bg.querySelector('#bmkLink').onclick = (e) => {
+    e.preventDefault();
+    bg.querySelector('#bmkDica').innerHTML = '<b>Arraste</b> o botão até a barra de favoritos — clicar aqui não faz nada, ' +
+      'porque ele só funciona dentro do Geekie ou do ActiveSoft.';
+  };
+  bg.querySelector('#bmkCopy').onclick = async (e) => {
+    e.preventDefault();
+    try {
+      await navigator.clipboard.writeText(BOOKMARKLET);
+      e.target.textContent = 'copiado! crie um favorito e cole isso no campo de endereço';
+    } catch (err) { e.target.textContent = 'não consegui copiar — arraste o botão'; }
+  };
+
+  const parar = () => { if (timer) clearInterval(timer); timer = null; };
+  bg.querySelector('#updFechar').onclick = () => { parar(); bg.remove(); marcarRetratos(); };
+
+  timer = setInterval(async () => {
+    tentativas++;
+    if (tentativas > 240) { parar(); txt.textContent = 'Parei de observar. Feche e abra de novo quando for atualizar.'; return; }
+    const iso = await retratoDe(f.source);
+    if (iso && inicial && iso !== inicial) {
+      parar();
+      bg.querySelector('.spin').remove();
+      txt.textContent = 'Retrato novo recebido. Recarregando o painel…';
+      setTimeout(() => location.reload(), 1200);
+    }
+  }, 10000);
+}
+
+$('#updGeekieBtn').onclick = () => openUpdateModal('geekie');
+$('#updActiveBtn').onclick = () => {
+  if (confirm('Atualizar o Painel Active?\n\n' + FONTES.active.aviso + '\n\nNada roda sem você: em seguida você abre o ActiveSoft e clica no favorito.')) {
+    openUpdateModal('active');
+  }
+};
+
 (async () => {
   try {
     await loadData();
@@ -1637,6 +1767,7 @@ $('#themeBtn').onclick = () => {
     $('#extractedAt').textContent = new Date(DATA.extraido_em+'T12:00:00').toLocaleDateString('pt-BR');
     render();
     placeLogoDots();
+    marcarRetratos();
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(placeLogoDots);
     await buildHashes();
     await loadAgenda();
