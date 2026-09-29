@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Habilis · Direção de Desempenho</title>
+<!-- v6 (29/09/2026): identidade dos alunos por id (ActiveSoft/Geekie), pareamento 1:1 por turma, aba Cadastro -->
 <style>
   :root {
     color-scheme: light;
@@ -223,7 +224,7 @@ function transformRemote(rows) {
   const discNames = {}; for (const [t,ds] of Object.entries(am.discs)) ds.forEach(d=>discNames[t+'|'+d.id] = cleanDisc(d.label));
   const faseTri = {}; for (const [t,fs] of Object.entries(am.fases)) fs.forEach(f=>{ const m = /^(\d)/.exec(f.label||''); faseTri[t+'|'+f.id] = m ? +m[1] : 2; });
   const asf_rows = [], asf_alunos = {};
-  const alunoNome = id => toTitle((am.alunos[String(id)]||{}).n || ('Aluno '+id));
+  const alunoNome = id => toTitle(String((am.alunos[String(id)]||{}).n || ('Aluno '+id)).replace(/\s+/g,' ').trim());
   many('activesoft_all','notas_v2').forEach(ch => ch.notas.forEach(n => {
     if (n.a==null || !ASF_TURMA[n.t]) return;
     const [serie, turma, unit] = ASF_TURMA[n.t];
@@ -387,40 +388,123 @@ function bindTips(root) {
 /* ---------- filtros globais ---------- */
 const state = { tab:'visao', unit:'Ambas', serie:'1ª série', tri:3, disc:'Todas', aluno:'', week:'', report:{} };
 function unitsSel() { return state.unit==='Ambas' ? UNITS : [state.unit]; }
-/* comparação de nomes entre fontes (ActiveSoft × Geekie): normaliza e exige 2+ tokens em comum */
+/* ============================================================ IDENTIDADE DOS ALUNOS
+   Cada aluno tem uma CHAVE única no painel (key): "a:<id ActiveSoft>:<turma>" quando existe no
+   ActiveSoft, ou "g:<member_id Geekie>:<turma>" quando só existe no Geekie. Todo filtro, clique e
+   agendamento usa essa chave — nunca o nome. O pareamento ActiveSoft × Geekie é feito SOMENTE
+   dentro da mesma turma, 1 para 1, em níveis de confiança:
+     1) nome idêntico (ignorando acentos/maiúsculas);
+     2) o nome mais curto está inteiro contido no mais longo (ex.: "Bia Azevedo Feitosa" ⊂ "Beatriz
+        Azevedo Feitosa"; "Ana Rodrigues" ⊂ "Ana Luiza Penha Rodrigues"), tolerando 1 letra de
+        diferença por sobrenome (Ieno/Leno, Priscila/Priscilla) — aceito só quando é o ÚNICO candidato;
+     3) o que sobra fica SEM PAR e aparece na aba "Cadastro" para conferência manual.
+   Assim, irmãos (Kevin × Eric × Nicole Asfury) e homônimas parciais (Ana Clara Torres × Ana Clara
+   Melo) nunca se misturam: estão em turmas diferentes e nenhum nome contém o outro. */
 const normName = s => String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/\s+/g,' ').trim();
-function sameStudent(a, b) {
-  const na = normName(a), nb = normName(b);
-  if (!na || !nb) return false;
-  if (na===nb || na.includes(nb) || nb.includes(na)) return true;
-  const stop = new Set(['de','da','do','das','dos','e']);
-  const ta = new Set(na.split(' ').filter(t=>!stop.has(t)));
-  const tb = nb.split(' ').filter(t=>!stop.has(t));
-  const common = tb.filter(t=>ta.has(t)).length;
-  return common >= 2 && (common >= ta.size-1 || common >= tb.length-1);
+const STOP_TOKENS = new Set(['de','da','do','das','dos','e','d']);
+const NICKNAMES = {bia:'beatriz', bea:'beatriz'};
+const nameTokens = s => normName(s).replace(/[^a-z0-9 ]+/g,' ').split(' ').filter(t=>t && !STOP_TOKENS.has(t)).map(t=>NICKNAMES[t]||t);
+function levenshtein(a, b) {
+  if (a===b) return 0; const m=a.length, n=b.length; if (!m) return n; if (!n) return m;
+  let prev = Array.from({length:n+1}, (_,i)=>i), cur;
+  for (let i=1;i<=m;i++) { cur=[i]; for (let j=1;j<=n;j++) cur[j]=Math.min(prev[j]+1, cur[j-1]+1, prev[j-1]+(a[i-1]===b[j-1]?0:1)); prev=cur; }
+  return prev[n];
 }
-function matchAluno(nome) { return !state.aluno || sameStudent(nome, state.aluno); }
-/* nomes por turma (união Geekie + ActiveSoft, sem quase-duplicatas) */
-let ALUNOS_POR_TURMA = {};
+/* dois sobrenomes/nomes são "iguais" se idênticos ou se diferem em 1 letra (2 letras a partir de 8) */
+const tokEq = (x, y) => x===y || (x.length>=4 && y.length>=4 && levenshtein(x,y) <= (Math.min(x.length,y.length)>=8 ? 2 : 1));
+/* grau de casamento entre dois nomes: 'exact' | 'subset' | null (primeiro nome precisa bater) */
+function matchGrade(a, b) {
+  if (normName(a)===normName(b)) return 'exact';
+  const ta = nameTokens(a), tb = nameTokens(b);
+  if (!ta.length || !tb.length || !tokEq(ta[0], tb[0])) return null;
+  const [sh, lg] = ta.length <= tb.length ? [ta, tb] : [tb, ta];
+  const used = new Set(); let common = 0;
+  sh.forEach(t => { const j = lg.findIndex((u,i)=>!used.has(i) && tokEq(t,u)); if (j>=0) { used.add(j); common++; } });
+  return common === sh.length ? 'subset' : null;
+}
+/* pareia listas (mesma turma) 1:1. Aceita um par só quando ele é a única opção do aluno Geekie e os
+   outros alunos Geekie que apontam para o mesmo registro ActiveSoft ainda têm alternativas. */
+function linkStudents(asfList, gkList) {
+  const links = {}, report = {linked:[], ambiguous:[], gkOnly:[], asfOnly:[]};
+  const byT = {};
+  asfList.forEach(a => (byT[a.turma] = byT[a.turma] || {a:[],g:[]}).a.push(a));
+  gkList.forEach(g => (byT[g.turma] = byT[g.turma] || {a:[],g:[]}).g.push(g));
+  for (const [turma, {a, g}] of Object.entries(byT)) {
+    let A = [...a], G = [...g];
+    for (const level of ['exact','subset']) {
+      let changed = true;
+      while (changed) {
+        changed = false;
+        const cand = {}, rev = {};
+        G.forEach(gg => A.forEach(aa => { const mg = matchGrade(gg.nome, aa.nome); if (mg && (mg==='exact' || level==='subset')) { (cand[gg.m]=cand[gg.m]||[]).push(aa); (rev[aa.aid]=rev[aa.aid]||[]).push(gg); } }));
+        for (const gg of [...G]) {
+          const c = cand[gg.m] || [];
+          if (c.length!==1) continue;
+          const others = (rev[c[0].aid]||[]).filter(x=>x!==gg);
+          if (others.some(o => (cand[o.m]||[]).length===1)) continue;   // disputa real → deixa para conferência
+          const grade = matchGrade(gg.nome, c[0].nome);
+          links[gg.m+'|'+turma] = {aid:c[0].aid, grade};
+          report.linked.push({turma, m:gg.m, aid:c[0].aid, gk:gg.nome, asf:c[0].nome, grade});
+          G = G.filter(x=>x!==gg); A = A.filter(x=>x!==c[0]); changed = true;
+        }
+      }
+    }
+    G.forEach(gg => { const c = A.filter(aa=>matchGrade(gg.nome, aa.nome)); if (c.length) report.ambiguous.push({turma, m:gg.m, gk:gg.nome, candidatos:c.map(x=>x.nome)}); else report.gkOnly.push({turma, m:gg.m, gk:gg.nome}); });
+    A.forEach(aa => report.asfOnly.push({turma, aid:aa.aid, asf:aa.nome}));
+  }
+  return {links, report};
+}
+let STUDENTS = [], BY_KEY = {}, KEY_OF_GK = {}, KEY_OF_ASF = {}, ALUNOS_POR_TURMA = {}, CADASTRO = null;
 function buildAlunosIndex() {
-  const byTurma = {};
-  DATA.asf_rows.forEach(r => { const s = byTurma[r.turma] = byTurma[r.turma] || []; if (!s.some(x=>sameStudent(x, r.aluno))) s.push(r.aluno); });
-  DATA.gk_acts.forEach(a => { const s = byTurma[a.turma] = byTurma[a.turma] || []; a.students.forEach(st => { if (!s.some(x=>sameStudent(x, st.nome))) s.push(st.nome); }); });
-  for (const t of Object.keys(byTurma)) byTurma[t].sort((a,b)=>a.localeCompare(b,'pt'));
-  ALUNOS_POR_TURMA = byTurma;
+  /* registros do ActiveSoft: um por (aluno, turma) */
+  const asfList = [], seenA = new Set();
+  DATA.asf_rows.forEach(r => { const k = r.aid+'|'+r.turma; if (seenA.has(k)) return; seenA.add(k);
+    asfList.push({aid:r.aid, turma:r.turma, unit:r.unit, serie:r.serie, nome:r.aluno, matricula:(DATA.asf_alunos[r.aid]||{}).matricula||''}); });
+  /* registros do Geekie: um por (member_id, turma) */
+  const gkList = [], seenG = new Set();
+  DATA.gk_acts.forEach(a => a.students.forEach(s => { const k = s.m+'|'+a.turma; if (seenG.has(k)) return; seenG.add(k);
+    gkList.push({m:s.m, turma:a.turma, unit:a.unit, serie:a.serie, nome:s.nome}); }));
+  const {links, report} = linkStudents(asfList, gkList);
+  STUDENTS = []; BY_KEY = {}; KEY_OF_GK = {}; KEY_OF_ASF = {};
+  asfList.forEach(a => {
+    const key = 'a:'+a.aid+':'+a.turma;
+    const st = {key, aid:a.aid, m:null, nome:a.nome, asfNome:a.nome, gkNome:null, turma:a.turma, unit:a.unit, serie:a.serie, matricula:a.matricula, status:'so_asf', grade:null};
+    STUDENTS.push(st); BY_KEY[key] = st; KEY_OF_ASF[a.aid+'|'+a.turma] = key;
+  });
+  gkList.forEach(g => {
+    const l = links[g.m+'|'+g.turma];
+    if (l) {
+      const st = BY_KEY[KEY_OF_ASF[l.aid+'|'+g.turma]];
+      st.m = g.m; st.gkNome = g.nome; st.grade = l.grade; st.status = l.grade==='exact' ? 'ok' : 'aprox';
+      KEY_OF_GK[g.m+'|'+g.turma] = st.key;
+    } else {
+      const key = 'g:'+g.m+':'+g.turma;
+      const amb = report.ambiguous.find(x=>x.m===g.m && x.turma===g.turma);
+      const st = {key, aid:null, m:g.m, nome:g.nome, asfNome:null, gkNome:g.nome, turma:g.turma, unit:g.unit, serie:g.serie, matricula:'', status: amb ? 'ambiguo' : 'so_gk', grade:null, candidatos: amb ? amb.candidatos : []};
+      STUDENTS.push(st); BY_KEY[key] = st; KEY_OF_GK[g.m+'|'+g.turma] = key;
+    }
+  });
+  /* mesmo aluno do ActiveSoft em mais de uma turma (matrícula duplicada) */
+  const byAid = {}; STUDENTS.forEach(s => { if (s.aid!=null) (byAid[s.aid]=byAid[s.aid]||[]).push(s.turma); });
+  STUDENTS.forEach(s => { s.turmas = s.aid!=null ? byAid[s.aid] : [s.turma]; });
+  ALUNOS_POR_TURMA = {};
+  STUDENTS.forEach(s => (ALUNOS_POR_TURMA[s.turma] = ALUNOS_POR_TURMA[s.turma] || []).push(s));
+  for (const t of Object.keys(ALUNOS_POR_TURMA)) ALUNOS_POR_TURMA[t].sort((a,b)=>a.nome.localeCompare(b.nome,'pt'));
+  CADASTRO = report;
+  /* propaga chave e nome oficial (ActiveSoft) para as atividades do Geekie */
+  DATA.gk_acts.forEach(a => a.students.forEach(s => { const st = BY_KEY[KEY_OF_GK[s.m+'|'+a.turma]]; s.key = st ? st.key : 'g:'+s.m+':'+a.turma; if (st) s.nome = st.nome; }));
 }
-/* aluno selecionado → registro ActiveSoft (id, turma…) */
+const selectedStudent = () => state.aluno ? (BY_KEY[state.aluno] || null) : null;
+const alunoNome = () => { const s = selectedStudent(); return s ? s.nome : state.aluno; };
+const matchAluno = key => !state.aluno || key===state.aluno;
+const studentLink = (key, nome) => `<a href="#" data-aluno="${esc(key)}" style="color:inherit;text-decoration:none">${esc(nome)}</a>`;
+const keyOfRow = r => KEY_OF_ASF[r.aid+'|'+r.turma] || '';
+/* aluno selecionado → registro ActiveSoft (id, turma…); null se o aluno só existe no Geekie */
 function selectedAsfAluno() {
-  if (!state.aluno) return null;
-  const t = selectedTurmaOf(state.aluno);
-  const list = Object.values(DATA.asf_alunos).filter(a => sameStudent(a.nome, state.aluno) && unitsSel().includes(a.unit))
-    .sort((a,b) => (b.turma===t) - (a.turma===t) || (normName(b.nome)===normName(state.aluno)) - (normName(a.nome)===normName(state.aluno)));
-  return list[0] || null;
+  const s = selectedStudent();
+  return s && s.aid!=null ? {id:s.aid, aid:s.aid, nome:s.nome, unit:s.unit, serie:s.serie, turma:s.turma, matricula:s.matricula, key:s.key} : null;
 }
-function selectedTurmaOf(nome) {
-  for (const [t, names] of Object.entries(ALUNOS_POR_TURMA)) if (names.some(n=>sameStudent(n,nome))) return t;
-  return '';
-}
+function selectedTurmaOf(key) { const s = BY_KEY[key||state.aluno]; return s ? s.turma : ''; }
 /* posiciona os pontos coloridos da logo sobre a/ı/ı */
 function placeLogoDots() {
   try {
@@ -513,7 +597,8 @@ function freqSummary(opts={}) {
     for (const [aid, st] of Object.entries(fr.al)) {
       const al = DATA.asf_alunos[aid]; if (!al) continue;
       if (opts.aid && String(opts.aid)!==String(aid)) continue;
-      const e = out[aid] = out[aid] || {aid, nome:al.nome, unit:al.unit, serie:al.serie, turma:al.turma, byDisc:{}, tot:{p:0,f:0,j:0,d:0,inf:0,datasF:[]}};
+      if (opts.turma && fr.turma!==opts.turma) continue;
+      const e = out[aid] = out[aid] || {aid, nome:al.nome, unit:fr.unit, serie:fr.serie, turma:fr.turma, byDisc:{}, tot:{p:0,f:0,j:0,d:0,inf:0,datasF:[]}};
       const d = e.byDisc[fr.disc] = e.byDisc[fr.disc] || {p:0,f:0,j:0,d:0,inf:0,datasF:[]};
       for (let i=0;i<st.length;i++) {
         const c = st[i], dt = fr.aulas[i];
@@ -543,12 +628,12 @@ function ocorrFiltered(opts={}) {
 }
 /* ============================================================ sinalizações (Busca Ativa) */
 /* pendências acumuladas até a semana `uptoMonday` (inclusive), ignorando o que veio antes de `afterMonday` (exclusive) */
-function studentFlags(uptoMonday, afterMondayByName) {
+function studentFlags(uptoMonday, afterMondayByKey) {
   const acts = DATA.gk_acts.filter(a => unitsSel().includes(a.unit) && serieMatch(a.serie) && triMatch(a.tri) && isDue(a) && (!uptoMonday || a.monday <= uptoMonday));
   const perStudent = {};
   acts.forEach(a => a.students.forEach(s => {
-    const e = perStudent[s.m] = perStudent[s.m] || {m:s.m, nome:s.nome, unit:a.unit, serie:a.serie, turma:a.turma, byWeek:{}, byDisc:{}, total:0, missed:0, resp:0, ok:0, byDiscPerf:{}};
-    const after = afterMondayByName ? afterMondayByName(s.nome) : null;
+    const e = perStudent[s.key] = perStudent[s.key] || {key:s.key, m:s.m, nome:s.nome, unit:a.unit, serie:a.serie, turma:a.turma, byWeek:{}, byDisc:{}, total:0, missed:0, resp:0, ok:0, byDiscPerf:{}};
+    const after = afterMondayByKey ? afterMondayByKey(s.key) : null;
     if (after && a.monday <= after) return;      // já coberto por um atendimento agendado
     e.total++; if (!s.fez) e.missed++;
     (e.byWeek[a.monday] = e.byWeek[a.monday] || []).push({a, fez:s.fez});
@@ -573,7 +658,7 @@ function studentFlags(uptoMonday, afterMondayByName) {
     if (lowDiscs.length) reasons.push({t:'perf', txt:'Rendimento ≤ 50% em: '+lowDiscs.join('; ')});
     const overall = e.resp>0 ? e.ok/e.resp : null;
     if (!lowDiscs.length && overall!=null && overall<=0.5 && e.resp>=10) reasons.push({t:'perf', txt:`Rendimento geral de ${Math.round(overall*100)}% nas questões respondidas`});
-    flags.push({m:e.m, nome:e.nome, unit:e.unit, serie:e.serie, turma:e.turma, reasons, missed:e.missed, total:e.total, overall,
+    flags.push({key:e.key, m:e.m, nome:e.nome, unit:e.unit, serie:e.serie, turma:e.turma, reasons, missed:e.missed, total:e.total, overall,
       score: reasons.filter(r=>r.t==='eng').length*2 + reasons.filter(r=>r.t==='perf').length + (e.total? e.missed/e.total : 0)});
   }
   return flags;
@@ -581,21 +666,25 @@ function studentFlags(uptoMonday, afterMondayByName) {
 
 /* ---------- agendamentos (Supabase: habilis_busca_ativa) ---------- */
 let AGENDA = [];           // linhas da tabela
-const HASHES = {};         // nome normalizado|turma -> hash
+const HASHES = {};         // key do aluno -> [hash...] (o 1º é o usado ao gravar)
 async function sha256Hex(s) {
   const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s));
   return [...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,'0')).join('');
 }
-async function alunoHash(nome, turma) {
-  const key = normName(nome)+'|'+turma;
-  if (!HASHES[key]) HASHES[key] = await sha256Hex('habilis:'+key);
-  return HASHES[key];
+/* nomes pelos quais o aluno pode ter sido gravado: o do Geekie (usado desde o início) e o do ActiveSoft */
+function hashNames(st) {
+  const names = [];
+  if (st.gkNome) names.push(st.gkNome);
+  if (st.asfNome && (!st.gkNome || normName(st.asfNome)!==normName(st.gkNome))) names.push(st.asfNome);
+  return names;
+}
+async function hashesOf(st) {
+  if (!HASHES[st.key]) HASHES[st.key] = await Promise.all(hashNames(st).map(n => sha256Hex('habilis:'+normName(n)+'|'+st.turma)));
+  return HASHES[st.key];
 }
 async function buildHashes() {
   if (!window.crypto || !crypto.subtle) return;
-  const jobs = [];
-  for (const [t, names] of Object.entries(ALUNOS_POR_TURMA)) names.forEach(n => jobs.push(alunoHash(n, t)));
-  await Promise.all(jobs);
+  await Promise.all(STUDENTS.map(hashesOf));
 }
 async function loadAgenda() {
   try {
@@ -622,10 +711,11 @@ async function decObs(b64) {
   } catch(e) { return OBS_CACHE[b64] = '(não foi possível abrir a observação)'; }
 }
 /* agendamento ativo (mais recente, não cancelado) de um aluno */
-function agendaOf(nome, turma) {
-  const h = HASHES[normName(nome)+'|'+turma];
-  if (!h) return null;
-  return AGENDA.filter(a => a.aluno_hash===h && a.status!=='cancelado').sort((a,b)=>b.agendado_em.localeCompare(a.agendado_em))[0] || null;
+function agendaOf(st) {
+  if (!st) return null;
+  const hs = HASHES[st.key] || [];
+  if (!hs.length) return null;
+  return AGENDA.filter(a => hs.includes(a.aluno_hash) && a.status!=='cancelado').sort((a,b)=>b.agendado_em.localeCompare(a.agendado_em))[0] || null;
 }
 async function saveAgenda(row) {
   const r = await fetch(SB_URL+'/rest/v1/habilis_busca_ativa', {method:'POST', headers:{apikey:SB_KEY, Authorization:'Bearer '+SB_KEY, 'Content-Type':'application/json', Prefer:'return=representation'}, body: JSON.stringify(row)});
@@ -654,7 +744,7 @@ function openScheduleModal(f, semanaRef) {
   bg.querySelector('#agSave').onclick = async () => {
     const btn = bg.querySelector('#agSave'); btn.disabled = true;
     try {
-      const h = await alunoHash(f.nome, f.turma);
+      const h = (await hashesOf(BY_KEY[f.key]))[0];
       const obs_enc = await encObs(bg.querySelector('#agObs').value.trim());
       await saveAgenda({aluno_hash:h, turma:f.turma, semana_ref:semanaRef||null, agendado_para: bg.querySelector('#agDate').value || null, status:'agendado', obs_enc});
       bg.remove(); render();
@@ -666,7 +756,7 @@ function openScheduleModal(f, semanaRef) {
 const TABS = [
   ['visao','Visão geral'], ['notas','Notas'], ['desempenho','Desempenho Geekie'],
   ['engajamento','Engajamento semanal'], ['busca','Busca Ativa'], ['aq','AQ calculada'], ['professores','Envios dos professores'],
-  ['presenca','Presença'], ['ocorrencias','Ocorrências'], ['relatorio','Exportar relatório']
+  ['presenca','Presença'], ['ocorrencias','Ocorrências'], ['cadastro','Cadastro'], ['relatorio','Exportar relatório']
 ];
 function renderTabs() {
   const nav = $('#tabs'); nav.innerHTML='';
@@ -798,7 +888,7 @@ function tabVisao(root) {
 /* ---------- NOTAS (boletim) ---------- */
 /* boletim de um aluno: tabela disciplina × (AE1 AE2 AQ Fase Faltas) por trimestre selecionado (ou os 3 + média anual) */
 function boletimTable(aid, tris, opts={}) {
-  const rows = DATA.asf_rows.filter(r => r.aid===aid);
+  const rows = DATA.asf_rows.filter(r => r.aid===aid && (!opts.turma || r.turma===opts.turma));
   const discs = [...new Set(rows.map(r=>r.disc))].sort((a,b)=>a.localeCompare(b,'pt'));
   const tbl = el('table',{class:'grid'});
   let head = '<thead><tr><th>Disciplina</th>';
@@ -837,10 +927,10 @@ function tabNotas(root) {
   /* ---- aluno selecionado: boletim completo ---- */
   const sel = selectedAsfAluno();
   if (state.aluno) {
-    if (!sel) { root.appendChild(el('div',{class:'notice'}, `Não encontrei <b>${esc(state.aluno)}</b> nas notas do ActiveSoft (aluno só no Geekie ou nome divergente).`)); return; }
+    if (!sel) { root.appendChild(el('div',{class:'notice'}, `Não encontrei <b>${esc(alunoNome())}</b> nas notas do ActiveSoft (aluno cadastrado só no Geekie — veja a aba Cadastro).`)); return; }
     const panel = el('div',{class:'panel'});
     panel.appendChild(el('h3',{}, `${esc(sel.nome)} <span class="muted">· ${esc(sel.turma)} · matrícula ${esc(sel.matricula)}</span>`));
-    panel.appendChild(boletimTable(sel.aid, tris));
+    panel.appendChild(boletimTable(sel.aid, tris, {turma: sel.turma}));
     /* comparação com a turma: média do aluno × média da turma por disciplina (nota da fase ou AE1 se fase vazia) */
     const rowsT = DATA.asf_rows.filter(r => r.turma===sel.turma && triMatch(r.tri));
     const discs = [...new Set(rowsT.map(r=>r.disc))].sort((a,b)=>a.localeCompare(b,'pt'));
@@ -895,10 +985,10 @@ function tabNotas(root) {
       head += '<th>Média</th></tr></thead>';
       tbl.innerHTML = head;
       const tb = el('tbody');
-      const alunos = {}; urows.forEach(r => { alunos[r.aid] = r.aluno; });
+      const alunos = {}, u_turma = {}; urows.forEach(r => { alunos[r.aid] = r.aluno; u_turma[r.aid] = r.turma; });
       Object.entries(alunos).sort((a,b)=>a[1].localeCompare(b[1],'pt')).forEach(([aid, nome]) => {
         const tr = el('tr');
-        let h = `<td><a href="#" data-aluno="${esc(nome)}" style="color:inherit;text-decoration:none">${esc(nome)}</a></td>`;
+        let h = `<td>${studentLink(KEY_OF_ASF[aid+'|'+u_turma[aid]]||'', nome)}</td>`;
         const vals = [];
         discs.forEach(d => {
           const vs = urows.filter(r=>String(r.aid)===aid && r.disc===d && r[metricSel]!=null).map(r=>r[metricSel]);
@@ -934,7 +1024,7 @@ function tabNotas(root) {
     const alunos = {}; urows.forEach(r => { alunos[r.aid] = r; });
     Object.values(alunos).sort((a,b)=>a.aluno.localeCompare(b.aluno,'pt')).forEach(t0 => {
       const tr = el('tr');
-      let h = `<td><a href="#" data-aluno="${esc(t0.aluno)}" style="color:inherit;text-decoration:none">${esc(t0.aluno)}</a></td>${multiTurma?`<td>${t0.turma}</td>`:''}`;
+      let h = `<td>${studentLink(keyOfRow(t0), t0.aluno)}</td>${multiTurma?`<td>${t0.turma}</td>`:''}`;
       tris.forEach(t => {
         const r = urows.find(x=>x.aid===t0.aid && x.tri===t) || {};
         h += gradeCell(r.ae1)+gradeCell(r.ae2)+gradeCell(r.aq)+gradeCell(r.media)+`<td>${r.faltas??'—'}</td>`;
@@ -946,10 +1036,10 @@ function tabNotas(root) {
 }
 /* ---------- DESEMPENHO GEEKIE ---------- */
 /* resumo por disciplina de um aluno (nome) nas atividades filtradas */
-function gkStudentSummary(nome, acts) {
+function gkStudentSummary(key, acts) {
   const byDisc = {};
   acts.forEach(a => a.students.forEach(s => {
-    if (!sameStudent(s.nome, nome)) return;
+    if (s.key!==key) return;
     const d = byDisc[a.disc] = byDisc[a.disc] || {disc:a.disc, total:0, fez:0, resp:0, ok:0, acts:[]};
     const due = isDue(a);
     if (due) { d.total++; if (s.fez) d.fez++; }
@@ -966,9 +1056,9 @@ function tabDesempenho(root) {
     const turma = selectedTurmaOf(state.aluno);
     const acts = DATA.gk_acts.filter(a => a.turma===turma && triMatch(a.tri) && (state.disc==='Todas'||a.disc===state.disc));
     const sum = gkStudentSummary(state.aluno, acts);
-    if (!sum.length) { root.appendChild(el('div',{class:'notice'}, `Sem atividades do Geekie para <b>${esc(state.aluno)}</b> no período.`)); return; }
+    if (!sum.length) { root.appendChild(el('div',{class:'notice'}, `Sem atividades do Geekie para <b>${esc(alunoNome())}</b> no período.`)); return; }
     const panel = el('div',{class:'panel'});
-    panel.appendChild(el('h3',{}, `${esc(state.aluno)} <span class="muted">· ${esc(turma)}</span>`));
+    panel.appendChild(el('h3',{}, `${esc(alunoNome())} <span class="muted">· ${esc(turma)}</span>`));
     const tbl = el('table',{class:'grid'});
     tbl.innerHTML = '<thead><tr><th>Disciplina</th><th>Atividades (prazo encerrado)</th><th>Feitas</th><th>Engajamento</th><th>Questões respondidas</th><th>Acertos</th><th>Desempenho</th><th>Turma</th></tr></thead>';
     const tb = el('tbody');
@@ -1032,13 +1122,13 @@ function tabDesempenho(root) {
     tbl.innerHTML = head;
     const tb = el('tbody');
     const studs = {};
-    acts.forEach(a => a.students.forEach(s => { (studs[s.m] = studs[s.m] || {nome:s.nome, cells:{}, resp:0, ok:0, fez:0}); }));
+    acts.forEach(a => a.students.forEach(s => { (studs[s.m] = studs[s.m] || {key:s.key, nome:s.nome, cells:{}, resp:0, ok:0, fez:0}); }));
     acts.forEach((a,i) => a.students.forEach(s => { const e=studs[s.m]; e.cells[i]=s; e.resp+=s.resp; e.ok+=s.acertos; if(s.fez && isDue(a))e.fez++; }));
     const nDue = acts.filter(isDue).length;
     Object.entries(studs).sort((a,b)=>a[1].nome.localeCompare(b[1].nome,'pt'))
       .forEach(([m,e]) => {
         const tr = el('tr');
-        let h = `<td><a href="#" data-aluno="${esc(e.nome)}" style="color:inherit;text-decoration:none">${esc(e.nome)}</a></td>`;
+        let h = `<td>${studentLink(e.key, e.nome)}</td>`;
         acts.forEach((a,i) => {
           const s = e.cells[i];
           if ((!s || (!s.fez && s.resp===0)) && !isDue(a)) { h += `<td class="hm" data-tip="<b>${esc(e.nome)}</b>prazo aberto até ${brDate(a.end)} · ${esc(a.title)}"><span class="muted">◌</span></td>`; return; }
@@ -1068,12 +1158,12 @@ function tabEngajamento(root) {
   if (state.aluno) {
     const turma = selectedTurmaOf(state.aluno);
     const acts = DATA.gk_acts.filter(a => a.turma===turma && triMatch(a.tri) && isDue(a) && (state.disc==='Todas'||a.disc===state.disc));
-    const mine = []; acts.forEach(a => a.students.forEach(s => { if (sameStudent(s.nome, state.aluno)) mine.push({a, s}); }));
-    if (!mine.length) { root.appendChild(el('div',{class:'notice'}, `Sem atividades com prazo encerrado para <b>${esc(state.aluno)}</b> no período.`)); return; }
+    const mine = []; acts.forEach(a => a.students.forEach(s => { if (s.key===state.aluno) mine.push({a, s}); }));
+    if (!mine.length) { root.appendChild(el('div',{class:'notice'}, `Sem atividades com prazo encerrado para <b>${esc(alunoNome())}</b> no período.`)); return; }
     const weeks = weeksOf(mine.map(x=>x.a));
     const discs = [...new Set(mine.map(x=>x.a.disc))].sort((a,b)=>a.localeCompare(b,'pt'));
     const panel = el('div',{class:'panel'});
-    panel.appendChild(el('h3',{}, `${esc(state.aluno)} <span class="muted">· ${esc(turma)}</span>`));
+    panel.appendChild(el('h3',{}, `${esc(alunoNome())} <span class="muted">· ${esc(turma)}</span>`));
     const tbl = el('table',{class:'grid'});
     let head = '<thead><tr><th>Disciplina</th>';
     weeks.forEach(w => head += `<th class="hm">${brDate(w)}</th>`);
@@ -1116,7 +1206,7 @@ function tabEngajamento(root) {
     const tb = el('tbody');
     const studs = {};
     acts.forEach(a => a.students.forEach(s => {
-      const e = studs[s.m] = studs[s.m] || {nome:s.nome, weeks:{}, missed:0, total:0};
+      const e = studs[s.m] = studs[s.m] || {key:s.key, nome:s.nome, weeks:{}, missed:0, total:0};
       const w = e.weeks[a.monday] = e.weeks[a.monday] || {t:0, m:[], f:0};
       w.t++; e.total++;
       if (s.fez) w.f++; else { w.m.push(a); e.missed++; }
@@ -1124,7 +1214,7 @@ function tabEngajamento(root) {
     Object.entries(studs).sort((a,b)=>b[1].missed-a[1].missed || a[1].nome.localeCompare(b[1].nome,'pt'))
       .forEach(([m,e]) => {
         const tr = el('tr');
-        let h = `<td><a href="#" data-aluno="${esc(e.nome)}" style="color:inherit;text-decoration:none">${esc(e.nome)}</a></td>`;
+        let h = `<td>${studentLink(e.key, e.nome)}</td>`;
         weeks.forEach(wk => {
           const w = e.weeks[wk];
           if (!w) { h += '<td class="hm muted">·</td>'; return; }
@@ -1161,26 +1251,27 @@ function tabBusca(root) {
   root.appendChild(tbar);
 
   /* semana de referência do agendamento ativo de cada aluno */
-  const afterOf = nome => { const t = selectedTurmaOf(nome); const ag = agendaOf(nome, t); return ag && ag.semana_ref ? ag.semana_ref : null; };
-  const flagsAll = studentFlags(state.week, afterOf).filter(f => matchAluno(f.nome));
+  const afterOf = key => { const ag = agendaOf(BY_KEY[key]); return ag && ag.semana_ref ? ag.semana_ref : null; };
+  const flagsAll = studentFlags(state.week, afterOf).filter(f => matchAluno(f.key));
   const fs = freqSummary({});
-  const faltasOf = (nome, turma) => { const e = Object.values(fs).find(x => x.turma===turma && sameStudent(x.nome, nome)); return e ? e.tot : null; };
-  const ocOf = (nome, turma) => ocorrFiltered().filter(o => sameStudent(o.nome, nome) && (!o.serie || o.turma===turma)).length;
+  const faltasOf = st => { if (!st || st.aid==null) return null; const e = Object.values(fs).find(x => String(x.aid)===String(st.aid) && x.turma===st.turma) || fs[st.aid]; return e ? e.tot : null; };
+  const ocOf = st => (!st || st.aid==null) ? 0 : ocorrFiltered({aid: st.aid}).length;
 
   const fila = flagsAll.filter(f => f.reasons.length).sort((a,b)=> b.score - a.score || a.nome.localeCompare(b.nome,'pt'));
-  const agendados = flagsAll.filter(f => !f.reasons.length && agendaOf(f.nome, f.turma)).sort((a,b)=>a.nome.localeCompare(b.nome,'pt'));
+  const agendados = flagsAll.filter(f => !f.reasons.length && agendaOf(BY_KEY[f.key])).sort((a,b)=>a.nome.localeCompare(b.nome,'pt'));
 
   const card = (f, sched) => {
     const it = el('div',{class:'item flagcard'+(sched?' sched':'')});
-    const ag = agendaOf(f.nome, f.turma);
-    const fal = faltasOf(f.nome, f.turma); const nOc = ocOf(f.nome, f.turma);
+    const st = BY_KEY[f.key];
+    const ag = agendaOf(st);
+    const fal = faltasOf(st); const nOc = ocOf(st);
     const ctx = [];
     if (fal && fal.inf) ctx.push(`<span class="badge ${faltaPct(fal)>=0.25?'bad':faltaPct(fal)>=0.1?'warn':'neutral'}" data-tip="Faltas no período (ActiveSoft)">${fal.f+fal.j} faltas · ${pct(faltaPct(fal))}</span>`);
     if (nOc) ctx.push(`<span class="badge warn" data-tip="Ocorrências disciplinares no período">${nOc} ocorrência${nOc>1?'s':''}</span>`);
     ctx.push(`<span class="badge neutral">${f.missed}/${f.total} não feitas</span>`);
     let agHtml = '';
     if (ag) agHtml = `<div style="margin-top:6px;font-size:.8rem;color:var(--brand-teal)"><b style="display:inline">📅 Atendimento ${ag.status==='realizado'?'realizado':'agendado'}${ag.agendado_para?' para '+brDateFull(ag.agendado_para):''}</b> · zera pendências até ${ag.semana_ref?brDate(ag.semana_ref):'—'} <span class="obs muted" data-obs="${esc(ag.obs_enc||'')}"></span></div>`;
-    it.innerHTML = `<b><a href="#" data-aluno="${esc(f.nome)}" style="color:inherit;text-decoration:none">${esc(f.nome)}</a> <span class="muted">· ${esc(f.turma)}</span></b>
+    it.innerHTML = `<b>${studentLink(f.key, f.nome)} <span class="muted">· ${esc(f.turma)}</span></b>
       <div class="why">${f.reasons.length ? f.reasons.slice(0,4).map(r=>'• '+esc(r.txt)).join('<br>') : '<span class="muted">Sem novas pendências desde o atendimento.</span>'}${f.reasons.length>4?`<br><span class="muted">+ ${f.reasons.length-4} sinais</span>`:''}</div>
       <div class="actions">${ctx.join(' ')}</div>${agHtml}<div class="actions"></div>`;
     const act = it.querySelectorAll('.actions')[1];
@@ -1214,7 +1305,7 @@ function tabBusca(root) {
     p.appendChild(el('h3',{}, `Histórico de atendimentos <span class="muted">(${hist.length})</span>`));
     const tbl = el('table',{class:'grid'}); tbl.innerHTML = '<thead><tr><th>Aluno</th><th>Turma</th><th>Semana ref.</th><th>Atendimento</th><th>Registrado em</th><th>Situação</th><th>Observação</th></tr></thead>';
     const tb = el('tbody');
-    const nameOfHash = h => { for (const [t,names] of Object.entries(ALUNOS_POR_TURMA)) for (const n of names) if (HASHES[normName(n)+'|'+t]===h) return n; return '(aluno não identificado)'; };
+    const nameOfHash = h => { const st = STUDENTS.find(s => (HASHES[s.key]||[]).includes(h)); return st ? st.nome : '(aluno não identificado)'; };
     hist.forEach(a => { const tr = el('tr'); tr.innerHTML = `<td>${esc(nameOfHash(a.aluno_hash))}</td><td>${esc(a.turma||'')}</td><td>${brDate(a.semana_ref)}</td><td>${brDateFull(a.agendado_para)}</td><td>${brDateFull((a.agendado_em||'').slice(0,10))}</td><td><span class="badge ${a.status==='realizado'?'ok':a.status==='cancelado'?'neutral':'warn'}">${a.status}</span></td><td class="wrap obs" data-obs="${esc(a.obs_enc||'')}"></td>`; tb.appendChild(tr);
       if (a.obs_enc && window.openpgp) decObs(a.obs_enc).then(t => { tr.querySelector('.obs').textContent = t; }); });
     tbl.appendChild(tb); p.appendChild(tbl); root.appendChild(p);
@@ -1242,12 +1333,12 @@ function tabAQ(root) {
     const tb = el('tbody');
     const studs = {};
     acts.forEach(a => a.students.forEach(s => {
-      const e = studs[s.m] = studs[s.m] || {nome:s.nome, byDisc:{}};
+      const e = studs[s.m] = studs[s.m] || {key:s.key, nome:s.nome, byDisc:{}};
       const d = e.byDisc[a.disc] = e.byDisc[a.disc] || {t:0,f:0};
       d.t++; if (s.fez) d.f++;
     }));
     Object.entries(studs).sort((a,b)=>a[1].nome.localeCompare(b[1].nome,'pt'))
-      .filter(([m,e]) => matchAluno(e.nome))
+      .filter(([m,e]) => matchAluno(e.key))
       .forEach(([m,e]) => {
         const tr = el('tr');
         let h = `<td>${esc(e.nome)}</td>`;
@@ -1318,8 +1409,8 @@ function tabPresenca(root) {
   root.appendChild(el('p',{class:'hint'}, 'Faltas registradas nos diários do ActiveSoft, sobre as aulas já dadas e com frequência informada (aulas futuras ou não lançadas não contam). Justificadas contam como falta, mas aparecem no tooltip. Vermelho: ≥ 25% de faltas · sombreado: ≥ 10%. Selecione um <b>aluno</b> para ver as datas.'));
   const sel = selectedAsfAluno();
   if (state.aluno) {
-    if (!sel) { root.appendChild(el('div',{class:'notice'}, `Não encontrei <b>${esc(state.aluno)}</b> nos diários do ActiveSoft.`)); return; }
-    const fs = freqSummary({aid: sel.aid, disc: state.disc});
+    if (!sel) { root.appendChild(el('div',{class:'notice'}, `Não encontrei <b>${esc(alunoNome())}</b> nos diários do ActiveSoft.`)); return; }
+    const fs = freqSummary({aid: sel.aid, turma: sel.turma, disc: state.disc});
     const e = fs[sel.aid];
     if (!e) { root.appendChild(el('div',{class:'notice'}, 'Sem aulas com frequência lançada para este aluno no período.')); return; }
     const panel = el('div',{class:'panel'});
@@ -1351,7 +1442,7 @@ function tabPresenca(root) {
     const tb = el('tbody');
     studs.sort((a,b)=>(faltaPct(b.tot)||0)-(faltaPct(a.tot)||0) || a.nome.localeCompare(b.nome,'pt')).forEach(e => {
       const tr = el('tr');
-      let h = `<td><a href="#" data-aluno="${esc(e.nome)}" style="color:inherit;text-decoration:none">${esc(e.nome)}</a></td>`;
+      let h = `<td>${studentLink(KEY_OF_ASF[e.aid+'|'+e.turma]||'', e.nome)}</td>`;
       discs.forEach(d => {
         const x = e.byDisc[d];
         if (!x || !x.inf) { h += '<td class="hm muted">·</td>'; return; }
@@ -1389,7 +1480,7 @@ function tabOcorrencias(root) {
   root.appendChild(el('p',{class:'hint'}, 'Todas as ocorrências registradas no ActiveSoft em 2026 para os alunos das turmas escolares, agrupadas por aluno. O trimestre é atribuído pela data da ocorrência. Clique na ocorrência para ler o registro completo.'));
   const sel = selectedAsfAluno();
   let list = ocorrFiltered(sel ? {aid: sel.aid} : {});
-  if (state.aluno && !sel) list = list.filter(o => sameStudent(o.nome, state.aluno));
+  if (state.aluno && !sel) list = [];   // aluno só no Geekie: não há ocorrências do ActiveSoft para ele
   if (!list.length) { root.appendChild(el('div',{class:'notice'}, '<span class="badge ok">Nenhuma ocorrência no período/filtro selecionado.</span>')); return; }
   /* resumo por tipo */
   const byTipo = {}; list.forEach(o => { byTipo[o.tipo] = (byTipo[o.tipo]||0)+1; });
@@ -1415,23 +1506,78 @@ function tabOcorrencias(root) {
   root.appendChild(panel);
 }
 
+
+/* ---------- CADASTRO (conferência de identidade ActiveSoft × Geekie) ---------- */
+const STATUS_INFO = {
+  ok:      ['ok',      'Pareado (nome idêntico)'],
+  aprox:   ['warn',    'Pareado por aproximação'],
+  so_asf:  ['neutral', 'Só no ActiveSoft'],
+  so_gk:   ['bad',     'Só no Geekie'],
+  ambiguo: ['bad',     'Ambíguo — conferir']
+};
+function tabCadastro(root) {
+  root.appendChild(el('h2',{}, `Cadastro de alunos — conferência ActiveSoft × GeekieOne · ${serieLabel()}`));
+  root.appendChild(el('p',{class:'hint'}, 'Cada linha é um aluno identificado pelo <b>id de matrícula do ActiveSoft</b> (ou pelo id do Geekie, quando não há matrícula na turma). O pareamento entre as duas fontes é feito <b>só dentro da mesma turma</b>, um para um, e nunca junta alunos que apenas compartilham sobrenomes (irmãos, homônimos parciais). Confira os casos destacados: aproximações de grafia, alunos sem par nas duas fontes e matrículas repetidas em mais de uma turma.'));
+  const list = STUDENTS.filter(s => unitsSel().includes(s.unit) && serieMatch(s.serie));
+  const n = k => list.filter(s=>s.status===k).length;
+  const multi = list.filter(s => s.turmas.length>1);
+  const cards = el('div',{class:'cards'});
+  const mk = (k,v,d) => { const c = el('div',{class:'card'}); c.append(el('div',{class:'k'},k), el('div',{class:'v'},String(v)), el('div',{class:'d'},d||'')); return c; };
+  cards.append(mk('Alunos no filtro', list.length, `${list.filter(s=>s.unit==='Bessa').length} Bessa · ${list.filter(s=>s.unit==='Sul').length} Sul`),
+    mk('Pareados (idênticos)', n('ok'), 'mesmo nome nas duas fontes'), mk('Pareados (aproximação)', n('aprox'), 'grafia/apelido diferente — conferir'),
+    mk('Só no ActiveSoft', n('so_asf'), 'sem conta ou fora da turma no Geekie'), mk('Só no Geekie', n('so_gk')+n('ambiguo'), 'sem matrícula na turma no ActiveSoft'),
+    mk('Em mais de uma turma', new Set(multi.map(s=>s.aid)).size, 'mesmo id do ActiveSoft em 2 turmas'));
+  root.appendChild(cards);
+  const pend = list.filter(s => s.status!=='ok');
+  if (!pend.length && !multi.length) root.appendChild(el('div',{class:'notice'}, '<span class="badge ok">Todos os alunos do filtro estão pareados com nome idêntico nas duas fontes.</span>'));
+  const turmas = [...new Set(list.map(s=>s.turma))].sort((a,b)=>a.localeCompare(b,'pt'));
+  const soPend = state.cadPend ?? true;
+  const tbar = el('div',{class:'toolbar'});
+  const chk = el('input',{type:'checkbox', id:'cadPend'}); chk.checked = soPend; chk.onchange = () => { state.cadPend = chk.checked; render(); };
+  const lab = el('label',{}); lab.append(chk, document.createTextNode(' mostrar só os casos a conferir (aproximações, sem par, ambíguos, 2 turmas)'));
+  tbar.appendChild(lab); root.appendChild(tbar);
+  turmas.forEach(t => {
+    let studs = list.filter(s=>s.turma===t).sort((a,b)=>a.nome.localeCompare(b.nome,'pt'));
+    if (soPend) studs = studs.filter(s => s.status!=='ok' || s.turmas.length>1);
+    if (!studs.length) return;
+    const panel = el('div',{class:'panel'});
+    panel.appendChild(el('h3',{}, `${esc(t)} <span class="muted">· ${list.filter(s=>s.turma===t).length} alunos</span>`));
+    const tbl = el('table',{class:'grid'});
+    tbl.innerHTML = '<thead><tr><th>Aluno (nome oficial)</th><th>Matrícula</th><th>Nome no Geekie</th><th>Situação</th><th>Observação</th></tr></thead>';
+    const tb = el('tbody');
+    studs.forEach(s => {
+      const [cls, lbl] = STATUS_INFO[s.status] || ['neutral', s.status];
+      const obs = [];
+      if (s.status==='aprox') obs.push('grafias diferentes nas duas fontes — confirmar que é a mesma pessoa');
+      if (s.status==='ambiguo') obs.push('nome curto no Geekie casa com: ' + s.candidatos.join(' | ') + ' — completar o nome no Geekie');
+      if (s.status==='so_gk') obs.push('não há aluno do ActiveSoft com esse nome nesta turma — verificar matrícula ou nome no Geekie');
+      if (s.status==='so_asf') obs.push('sem atividades do Geekie nesta turma — verificar se tem conta/turma no Geekie');
+      if (s.turmas.length>1) obs.push('mesmo id do ActiveSoft também em ' + s.turmas.filter(x=>x!==s.turma).join(', '));
+      const tr = el('tr');
+      tr.innerHTML = `<td>${studentLink(s.key, s.nome)}</td><td class="muted">${esc(s.matricula||'—')}</td><td class="wrap" style="text-align:left">${esc(s.gkNome||'—')}</td><td><span class="badge ${cls}">${lbl}</span></td><td class="wrap muted">${esc(obs.join('; ')||'—')}</td>`;
+      tb.appendChild(tr);
+    });
+    tbl.appendChild(tb); panel.appendChild(tbl); root.appendChild(panel);
+  });
+}
+
 /* ---------- RELATÓRIO DO ALUNO ---------- */
 function studentDossier() {
   const sel = selectedAsfAluno();
-  const nome = sel ? sel.nome : state.aluno;
+  const nome = alunoNome();
   const turma = sel ? sel.turma : selectedTurmaOf(state.aluno);
   const tris = trisSel();
-  const notas = sel ? DATA.asf_rows.filter(r => r.aid===sel.aid && triMatch(r.tri)) : [];
+  const notas = sel ? DATA.asf_rows.filter(r => r.aid===sel.aid && r.turma===sel.turma && triMatch(r.tri)) : [];
   const notasTurma = DATA.asf_rows.filter(r => r.turma===turma && triMatch(r.tri));
-  const fs = sel ? (freqSummary({aid: sel.aid})[sel.aid] || null) : null;
+  const fs = sel ? (freqSummary({aid: sel.aid, turma: sel.turma})[sel.aid] || null) : null;
   const oc = sel ? ocorrFiltered({aid: sel.aid}) : [];
   const gacts = DATA.gk_acts.filter(a => a.turma===turma && triMatch(a.tri));
-  const gk = gkStudentSummary(nome, gacts);
+  const gk = gkStudentSummary(state.aluno, gacts);
   const due = gacts.filter(isDue);
   let T=0,F=0,R=0,K=0; gk.forEach(d=>{T+=d.total;F+=d.fez;R+=d.resp;K+=d.ok;});
   let TT=0,TF=0,TR=0,TK=0; due.forEach(a=>a.students.forEach(s=>{TT++; if(s.fez)TF++;})); gacts.forEach(a=>a.students.forEach(s=>{TR+=s.resp;TK+=s.acertos;}));
   /* semanas com 3+ não feitas */
-  const byWeek = {}; due.forEach(a => a.students.forEach(s => { if (sameStudent(s.nome,nome)) { const w = byWeek[a.monday] = byWeek[a.monday] || {t:0,m:0}; w.t++; if(!s.fez) w.m++; } }));
+  const byWeek = {}; due.forEach(a => a.students.forEach(s => { if (s.key===state.aluno) { const w = byWeek[a.monday] = byWeek[a.monday] || {t:0,m:0}; w.t++; if(!s.fez) w.m++; } }));
   const badWeeks = Object.entries(byWeek).filter(([w,x])=>x.m>=3).map(([w])=>w).sort();
   const mediaAluno = k => mean(notas.filter(r=>r[k]!=null).map(r=>r[k]));
   const mediaTurma = k => mean(notasTurma.filter(r=>r[k]!=null).map(r=>r[k]));
@@ -1439,7 +1585,7 @@ function studentDossier() {
   const gkFracos = gk.filter(d=>d.resp>=5 && d.ok/d.resp<=0.5).map(d=>`${d.disc} (${pct(d.ok/d.resp)})`);
   const gkBaixoEng = gk.filter(d=>d.total>=3 && d.fez/d.total<0.6).map(d=>`${d.disc} (${d.fez}/${d.total})`);
   const faltasDiscs = fs ? Object.entries(fs.byDisc).filter(([d,x])=>faltaPct(x)!=null && faltaPct(x)>=0.25).map(([d,x])=>`${d} (${pct(faltaPct(x))})`) : [];
-  const ag = agendaOf(nome, turma);
+  const ag = agendaOf(selectedStudent());
   return {sel, nome, turma, tris, notas, notasTurma, fs, oc, gk, eng:{T,F,R,K}, engTurma:{TT,TF,TR,TK}, badWeeks, mediaAluno, mediaTurma, discsBaixas, gkFracos, gkBaixoEng, faltasDiscs, ag};
 }
 function ruleAnalysis(d) {
@@ -1565,7 +1711,7 @@ function tabRelatorio(root) {
   rep.appendChild(kp);
   /* notas */
   rep.appendChild(el('h3',{}, '1. Notas (ActiveSoft)'));
-  if (d.sel && d.notas.length) rep.appendChild(boletimTable(d.sel.aid, d.tris, {noFaltas: d.tris.length>1}));
+  if (d.sel && d.notas.length) rep.appendChild(boletimTable(d.sel.aid, d.tris, {noFaltas: d.tris.length>1, turma: d.sel.turma}));
   else rep.appendChild(el('p',{class:'muted'}, 'Sem notas no período.'));
   /* presença */
   rep.appendChild(el('h3',{}, '2. Presença'));
@@ -1614,10 +1760,10 @@ function renderFilters() {
     .sort((a,b)=>a.localeCompare(b,'pt'));
   let html = '<option value="">Todos</option>';
   turmas.forEach(t => {
-    html += `<optgroup label="${esc(t)}">` + ALUNOS_POR_TURMA[t].map(n=>`<option value="${esc(n)}"${n===state.aluno?' selected':''}>${esc(n)}</option>`).join('') + '</optgroup>';
+    html += `<optgroup label="${esc(t)}">` + ALUNOS_POR_TURMA[t].map(s=>`<option value="${esc(s.key)}"${s.key===state.aluno?' selected':''}>${esc(s.nome)}${s.status==='so_gk'||s.status==='ambiguo'?' (só Geekie)':''}</option>`).join('') + '</optgroup>';
   });
   asel.innerHTML = html;
-  if (state.aluno && !turmas.some(t=>ALUNOS_POR_TURMA[t].includes(state.aluno))) { state.aluno=''; asel.value=''; }
+  if (state.aluno && !turmas.some(t=>ALUNOS_POR_TURMA[t].some(s=>s.key===state.aluno))) { state.aluno=''; asel.value=''; }
 }
 function render() {
   renderTabs(); renderFilters();
@@ -1625,7 +1771,7 @@ function render() {
   const sec = el('section',{class:'tab active', style:'display:block'});
   try {
     ({visao:tabVisao, notas:tabNotas, desempenho:tabDesempenho, engajamento:tabEngajamento,
-      busca:tabBusca, aq:tabAQ, professores:tabProfessores, presenca:tabPresenca, ocorrencias:tabOcorrencias, relatorio:tabRelatorio}[state.tab])(sec);
+      busca:tabBusca, aq:tabAQ, professores:tabProfessores, presenca:tabPresenca, ocorrencias:tabOcorrencias, cadastro:tabCadastro, relatorio:tabRelatorio}[state.tab])(sec);
   } catch (e) { sec.appendChild(el('div',{class:'notice'}, 'Erro ao montar a aba: '+esc(String(e)))); console.error(e); }
   main.appendChild(sec);
   bindTips(main);
