@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Local de Prova ENEM · Habilis</title>
+<meta name="description" content="Informe ao Habilis o seu local de prova do ENEM 2026.">
+<link rel="icon" href="logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&family=Barlow+Condensed:wght@700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --amarelo:#FBB030; --roxo:#A53692; --teal:#51A8B1;
+    --creme:#FFFBF4; --tinta:#1A1A1A; --suave:#5E5A55; --borda:#E8DFD1; --branco:#FFFFFF;
+    --erro:#C62828;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--creme);color:var(--tinta);font-family:"Open Sans",system-ui,sans-serif}
+  body{min-height:100vh;display:flex;flex-direction:column}
+  .faixa{display:flex;height:12px}
+  .faixa span{flex:1}
+  .faixa span:nth-child(1){background:var(--amarelo)}
+  .faixa span:nth-child(2){background:var(--roxo)}
+  .faixa span:nth-child(3){background:var(--teal)}
+  main{flex:1;width:100%;max-width:560px;margin:0 auto;padding:28px 16px 40px}
+  header{display:flex;align-items:center;gap:16px;margin-bottom:22px}
+  header img{width:72px;height:auto}
+  .pilula{display:inline-block;background:var(--tinta);color:#fff;font-weight:800;font-size:12px;letter-spacing:.12em;padding:6px 12px;border-radius:999px}
+  .publico{font-size:13px;color:var(--suave);margin-top:6px}
+  h1{font-weight:800;font-size:30px;line-height:1.12;letter-spacing:-.01em;margin-bottom:10px}
+  h1 em{font-style:normal;color:var(--roxo)}
+  .intro{font-size:15px;line-height:1.55;color:var(--suave);margin-bottom:18px}
+  .prazo{display:flex;align-items:center;gap:14px;background:var(--amarelo);border-radius:14px;padding:12px 16px;margin-bottom:24px}
+  .prazo .data{font-family:"Barlow Condensed",sans-serif;font-weight:800;font-size:34px;line-height:1}
+  .prazo .txt{font-size:13px;font-weight:600;line-height:1.35}
+  form{background:var(--branco);border:2px solid var(--borda);border-radius:18px;padding:22px 18px}
+  .campo{margin-bottom:18px}
+  label{display:block;font-weight:700;font-size:15px;margin-bottom:6px}
+  .dica{font-size:12.5px;color:var(--suave);margin-top:5px;line-height:1.4}
+  select,input,textarea{width:100%;font:inherit;font-size:16px;color:var(--tinta);background:var(--creme);border:2px solid var(--borda);border-radius:12px;padding:12px 14px;outline:none;transition:border-color .15s}
+  textarea{resize:vertical;min-height:84px}
+  select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--roxo) 50%),linear-gradient(135deg,var(--roxo) 50%,transparent 50%);background-position:calc(100% - 20px) 50%,calc(100% - 14px) 50%;background-size:6px 6px;background-repeat:no-repeat;padding-right:40px}
+  select:focus,input:focus,textarea:focus{border-color:var(--teal)}
+  .invalido{border-color:var(--erro)!important}
+  .msg-erro{color:var(--erro);font-size:13px;font-weight:600;margin-top:5px;display:none}
+  .invalido + .msg-erro, .invalido ~ .msg-erro{display:block}
+  button{width:100%;font:inherit;font-weight:800;font-size:17px;color:#fff;background:var(--roxo);border:0;border-radius:14px;padding:15px;cursor:pointer;transition:transform .1s,opacity .15s}
+  button:active{transform:scale(.98)}
+  button:disabled{opacity:.6;cursor:wait}
+  .alerta{display:none;margin-top:14px;padding:12px 14px;border-radius:12px;background:#FDECEA;color:var(--erro);font-size:14px;font-weight:600}
+  .sucesso,.encerrado{display:none;text-align:center;background:var(--branco);border:2px solid var(--teal);border-radius:18px;padding:30px 20px}
+  .sucesso .ok{width:64px;height:64px;border-radius:50%;background:var(--teal);color:#fff;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:34px;font-weight:800}
+  .sucesso h2,.encerrado h2{font-weight:800;font-size:22px;margin-bottom:8px}
+  .sucesso p,.encerrado p{color:var(--suave);font-size:15px;line-height:1.5}
+  .bloco-roxo{background:var(--roxo);color:#fff;border-radius:14px;padding:16px;margin-top:18px;font-size:14.5px;line-height:1.5;font-weight:600}
+  .outra{margin-top:16px;background:transparent;color:var(--roxo);border:2px solid var(--roxo)}
+  footer{text-align:center;font-size:12.5px;color:var(--suave);padding:0 16px 22px}
+  .bolinhas{display:flex;justify-content:center;gap:6px;margin-top:8px}
+  .bolinhas i{width:9px;height:9px;border-radius:50%;display:block}
+</style>
+</head>
+<body>
+<div class="faixa"><span></span><span></span><span></span></div>
+<main>
+  <header>
+    <img src="logo.png" alt="Habilis">
+    <div>
+      <span class="pilula">ENEM 2026</span>
+      <div class="publico">Para alunos do 9º ano ao Pré-ENEM</div>
+    </div>
+  </header>
+
+  <h1>Onde você vai fazer o <em>ENEM</em>?</h1>
+  <p class="intro">O local de prova já saiu! Confira no seu Cartão de Confirmação da Inscrição (Página do Participante) e informe aqui. Assim o Habilis consegue acompanhar e apoiar cada aluno nos dias de prova.</p>
+
+  <div class="prazo">
+    <div class="data">30/10</div>
+    <div class="txt">Prazo para responder:<br>sexta-feira, até 23h59</div>
+  </div>
+
+  <form id="form" novalidate>
+    <div class="campo">
+      <label for="unidade">Unidade</label>
+      <select id="unidade" required>
+        <option value="" selected disabled>Selecione sua unidade</option>
+        <option>Bessa</option>
+        <option>Sul</option>
+      </select>
+      <div class="msg-erro">Escolha sua unidade.</div>
+    </div>
+    <div class="campo">
+      <label for="turma">Turma</label>
+      <select id="turma" required>
+        <option value="" selected disabled>Selecione sua turma</option>
+        <option>9º ano</option>
+        <option>1ª Série</option>
+        <option>2ª Série</option>
+        <option>3ª Série</option>
+        <option>Pré-ENEM</option>
+      </select>
+      <div class="msg-erro">Escolha sua turma.</div>
+    </div>
+    <div class="campo">
+      <label for="nome">Nome completo</label>
+      <input id="nome" type="text" autocomplete="name" maxlength="120" placeholder="Ex.: Maria Eduarda da Silva" required>
+      <div class="msg-erro">Escreva seu nome completo.</div>
+    </div>
+    <div class="campo">
+      <label for="local">Local de prova</label>
+      <textarea id="local" maxlength="300" placeholder="Ex.: UFPB – Campus I, Centro de Educação, Castelo Branco" required></textarea>
+      <div class="msg-erro">Informe seu local de prova.</div>
+      <div class="dica">Escreva o nome da escola ou faculdade e o endereço/bairro, do jeito que aparece no seu cartão.</div>
+    </div>
+    <button type="submit" id="enviar">Enviar meu local de prova</button>
+    <div class="alerta" id="alerta"></div>
+  </form>
+
+  <section class="sucesso" id="sucesso">
+    <div class="ok">✓</div>
+    <h2>Recebido!</h2>
+    <p>Seu local de prova foi registrado. Obrigado por informar.</p>
+    <div class="bloco-roxo">Dica: visite o local antes do dia da prova, planeje o trajeto e chegue cedo. Os portões fecham às 13h (horário de Brasília).</div>
+    <button class="outra" id="outra" type="button">Enviar outra resposta</button>
+  </section>
+
+  <section class="encerrado" id="encerrado">
+    <h2>Prazo encerrado</h2>
+    <p>O formulário recebeu respostas até sexta-feira, 30/10, às 23h59. Se você ainda não informou seu local de prova, procure a Direção de Desempenho.</p>
+  </section>
+</main>
+<footer>
+  Direção de Desempenho · Habilis
+  <div class="bolinhas"><i style="background:var(--amarelo)"></i><i style="background:var(--roxo)"></i><i style="background:var(--teal)"></i></div>
+</footer>
+
+<script>
+  const SUPABASE_URL = "https://lnwkkomjfidfqqsxtznd.supabase.co";
+  const SUPABASE_KEY = "sb_publishable_RxhWn58mcZ4SEuSzBndCwA_ULthNrjp";
+  const PRAZO = new Date("2026-10-30T23:59:59-03:00");
+
+  const form = document.getElementById("form");
+  const alerta = document.getElementById("alerta");
+  const botao = document.getElementById("enviar");
+  const campos = ["unidade","turma","nome","local"].map(id => document.getElementById(id));
+
+  function encerrar(){
+    form.style.display = "none";
+    document.getElementById("sucesso").style.display = "none";
+    document.getElementById("encerrado").style.display = "block";
+  }
+  if (new Date() > PRAZO) encerrar();
+
+  campos.forEach(c => c.addEventListener("input", () => c.classList.remove("invalido")));
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    alerta.style.display = "none";
+    if (new Date() > PRAZO) { encerrar(); return; }
+
+    const [unidade, turma, nome, local] = campos;
+    let ok = true;
+    if (!unidade.value) { unidade.classList.add("invalido"); ok = false; }
+    if (!turma.value) { turma.classList.add("invalido"); ok = false; }
+    if (nome.value.trim().length < 3) { nome.classList.add("invalido"); ok = false; }
+    if (local.value.trim().length < 3) { local.classList.add("invalido"); ok = false; }
+    if (!ok) return;
+
+    botao.disabled = true;
+    botao.textContent = "Enviando...";
+    try {
+      const resp = await fetch(SUPABASE_URL + "/rest/v1/enem_local_prova_2026", {
+        method: "POST",
+        headers: {
+          "apikey": SUPABASE_KEY,
+          "Content-Type": "application/json",
+          "Prefer": "return=minimal"
+        },
+        body: JSON.stringify({
+          unidade: unidade.value,
+          turma: turma.value,
+          nome: nome.value.trim().replace(/\s+/g, " "),
+          local_prova: local.value.trim().replace(/\s+/g, " ")
+        })
+      });
+      if (!resp.ok) throw new Error("HTTP " + resp.status);
+      form.style.display = "none";
+      document.getElementById("sucesso").style.display = "block";
+      window.scrollTo({top: 0, behavior: "smooth"});
+    } catch (err) {
+      alerta.textContent = new Date() > PRAZO
+        ? "O prazo de respostas já terminou."
+        : "Não foi possível enviar agora. Verifique sua internet e tente de novo.";
+      alerta.style.display = "block";
+    } finally {
+      botao.disabled = false;
+      botao.textContent = "Enviar meu local de prova";
+    }
+  });
+
+  document.getElementById("outra").addEventListener("click", () => {
+    form.reset();
+    document.getElementById("sucesso").style.display = "none";
+    form.style.display = "block";
+  });
+</script>
+</body>
+</html>
