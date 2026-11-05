@@ -385,6 +385,9 @@ for(const k of 'FMT'){const cal=DATA.days[k];let n=0;RUN[k]={};Object.keys(cal).
 const S={view:'mes',date:new Date(2027,0,25),sel:null,uni:'all',ser:new Set(SERIES),off:new Set(),open:new Set(),info:false,itab:'resumo',mini:null,hit:null,mine:[]};
 const LS='habilis-cal27';
 try{const st=JSON.parse(localStorage.getItem(LS)||'null');if(st){S.view=st.view||S.view;if(st.date)S.date=P(st.date);S.uni=st.uni||'all';if(st.ser)S.ser=new Set(st.ser);if(st.off)S.off=new Set(st.off);if(st.itab)S.itab=st.itab}}catch(e){}
+/* v9: aberto de dentro do painel por um usuário de unidade (?uni=Bessa|Sul): trava a unidade */
+const UNI_FIXA=new URLSearchParams(location.search).get('uni');
+if(UNI_FIXA==='Bessa'||UNI_FIXA==='Sul'){S.uni=UNI_FIXA;document.querySelectorAll('#unis button').forEach(b=>{if(b.dataset.u!==UNI_FIXA)b.style.display='none'})}
 try{if(TODAY>=RANGE[0]&&TODAY<=RANGE[1]&&!localStorage.getItem(LS))S.date=new Date(TODAY)}catch(e){}
 function save(){try{localStorage.setItem(LS,JSON.stringify({view:S.view,date:K(S.date),uni:S.uni,ser:[...S.ser],off:[...S.off],itab:S.itab}))}catch(e){}}
 
@@ -813,7 +816,7 @@ document.getElementById('views').onclick=e=>{const b=e.target.closest('button');
 document.getElementById('infoBtn').onclick=()=>{S.info=!S.info;render()};
 document.getElementById('gBtn').onclick=gModal;
 document.getElementById('sideBtn').onclick=()=>document.body.classList.toggle('sideopen');
-document.getElementById('unis').onclick=e=>{const b=e.target.closest('button');if(!b)return;S.uni=b.dataset.u;render()};
+document.getElementById('unis').onclick=e=>{const b=e.target.closest('button');if(!b)return;if(UNI_FIXA&&b.dataset.u!==UNI_FIXA)return;S.uni=b.dataset.u;render()};
 const qi=document.getElementById('q');qi.oninput=()=>search(qi.value);qi.onfocus=()=>search(qi.value);
 qi.onkeydown=e=>{if(e.key==='Escape'){qi.value='';search('')}};
 document.addEventListener('click',e=>{
