@@ -661,6 +661,7 @@ const esc = s => String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replac
 const fmt = (x, d=1) => x==null || isNaN(x) ? '—' : x.toLocaleString('pt-BR', {minimumFractionDigits:d, maximumFractionDigits:d});
 const pct = x => x==null || isNaN(x) ? '—' : Math.round(x*100) + '%';
 let UNITS = ['Bessa','Sul'];
+const unitLegend = () => UNITS.map(u => `<span><span class="sw" style="background:var(--s-${u.toLowerCase()})"></span>${u}</span>`).join('');
 const UCOLOR = { Bessa: 'var(--s-bessa)', Sul: 'var(--s-sul)' };
 const SERIES = ['6º ano','7º ano','8º ano','9º ano','1ª série','2ª série','3ª série'];
 const TRIS = [1,2,3];
@@ -1235,7 +1236,7 @@ function tabVisao(root) {
   if (weeks.length>1) {
     const panel = el('div',{class:'panel'});
     panel.appendChild(el('h3',{}, 'Engajamento por semana'));
-    panel.appendChild(el('div',{class:'legend'}, `<span><span class="sw" style="background:var(--s-bessa)"></span>Bessa</span><span><span class="sw" style="background:var(--s-sul)"></span>Sul</span>`));
+    panel.appendChild(el('div',{class:'legend'}, unitLegend()));
     const W=900, H=230, padL=46, padB=30, padT=14, cw=(W-padL-20)/(weeks.length-1||1);
     let s = `<svg class="chart" viewBox="0 0 ${W} ${H}" style="width:100%;max-width:${W}px">`;
     for (let t=0;t<=4;t++){ const y=padT+(H-padT-padB)*t/4; s+=`<line class="gridline" x1="${padL}" y1="${y}" x2="${W-16}" y2="${y}"/><text x="${padL-6}" y="${y+4}" text-anchor="end">${100-25*t}%</text>`; }
@@ -1264,7 +1265,7 @@ function tabVisao(root) {
   msel2.onchange = e => { state.visMetric = e.target.value; render(); };
   h32.appendChild(msel2);
   panel2.appendChild(h32);
-  panel2.appendChild(el('div',{class:'legend'}, `<span><span class="sw" style="background:var(--s-bessa)"></span>Bessa</span><span><span class="sw" style="background:var(--s-sul)"></span>Sul</span>`));
+  panel2.appendChild(el('div',{class:'legend'}, unitLegend()));
   if (state.serie==='Todas') {
     panel2.appendChild(el('div',{class:'notice'}, 'Selecione uma <b>série</b> para comparar disciplina a disciplina (disciplinas variam entre séries).'));
   } else {
@@ -1494,7 +1495,7 @@ function tabDesempenho(root) {
   if (state.disc==='Todas') {
     const panel = el('div',{class:'panel'});
     panel.appendChild(el('h3',{}, 'Desempenho médio por disciplina'));
-    panel.appendChild(el('div',{class:'legend'}, `<span><span class="sw" style="background:var(--s-bessa)"></span>Bessa</span><span><span class="sw" style="background:var(--s-sul)"></span>Sul</span>`));
+    panel.appendChild(el('div',{class:'legend'}, unitLegend()));
     const items = gkDiscsAll(state.serie).map(d => {
       const it = {label:d};
       UNITS.forEach(u => {
