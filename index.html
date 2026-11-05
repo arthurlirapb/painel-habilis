@@ -843,7 +843,7 @@ function openScheduleModal(f, semanaRef) {
 const TABS = [
   ['visao','Visão geral'], ['notas','Notas'], ['desempenho','Desempenho Geekie'],
   ['engajamento','Engajamento semanal'], ['busca','Busca Ativa'], ['aq','AQ calculada'], ['professores','Envios dos professores'],
-  ['recuperacao','Recuperação'], ['presenca','Presença'], ['ocorrencias','Ocorrências'], ['cadastro','Cadastro'], ['relatorio','Exportar relatório'], ['familia','Relatório à família']
+  ['recuperacao','Recuperação'], ['presenca','Presença'], ['ocorrencias','Ocorrências'], ['cadastro','Cadastro'], ['relatorio','Exportar relatório'], ['familia','Relatório à família'], ['calendario','Calendário 2027']
 ];
 function renderTabs() {
   const nav = $('#tabs'); nav.innerHTML='';
@@ -2556,13 +2556,22 @@ function renderFilters() {
   asel.innerHTML = html;
   if (state.aluno && !turmas.some(t=>ALUNOS_POR_TURMA[t].some(s=>s.key===state.aluno))) { state.aluno=''; asel.value=''; }
 }
+/* ===== Aba Calendário 2027: calendário interativo (arquivo calendario-2027.html, mesmo site) ===== */
+function tabCalendario(root) {
+  const f = el('iframe', {src:'calendario-2027.html', title:'Calendário Letivo 2027', style:'width:100%;height:720px;border:1px solid var(--line);border-radius:12px;background:var(--card);display:block'});
+  root.appendChild(f);
+  window._calFit = () => { if (!f.isConnected) return; const top = f.getBoundingClientRect().top + window.scrollY; f.style.height = Math.max(560, window.innerHeight - top - 18) + 'px'; };
+  requestAnimationFrame(window._calFit);
+  if (!window._calFitOn) { window.addEventListener('resize', () => window._calFit && window._calFit()); window._calFitOn = true; }
+}
 function render() {
   renderTabs(); renderFilters();
+  $('#filters').style.display = state.tab==='calendario' ? 'none' : '';
   const main = $('#main'); main.innerHTML='';
   const sec = el('section',{class:'tab active', style:'display:block'});
   try {
     ({visao:tabVisao, notas:tabNotas, desempenho:tabDesempenho, engajamento:tabEngajamento,
-      busca:tabBusca, aq:tabAQ, recuperacao:tabRecuperacao, professores:tabProfessores, presenca:tabPresenca, ocorrencias:tabOcorrencias, cadastro:tabCadastro, relatorio:tabRelatorio, familia:tabFamilia}[state.tab])(sec);
+      busca:tabBusca, aq:tabAQ, recuperacao:tabRecuperacao, professores:tabProfessores, presenca:tabPresenca, ocorrencias:tabOcorrencias, cadastro:tabCadastro, relatorio:tabRelatorio, familia:tabFamilia, calendario:tabCalendario}[state.tab])(sec);
   } catch (e) { sec.appendChild(el('div',{class:'notice'}, 'Erro ao montar a aba: '+esc(String(e)))); console.error(e); }
   main.appendChild(sec);
   bindTips(main);
