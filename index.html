@@ -357,6 +357,10 @@ function transformRemote(rows) {
   const get = (src,key) => rows.find(r=>r.source===src && r.chunk_key===key)?.payload;
   const many = (src,prefix) => rows.filter(r=>r.source===src && r.chunk_key.startsWith(prefix)).sort((a,b)=>a.chunk_key.localeCompare(b.chunk_key)).map(r=>r.payload);
   const cfg = get('config','info') || {};
+  /* Alunos que saíram da escola (Cancelado/Transferido/Desistente/Não efetivado no ActiveSoft).
+     Lista em config/inativos: ids do ActiveSoft (asf) e member_id da Geekie (gk). Ficam fora de tudo. */
+  const inat = get('config','inativos') || {};
+  const EXA = new Set((inat.asf||[]).map(String)), EXG = new Set((inat.gk||[]).map(String));
   /* ActiveSoft */
   const am = get('activesoft_all','meta_v2');
   const discNames = {}; for (const [t,ds] of Object.entries(am.discs)) ds.forEach(d=>discNames[t+'|'+d.id] = cleanDisc(d.label));
@@ -368,7 +372,7 @@ function transformRemote(rows) {
   many('activesoft_all','rec_v1').forEach(ch => { if (ch.extraido_em) recData = ch.extraido_em; (ch.rec||[]).forEach(x => { recMap[x.a+'|'+x.t+'|'+x.d+'|'+x.tri] = x.n==null ? null : +x.n; }); });
   const alunoNome = id => toTitle(String((am.alunos[String(id)]||{}).n || ('Aluno '+id)).replace(/\s+/g,' ').trim());
   many('activesoft_all','notas_v2').forEach(ch => ch.notas.forEach(n => {
-    if (n.a==null || !ASF_TURMA[n.t]) return;
+    if (n.a==null || !ASF_TURMA[n.t] || EXA.has(String(n.a))) return;
     const [serie, turma, unit] = ASF_TURMA[n.t];
     const v = x => { if (x==null) return null; const f = parseFloat(x); return f<0 ? null : f; };
     const aluno = alunoNome(n.a);
@@ -387,18 +391,19 @@ function transformRemote(rows) {
     const [serie, turma, unit] = ASF_TURMA[d.t];
     const m = /^(\d)/.exec(d.fl||''); const tri = m ? +m[1] : (faseTri[d.t+'|'+d.f] ?? 2);
     const disc = discNames[d.t+'|'+d.d] || cleanDisc(d.dn||('Disc '+d.d));
-    freq.push({unit, serie, turma: turma+' '+unit, tri, disc, aulas: d.aulas||[], al: d.al||{}});
+    const al = {}; for (const [k,v] of Object.entries(d.al||{})) if (!EXA.has(String(k))) al[k] = v;
+    freq.push({unit, serie, turma: turma+' '+unit, tri, disc, aulas: d.aulas||[], al});
   }));
   /* Ocorrências */
   const oc = get('activesoft_all','ocorr_v1');
-  const ocorrencias = ((oc&&oc.ocorrencias)||[]).map(o => {
+  const ocorrencias = ((oc&&oc.ocorrencias)||[]).filter(o => !EXA.has(String(o.a))).map(o => {
     const st = asf_alunos[o.a];
     return {id:o.id, aid:o.a, nome: st ? st.nome : toTitle(o.an), unit: st?st.unit:null, serie: st?st.serie:null, turma: st?st.turma:(o.turma||'').split('/').pop().trim(),
       dt:o.dt, tipo:o.tn, cat:o.cat, obs:o.obs||'', reg:o.reg, imp:!!o.imp, lib:o.lib, turmaRaw:o.turma};
   }).sort((a,b)=>b.dt.localeCompare(a.dt));
   /* GeekieOne */
   const gm = get('geekieone_all','meta_v2');
-  const slist = Object.entries(gm.students).map(([id,nome])=>({id, nome: toTitle(nome)})).sort((a,b)=>a.id.localeCompare(b.id));
+  const slist = Object.entries(gm.students).filter(([id]) => !EXG.has(String(id))).map(([id,nome])=>({id, nome: toTitle(nome)})).sort((a,b)=>a.id.localeCompare(b.id));
   const sidx = {}; slist.forEach((s,i)=>sidx[s.id]=i);
   const gk_acts = [];
   many('geekieone_all','acts_v2').forEach(ch => ch.acts.forEach(a => {
@@ -416,7 +421,7 @@ function transformRemote(rows) {
   /* Responsáveis (resp_v1): pai/mãe/responsável financeiro por aluno + nomes */
   const rp = get('activesoft_all','resp_v1');
   const resp = rp ? {alunos: rp.alunos||{}, resp: rp.resp||{}, tipos: rp.tipos||{}, extraido_em: rp.extraido_em||null} : null;
-  return {asf_rows, asf_alunos, freq, ocorrencias, gk_acts, students_list: slist, resp, tem_rec: Object.keys(recMap).length>0, rec_em: recData, extraido_em: cfg.extraido_em || new Date().toISOString().slice(0,10)};
+  return {asf_rows, asf_alunos, freq, ocorrencias, gk_acts, students_list: slist, resp, tem_rec: Object.keys(recMap).length>0, rec_em: recData, inativos: {n: EXA.size, em: inat.atualizado_em || null}, extraido_em: cfg.extraido_em || new Date().toISOString().slice(0,10)};
 }
 /* ---- criptografia dos dados (modo remoto) ---- */
 function loadOpenPGP() {
