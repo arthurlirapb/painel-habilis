@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Habilis Tank · Voto do Público</title>
+<style>
+  :root { --navy:#2E3547; --blue:#4A5670; --teal:#4E8689; --must:#FDCB2C; --yel:#FDF015; --bg:#FFFBF4; --line:#E3DDCD; --ink:#2B2B2B; --gray:#666; --err:#B3261E; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; -webkit-text-size-adjust:100%; }
+  .bar { display:flex; height:10px; } .bar i { flex:1; }
+  main { max-width:560px; margin:0 auto; padding:20px 18px 56px; }
+  .logo { display:block; width:210px; max-width:60%; margin:8px auto 0; }
+  .kicker { text-align:center; font-size:12px; font-weight:800; letter-spacing:.3em; color:var(--teal); margin:18px 0 4px; }
+  h1 { text-align:center; font-size:30px; line-height:1.1; margin:0; color:var(--navy); font-style:italic; font-weight:900; }
+  .lead { text-align:center; color:var(--gray); font-size:15px; margin:10px 0 0; }
+  section { background:#fff; border:1px solid var(--line); border-radius:18px; padding:18px 16px; margin-top:18px; }
+  h2 { font-size:17px; margin:0 0 4px; color:var(--navy); display:flex; align-items:center; gap:10px; }
+  h2 span { flex:none; width:28px; height:28px; border-radius:50%; background:var(--must); color:var(--ink); display:inline-flex; align-items:center; justify-content:center; font-size:14px; font-weight:900; }
+  .hint { font-size:13.5px; color:var(--gray); margin:0 0 12px; }
+  label.f { display:block; font-size:13px; font-weight:700; color:var(--navy); margin:12px 0 5px; }
+  input[type=text], select, textarea { width:100%; font:inherit; font-size:16px; padding:13px 14px; border:1.5px solid #CFC8B6; border-radius:12px; background:#fff; color:var(--ink); }
+  input:focus, select:focus, textarea:focus, button:focus-visible, .opt:focus-within { outline:3px solid rgba(78,134,137,.45); outline-offset:1px; }
+  textarea { min-height:120px; resize:vertical; }
+  .res { margin-top:8px; display:grid; gap:8px; }
+  .res button { text-align:left; font:inherit; padding:12px 14px; border-radius:12px; border:1.5px solid var(--line); background:var(--bg); color:var(--ink); cursor:pointer; min-height:48px; }
+  .res button b { display:block; font-size:15.5px; }
+  .res button small { color:var(--gray); font-size:13px; }
+  .res button[disabled] { opacity:.55; cursor:not-allowed; }
+  .link { background:none; border:0; padding:10px 0 0; font:inherit; font-size:14px; color:var(--teal); font-weight:700; text-decoration:underline; cursor:pointer; min-height:44px; }
+  .who { display:flex; gap:12px; align-items:center; background:var(--navy); color:#fff; border-radius:14px; padding:14px; }
+  .who div { flex:1; min-width:0; } .who b { display:block; font-size:16.5px; } .who small { color:#D5D9E3; font-size:13.5px; }
+  .who button { flex:none; background:#fff; color:var(--navy); border:0; border-radius:10px; font:inherit; font-size:13.5px; font-weight:800; padding:10px 12px; min-height:44px; cursor:pointer; }
+  .row { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .opts { display:grid; gap:8px; }
+  .opt { display:flex; align-items:center; gap:12px; padding:12px 14px; border:1.5px solid var(--line); border-radius:12px; background:var(--bg); cursor:pointer; min-height:52px; }
+  .opt input { position:absolute; opacity:0; pointer-events:none; }
+  .box { flex:none; width:24px; height:24px; border:2px solid var(--navy); border-radius:6px; background:#fff; display:flex; align-items:center; justify-content:center; }
+  .box svg { width:16px; height:16px; opacity:0; }
+  .opt .n { flex:none; font-size:12.5px; font-weight:800; color:var(--teal); width:22px; }
+  .opt .p { font-size:16px; font-weight:700; }
+  .opt.on { border-color:var(--navy); background:#FFF3C4; }
+  .opt.on .box { background:var(--navy); } .opt.on .box svg { opacity:1; }
+  .count { text-align:right; font-size:12.5px; color:var(--gray); margin-top:4px; }
+  .send { width:100%; margin-top:20px; background:var(--navy); color:#fff; border:0; border-radius:14px; font:inherit; font-size:18px; font-weight:900; padding:17px; min-height:56px; cursor:pointer; }
+  .send[disabled] { opacity:.6; cursor:wait; }
+  .msg { margin-top:14px; padding:12px 14px; border-radius:12px; background:#FCE8E6; color:var(--err); font-size:14.5px; font-weight:600; }
+  .big { text-align:center; padding:34px 18px; }
+  .big svg { width:76px; height:76px; }
+  .big h2 { justify-content:center; font-size:24px; margin-top:12px; }
+  .big p { color:var(--gray); font-size:15.5px; margin:8px 0 0; }
+  .foot { text-align:center; font-size:12.5px; color:#8A8676; margin-top:22px; }
+  [hidden] { display:none !important; }
+</style>
+</head>
+<body>
+<div class="bar" aria-hidden="true"><i style="background:#4A5670"></i><i style="background:#4E8689"></i><i style="background:#FDCB2C"></i><i style="background:#FDF015"></i></div>
+<main>
+  <img class="logo" src="logo.png" alt="Habilis Tank — Educação Empreendedora">
+  <div class="kicker">VOTO DO PÚBLICO</div>
+  <h1>Qual projeto merece vencer?</h1>
+  <p class="lead" id="lead">Você também é jurado. Identifique-se, escolha um projeto e conte por quê.</p>
+
+  <div id="loading" class="big" role="status"><p>Carregando…</p></div>
+
+  <section id="closed" class="big" hidden>
+    <svg viewBox="0 0 24 24" fill="none" stroke="#2E3547" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+    <h2>Votação encerrada</h2>
+    <p>Obrigado por participar do Habilis Tank! O resultado será anunciado no evento.</p>
+  </section>
+
+  <section id="done" class="big" hidden>
+    <svg viewBox="0 0 24 24" fill="none" stroke="#4E8689" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="M7.5 12.5l3 3 6-6.5"/></svg>
+    <h2>Voto registrado!</h2>
+    <p id="doneTxt">Obrigado por participar do Habilis Tank.</p>
+  </section>
+
+  <form id="form" hidden novalidate>
+    <section>
+      <h2><span>1</span>Quem é você?</h2>
+      <div id="pick">
+        <p class="hint">Digite pelo menos 3 letras do seu nome e toque nele na lista.</p>
+        <label class="f" for="q">Seu nome</label>
+        <input type="text" id="q" autocomplete="off" autocapitalize="words" spellcheck="false" placeholder="Ex.: Maria Clara">
+        <div class="res" id="res" aria-live="polite"></div>
+        <button type="button" class="link" id="toManual">Não encontrei meu nome</button>
+      </div>
+      <div id="chosen" hidden>
+        <div class="who"><div><b id="cNome"></b><small id="cInfo"></small></div><button type="button" id="change">Trocar</button></div>
+      </div>
+      <div id="manual" hidden>
+        <p class="hint">Preencha seus dados.</p>
+        <label class="f" for="mNome">Nome completo</label>
+        <input type="text" id="mNome" autocomplete="name" autocapitalize="words" maxlength="120">
+        <div class="row">
+          <div><label class="f" for="mUni">Unidade</label><select id="mUni"><option value="">Selecione</option><option>Bessa</option><option>Sul</option></select></div>
+          <div><label class="f" for="mTur">Turma</label><select id="mTur"><option value="">Selecione</option><option>6º ano</option><option>7º ano</option><option>8º ano</option><option>9º ano</option><option>1ª série</option><option>2ª série</option><option>3ª série</option></select></div>
+        </div>
+        <button type="button" class="link" id="toPick">Voltar e procurar meu nome na lista</button>
+      </div>
+    </section>
+
+    <section>
+      <h2><span>2</span>Seu voto</h2>
+      <p class="hint">Marque apenas um projeto.</p>
+      <div class="opts" id="opts" role="radiogroup" aria-label="Projetos"></div>
+    </section>
+
+    <section>
+      <h2><span>3</span>Por que esse projeto?</h2>
+      <p class="hint">Justifique seu voto em poucas linhas.</p>
+      <label class="f" for="just">Justificativa</label>
+      <textarea id="just" maxlength="1000" placeholder="O que mais chamou sua atenção nesse projeto?"></textarea>
+      <div class="count"><span id="cnt">0</span> / 1000</div>
+    </section>
+
+    <div class="msg" id="msg" role="alert" hidden></div>
+    <button class="send" id="send" type="submit">Enviar meu voto</button>
+  </form>
+  <p class="foot">Habilis Tank 2026 · Educação Empreendedora</p>
+</main>
+<div class="bar" aria-hidden="true"><i style="background:#4A5670"></i><i style="background:#4E8689"></i><i style="background:#FDCB2C"></i><i style="background:#FDF015"></i></div>
+
+<script>
+(function () {
+  var URL_ = 'https://lnwkkomjfidfqqsxtznd.supabase.co/rest/v1/rpc/';
+  var KEY = 'sb_publishable_RxhWn58mcZ4SEuSzBndCwA_ULthNrjp';
+  var PROJ = ['Folk Kitchen','Cestou','NextBiz','FreeRide','Focuss','WayTify','Âncora','Bloom','Pede no Bairro','ArquivoKypee','Prime','TrocAê','ConnectMed','Your Social','Restocke','Mangiê','Bonde FIT','NutriUP','LumIA','NearTag'];
+  var $ = function (id) { return document.getElementById(id); };
+  var sel = null, manual = false, timer = null, seq = 0;
+
+  function rpc(fn, body) {
+    return fetch(URL_ + fn, { method: 'POST', headers: { apikey: KEY, Authorization: 'Bearer ' + KEY, 'Content-Type': 'application/json' }, body: JSON.stringify(body || {}) })
+      .then(function (r) { if (!r.ok) throw new Error('http ' + r.status); return r.json(); });
+  }
+  function show(id) { ['loading', 'closed', 'done', 'form'].forEach(function (x) { $(x).hidden = x !== id; }); $('lead').hidden = id !== 'form'; }
+  function voted() { try { return localStorage.getItem('tank2026_voto'); } catch (e) { return null; } }
+  function err(t) { $('msg').textContent = t; $('msg').hidden = !t; if (t) $('msg').scrollIntoView({ block: 'center', behavior: 'smooth' }); }
+
+  // projects
+  PROJ.forEach(function (p, i) {
+    var l = document.createElement('label'); l.className = 'opt';
+    var inp = document.createElement('input'); inp.type = 'radio'; inp.name = 'projeto'; inp.value = p;
+    var box = document.createElement('span'); box.className = 'box';
+    box.innerHTML = '<svg viewBox="0 0 16 16" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8"/></svg>';
+    var n = document.createElement('span'); n.className = 'n'; n.textContent = (i < 9 ? '0' : '') + (i + 1);
+    var t = document.createElement('span'); t.className = 'p'; t.textContent = p;
+    l.appendChild(inp); l.appendChild(box); l.appendChild(n); l.appendChild(t); $('opts').appendChild(l);
+    inp.addEventListener('change', function () {
+      Array.prototype.forEach.call(document.querySelectorAll('.opt'), function (o) { o.classList.toggle('on', o.querySelector('input').checked); });
+    });
+  });
+
+  // search
+  function render(rows) {
+    var box = $('res'); box.textContent = '';
+    if (!rows.length) { var p = document.createElement('p'); p.className = 'hint'; p.textContent = 'Nenhum nome encontrado. Confira a grafia ou toque em "Não encontrei meu nome".'; box.appendChild(p); return; }
+    rows.forEach(function (r) {
+      var b = document.createElement('button'); b.type = 'button';
+      var n = document.createElement('b'); n.textContent = r.nome;
+      var s = document.createElement('small'); s.textContent = r.turma + ' · Unidade ' + r.unidade + (r.ja_votou ? ' · já votou' : '');
+      b.appendChild(n); b.appendChild(s); b.disabled = !!r.ja_votou;
+      b.addEventListener('click', function () { sel = r; $('cNome').textContent = r.nome; $('cInfo').textContent = r.turma + ' · Unidade ' + r.unidade; $('pick').hidden = true; $('chosen').hidden = false; err(''); });
+      box.appendChild(b);
+    });
+  }
+  $('q').addEventListener('input', function () {
+    var v = this.value.trim(); clearTimeout(timer);
+    if (v.length < 3) { $('res').textContent = ''; return; }
+    timer = setTimeout(function () {
+      var my = ++seq;
+      rpc('tank_buscar', { q: v }).then(function (rows) { if (my === seq) render(rows); }).catch(function () { if (my === seq) { $('res').textContent = ''; err('Não consegui buscar os nomes. Verifique a internet e tente de novo.'); } });
+    }, 280);
+  });
+  $('change').addEventListener('click', function () { sel = null; $('chosen').hidden = true; $('pick').hidden = false; $('q').focus(); });
+  $('toManual').addEventListener('click', function () { manual = true; sel = null; $('pick').hidden = true; $('manual').hidden = false; $('mNome').value = $('q').value; $('mNome').focus(); });
+  $('toPick').addEventListener('click', function () { manual = false; $('manual').hidden = true; $('pick').hidden = false; $('q').focus(); });
+  $('just').addEventListener('input', function () { $('cnt').textContent = this.value.length; });
+
+  // submit
+  $('form').addEventListener('submit', function (e) {
+    e.preventDefault(); err('');
+    var proj = document.querySelector('input[name=projeto]:checked'), just = $('just').value.trim(), body;
+    if (manual) {
+      var nm = $('mNome').value.trim().replace(/\s+/g, ' ');
+      if (nm.split(' ').length < 2 || nm.length < 5) return err('Informe seu nome completo.');
+      if (!$('mUni').value) return err('Selecione sua unidade.');
+      if (!$('mTur').value) return err('Selecione sua turma.');
+      body = { p_aluno: null, p_nome: nm, p_unidade: $('mUni').value, p_turma: $('mTur').value };
+    } else {
+      if (!sel) return err('Procure e selecione seu nome na lista.');
+      body = { p_aluno: sel.id, p_nome: sel.nome, p_unidade: sel.unidade, p_turma: sel.turma };
+    }
+    if (!proj) return err('Escolha o projeto em que você vota.');
+    if (just.length < 10) return err('Escreva uma justificativa com pelo menos 10 caracteres.');
+    body.p_projeto = proj.value; body.p_just = just;
+    var btn = $('send'); btn.disabled = true; btn.textContent = 'Enviando…';
+    rpc('tank_votar', body).then(function (r) {
+      if (r === 'ok') { try { localStorage.setItem('tank2026_voto', proj.value); } catch (e2) {} $('doneTxt').textContent = 'Seu voto em ' + proj.value + ' foi registrado. Obrigado por participar do Habilis Tank!'; show('done'); window.scrollTo(0, 0); return; }
+      if (r === 'fechado') { show('closed'); window.scrollTo(0, 0); return; }
+      btn.disabled = false; btn.textContent = 'Enviar meu voto';
+      err(r === 'duplicado' ? 'Já existe um voto registrado com esse nome. Cada aluno vota uma única vez.' : 'Não foi possível registrar. Confira os campos e tente de novo.');
+    }).catch(function () { btn.disabled = false; btn.textContent = 'Enviar meu voto'; err('Falha de conexão. Verifique a internet e toque em Enviar novamente.'); });
+  });
+
+  // start
+  rpc('tank_status').then(function (open) {
+    if (!open) return show('closed');
+    var v = voted();
+    if (v) { $('doneTxt').textContent = 'Seu voto em ' + v + ' já foi registrado neste aparelho. Obrigado por participar!'; return show('done'); }
+    show('form');
+  }).catch(function () { show('form'); err('Não consegui conectar. Verifique a internet e recarregue a página.'); });
+})();
+</script>
+</body>
+</html>
