@@ -60,8 +60,8 @@
 
   <section id="before" class="big" hidden>
     <svg viewBox="0 0 24 24" fill="none" stroke="#2F62B5" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="M12 6.5V12l3.5 2.2"/></svg>
-    <h2>O questionário abre às 20h</h2>
-    <p>Sexta-feira, 27/11/2026, das 20h às 22h30. Esta página libera as perguntas sozinha quando chegar a hora.</p>
+    <h2>O questionário abre às 21h</h2>
+    <p>Sexta-feira, 27/11/2026, das 21h às 22h30. Esta página libera as perguntas sozinha quando chegar a hora.</p>
     <div class="count" aria-live="off"><div><b id="cd">0</b><span>DIAS</span></div><div><b id="ch">00</b><span>HORAS</span></div><div><b id="cm">00</b><span>MIN</span></div><div><b id="cs">00</b><span>SEG</span></div></div>
     <ul class="rules">
       <li>Só responde quem é aluno Habilis: você vai escolher o seu nome na lista da escola.</li>
@@ -74,7 +74,7 @@
   <section id="closed" class="big" hidden>
     <svg viewBox="0 0 24 24" fill="none" stroke="#111C3F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
     <h2>Questionário encerrado</h2>
-    <p>O prazo terminou às 22h30 de 27/11/2026. Obrigado por participar da Mostra Cultural Habilis!</p>
+    <p>O prazo de respostas terminou. Obrigado por participar da Mostra Cultural Habilis!</p>
   </section>
 
   <section id="done" class="big" hidden>
@@ -228,8 +228,7 @@
       return;
     }
     if (state !== 'form') show('form');
-    var left = Math.floor((fecha - t) / 60000);
-    $('clock').textContent = left >= 60 ? 'O questionário fecha às 22h30.' : (left > 0 ? 'Faltam ' + left + ' min para o encerramento (22h30).' : 'Menos de 1 minuto para o encerramento.');
+    $('clock').textContent = 'Envie suas respostas até as 22h30.';
   }
   function start() {
     rpc('mostra_status').then(function (s) {
