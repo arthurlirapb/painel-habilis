@@ -54,7 +54,7 @@
 <main>
   <img class="logo" src="logo.png" alt="Mostra Cultural Habilis 2026">
   <h1>Questionário da Noite Cultural</h1>
-  <p class="lead" id="lead">Responda sobre os dois espetáculos da noite para validar a sua pontuação.</p>
+  <p class="lead" id="lead">Responda sobre os dois espetáculos da noite. Para obter a pontuação, acerte no mínimo 7 das 10 respostas (70%).</p>
 
   <div id="loading" class="big" role="status"><p>Carregando…</p></div>
 
@@ -67,6 +67,7 @@
       <li>Só responde quem é aluno Habilis: você vai escolher o seu nome na lista da escola.</li>
       <li>São 10 perguntas abertas, 5 sobre cada espetáculo.</li>
       <li>Cada aluno responde uma única vez.</li>
+      <li>Para obter a pontuação, é preciso acertar no mínimo 70% do questionário: 7 das 10 respostas.</li>
       <li>A pontuação só vale depois da validação das respostas.</li>
     </ul>
   </section>
@@ -228,7 +229,7 @@
       return;
     }
     if (state !== 'form') show('form');
-    $('clock').textContent = 'Envie suas respostas até as 22h30.';
+    $('clock').textContent = 'Envie suas respostas até as 22h30. Mínimo para pontuar: 7 acertos em 10.';
   }
   function start() {
     rpc('mostra_status').then(function (s) {
