@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Mostra Cultural Habilis 2026 · Questionário</title>
+<style>
+  :root { --navy:#111C3F; --blue:#2F62B5; --sky:#3D7FCC; --cyan:#62CBD3; --yel:#F9D10A; --mag:#EE2A9B; --red:#ED1C24; --green:#84CC29; --org:#F27116; --line:#DCE3EF; --ink:#1B2233; --gray:#5B6475; --bg:#F6F8FC; --err:#B3261E; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; -webkit-text-size-adjust:100%; }
+  .bar { display:flex; height:10px; } .bar i { flex:1; }
+  main { max-width:600px; margin:0 auto; padding:18px 18px 56px; }
+  .logo { display:block; width:230px; max-width:62%; margin:6px auto 0; }
+  h1 { text-align:center; font-size:27px; line-height:1.15; margin:16px 0 0; color:var(--navy); font-weight:900; }
+  .lead { text-align:center; color:var(--gray); font-size:15px; margin:10px 0 0; }
+  section { background:#fff; border:1px solid var(--line); border-radius:18px; padding:18px 16px; margin-top:18px; }
+  h2 { font-size:17px; margin:0 0 4px; color:var(--navy); }
+  .tag { display:inline-block; font-size:11.5px; font-weight:800; letter-spacing:.14em; color:#fff; border-radius:999px; padding:5px 12px; margin-bottom:8px; }
+  .hint { font-size:13.5px; color:var(--gray); margin:0 0 12px; }
+  label.f { display:block; font-size:13px; font-weight:700; color:var(--navy); margin:12px 0 5px; }
+  label.q { display:block; font-size:15.5px; font-weight:700; color:var(--ink); margin:18px 0 7px; line-height:1.35; }
+  label.q b { color:var(--blue); }
+  input[type=text], textarea { width:100%; font:inherit; font-size:16px; padding:13px 14px; border:1.5px solid #BFC9DB; border-radius:12px; background:#fff; color:var(--ink); }
+  textarea { min-height:84px; resize:vertical; }
+  input:focus, textarea:focus, button:focus-visible { outline:3px solid rgba(61,127,204,.45); outline-offset:1px; }
+  textarea.bad { border-color:var(--err); background:#FFF6F5; }
+  .qe { font-size:13px; color:var(--err); font-weight:600; margin-top:4px; }
+  .res { margin-top:8px; display:grid; gap:8px; }
+  .res button { text-align:left; font:inherit; padding:12px 14px; border-radius:12px; border:1.5px solid var(--line); background:var(--bg); color:var(--ink); cursor:pointer; min-height:48px; }
+  .res button b { display:block; font-size:15.5px; } .res button small { color:var(--gray); font-size:13px; }
+  .res button[disabled] { opacity:.55; cursor:not-allowed; }
+  .who { display:flex; gap:12px; align-items:center; background:var(--navy); color:#fff; border-radius:14px; padding:14px; }
+  .who div { flex:1; min-width:0; } .who b { display:block; font-size:16.5px; } .who small { color:#CFD7EA; font-size:13.5px; }
+  .who button { flex:none; background:#fff; color:var(--navy); border:0; border-radius:10px; font:inherit; font-size:13.5px; font-weight:800; padding:10px 12px; min-height:44px; cursor:pointer; }
+  .send { width:100%; margin-top:20px; background:var(--blue); color:#fff; border:0; border-radius:14px; font:inherit; font-size:18px; font-weight:900; padding:17px; min-height:56px; cursor:pointer; }
+  .send[disabled] { opacity:.6; cursor:wait; }
+  .msg { margin-top:14px; padding:12px 14px; border-radius:12px; background:#FCE8E6; color:var(--err); font-size:14.5px; font-weight:600; }
+  .big { text-align:center; padding:30px 18px; }
+  .big svg { width:72px; height:72px; }
+  .big h2 { font-size:23px; margin-top:12px; }
+  .big p { color:var(--gray); font-size:15.5px; margin:8px 0 0; }
+  .count { display:flex; justify-content:center; gap:10px; margin-top:18px; }
+  .count div { background:var(--navy); color:#fff; border-radius:12px; padding:10px 0; width:72px; }
+  .count b { display:block; font-size:26px; font-weight:900; line-height:1.1; font-variant-numeric: tabular-nums; } .count span { font-size:11px; letter-spacing:.08em; color:#CFD7EA; }
+  .clock { text-align:center; font-size:13px; color:var(--gray); margin-top:14px; }
+  .rules { text-align:left; margin:16px 0 0; padding-left:20px; color:var(--ink); font-size:14.5px; } .rules li { margin-bottom:6px; }
+  .foot { text-align:center; font-size:12.5px; color:#7A8394; margin-top:22px; }
+  [hidden] { display:none !important; }
+</style>
+</head>
+<body>
+<div class="bar" aria-hidden="true"><i style="background:#3D7FCC"></i><i style="background:#62CBD3"></i><i style="background:#84CC29"></i><i style="background:#F9D10A"></i><i style="background:#F27116"></i><i style="background:#ED1C24"></i><i style="background:#EE2A9B"></i></div>
+<main>
+  <img class="logo" src="logo.png" alt="Mostra Cultural Habilis 2026">
+  <h1>Questionário da Noite Cultural</h1>
+  <p class="lead" id="lead">Responda sobre os dois espetáculos da noite para validar a sua pontuação.</p>
+
+  <div id="loading" class="big" role="status"><p>Carregando…</p></div>
+
+  <section id="before" class="big" hidden>
+    <svg viewBox="0 0 24 24" fill="none" stroke="#2F62B5" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="M12 6.5V12l3.5 2.2"/></svg>
+    <h2>O questionário abre às 20h</h2>
+    <p>Sexta-feira, 27/11/2026, das 20h às 22h30. Esta página libera as perguntas sozinha quando chegar a hora.</p>
+    <div class="count" aria-live="off"><div><b id="cd">0</b><span>DIAS</span></div><div><b id="ch">00</b><span>HORAS</span></div><div><b id="cm">00</b><span>MIN</span></div><div><b id="cs">00</b><span>SEG</span></div></div>
+    <ul class="rules">
+      <li>Só responde quem é aluno Habilis: você vai escolher o seu nome na lista da escola.</li>
+      <li>São 10 perguntas abertas, 5 sobre cada espetáculo.</li>
+      <li>Cada aluno responde uma única vez.</li>
+      <li>A pontuação só vale depois da validação das respostas.</li>
+    </ul>
+  </section>
+
+  <section id="closed" class="big" hidden>
+    <svg viewBox="0 0 24 24" fill="none" stroke="#111C3F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+    <h2>Questionário encerrado</h2>
+    <p>O prazo terminou às 22h30 de 27/11/2026. Obrigado por participar da Mostra Cultural Habilis!</p>
+  </section>
+
+  <section id="done" class="big" hidden>
+    <svg viewBox="0 0 24 24" fill="none" stroke="#5FA313" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="M7.5 12.5l3 3 6-6.5"/></svg>
+    <h2>Respostas enviadas!</h2>
+    <p id="doneTxt">Suas respostas foram registradas. A pontuação será confirmada depois da validação.</p>
+  </section>
+
+  <form id="form" hidden novalidate>
+    <section>
+      <span class="tag" style="background:#111C3F">IDENTIFICAÇÃO</span>
+      <h2>Quem é você?</h2>
+      <div id="pick">
+        <p class="hint">Digite pelo menos 3 letras do seu nome e toque nele na lista. Só alunos cadastrados no Habilis podem responder.</p>
+        <label class="f" for="q">Seu nome</label>
+        <input type="text" id="q" autocomplete="off" autocapitalize="words" spellcheck="false" placeholder="Ex.: Maria Clara">
+        <div class="res" id="res" aria-live="polite"></div>
+      </div>
+      <div id="chosen" hidden>
+        <div class="who"><div><b id="cNome"></b><small id="cInfo"></small></div><button type="button" id="change">Trocar</button></div>
+      </div>
+    </section>
+
+    <section>
+      <span class="tag" style="background:#2F62B5">QUESTIONÁRIO 1 · HABILIS SUL</span>
+      <h2>"Os desejos de Catirina"</h2>
+      <p class="hint">Responda com suas palavras, em frases que façam sentido.</p>
+      <div id="q1"></div>
+    </section>
+
+    <section>
+      <span class="tag" style="background:#EE2A9B">QUESTIONÁRIO 2 · HABILIS BESSA</span>
+      <h2>"Ser(tão) Habilis"</h2>
+      <p class="hint">Responda com suas palavras, em frases que façam sentido.</p>
+      <div id="q2"></div>
+    </section>
+
+    <div class="msg" id="msg" role="alert" hidden></div>
+    <button class="send" id="send" type="submit">Enviar minhas respostas</button>
+    <p class="clock" id="clock"></p>
+  </form>
+  <p class="foot">Mostra Cultural Habilis 2026 · Teatro de Arena (Espaço Cultural)</p>
+</main>
+
+<script>
+(function () {
+  var URL_ = 'https://lnwkkomjfidfqqsxtznd.supabase.co/rest/v1/rpc/';
+  var KEY = 'sb_publishable_RxhWn58mcZ4SEuSzBndCwA_ULthNrjp';
+  var Q = [
+    'No início da peça, o narrador apresenta os nomes de três personagens. Quais são eles?',
+    'Qual foi o primeiro desejo de Catirina?',
+    'Segundo o espetáculo "Os desejos de Catirina", quem é a Comadre Fulozinha?',
+    'Qual foi o segundo desejo de Catirina?',
+    'Quem é o Nego d\'água, apresentado na peça?',
+    'Quais os nomes das três irmãs protagonistas da trama?',
+    'Por qual apelido carinhoso Dorinha chamava o Cabo Anchieta?',
+    'Com qual objetivo o Coronel Adamastor convidou Raimundo Caça-Rato para passar uns dias em sua casa?',
+    'Por qual razão o casamento de Jurema e de Pierre Ariosto não aconteceu?',
+    'Qual o nome da cidade vizinha à Quengo Quente, onde fica localizada a escola Habilis, escola na qual a filha do delegado estudou?'
+  ];
+  var $ = function (id) { return document.getElementById(id); };
+  var sel = null, timer = null, seq = 0, off = 0, abre = 0, fecha = 0, state = 'loading', sent = false;
+
+  function rpc(fn, body) {
+    return fetch(URL_ + fn, { method: 'POST', headers: { apikey: KEY, Authorization: 'Bearer ' + KEY, 'Content-Type': 'application/json' }, body: JSON.stringify(body || {}) })
+      .then(function (r) { if (!r.ok) throw new Error('http ' + r.status); return r.json(); });
+  }
+  function show(id) { ['loading', 'before', 'closed', 'done', 'form'].forEach(function (x) { $(x).hidden = x !== id; }); $('lead').hidden = id === 'done' || id === 'closed'; state = id; }
+  function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; } }
+  function err(t) { $('msg').textContent = t; $('msg').hidden = !t; }
+  function now() { return Date.now() + off; }
+  function p2(n) { return (n < 10 ? '0' : '') + n; }
+
+  // same checks the server applies: the text has to look like real words
+  function logico(t) {
+    var s = (t || '').trim().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/\s+/g, ' ');
+    if (s.length < 3 || t.length > 600) return false;
+    var l = s.replace(/[^a-z]/g, ''); if (l.length < 3) return false;
+    if (l.length / s.replace(/ /g, '').length < 0.6) return false;
+    var v = l.replace(/[^aeiou]/g, '').length / l.length; if (v < 0.2 || v > 0.85) return false;
+    if (/(.)\1\1\1/.test(s)) return false;
+    if (/[bcdfghjklmnpqrstvwxyz]{6,}/.test(l)) return false;
+    if (/^(.{1,3})\1{2,}$/.test(l)) return false;
+    return true;
+  }
+
+  // questions
+  Q.forEach(function (txt, i) {
+    var box = $(i < 5 ? 'q1' : 'q2');
+    var lb = document.createElement('label'); lb.className = 'q'; lb.htmlFor = 'r' + i;
+    var n = document.createElement('b'); n.textContent = (i % 5 + 1) + '. '; lb.appendChild(n); lb.appendChild(document.createTextNode(txt));
+    var ta = document.createElement('textarea'); ta.id = 'r' + i; ta.maxLength = 600; ta.setAttribute('autocapitalize', 'sentences');
+    var e = document.createElement('div'); e.className = 'qe'; e.id = 'e' + i; e.hidden = true; e.textContent = 'Escreva uma resposta com palavras de verdade (pelo menos 3 letras).';
+    ta.value = store('mostra26_r' + i) || '';
+    ta.addEventListener('input', function () { store('mostra26_r' + i, ta.value); if (ta.classList.contains('bad') && logico(ta.value)) { ta.classList.remove('bad'); ta.removeAttribute('aria-invalid'); e.hidden = true; } });
+    box.appendChild(lb); box.appendChild(ta); box.appendChild(e);
+  });
+  function mark(i, bad) { var ta = $('r' + i); ta.classList.toggle('bad', bad); if (bad) ta.setAttribute('aria-invalid', 'true'); else ta.removeAttribute('aria-invalid'); $('e' + i).hidden = !bad; }
+
+  // name search (school roster only)
+  function render(rows) {
+    var box = $('res'); box.textContent = '';
+    if (!rows.length) { var p = document.createElement('p'); p.className = 'hint'; p.textContent = 'Nenhum aluno encontrado com esse nome. Confira a grafia. Se o seu nome não aparecer, procure a coordenação.'; box.appendChild(p); return; }
+    rows.forEach(function (r) {
+      var b = document.createElement('button'); b.type = 'button';
+      var n = document.createElement('b'); n.textContent = r.nome;
+      var s = document.createElement('small'); s.textContent = r.turma + ' · Unidade ' + r.unidade + (r.ja_respondeu ? ' · já respondeu' : '');
+      b.appendChild(n); b.appendChild(s); b.disabled = !!r.ja_respondeu;
+      b.addEventListener('click', function () { sel = r; $('cNome').textContent = r.nome; $('cInfo').textContent = r.turma + ' · Unidade ' + r.unidade; $('pick').hidden = true; $('chosen').hidden = false; err(''); });
+      box.appendChild(b);
+    });
+  }
+  $('q').addEventListener('input', function () {
+    var v = this.value.trim(); clearTimeout(timer);
+    if (v.length < 3) { $('res').textContent = ''; return; }
+    timer = setTimeout(function () {
+      var my = ++seq;
+      rpc('mostra_buscar', { q: v }).then(function (rows) { if (my === seq) render(rows); }).catch(function () { if (my === seq) { $('res').textContent = ''; err('Não consegui buscar os nomes. Verifique a internet e tente de novo.'); } });
+    }, 280);
+  });
+  $('change').addEventListener('click', function () { sel = null; $('chosen').hidden = true; $('pick').hidden = false; $('q').focus(); });
+
+  // submit
+  $('form').addEventListener('submit', function (ev) {
+    ev.preventDefault(); err('');
+    if (!sel) { err('Procure e selecione o seu nome na lista de alunos.'); $('q').scrollIntoView({ block: 'center', behavior: 'smooth' }); return; }
+    var resp = [], first = -1;
+    for (var i = 0; i < 10; i++) { var v = $('r' + i).value.trim(); resp.push(v); var bad = !logico(v); mark(i, bad); if (bad && first < 0) first = i; }
+    if (first >= 0) { err('Há respostas em branco ou sem sentido. Corrija as perguntas marcadas em vermelho.'); $('r' + first).focus(); $('r' + first).scrollIntoView({ block: 'center', behavior: 'smooth' }); return; }
+    var btn = $('send'); btn.disabled = true; btn.textContent = 'Enviando…';
+    rpc('mostra_responder', { p_aluno: sel.id, p_respostas: resp }).then(function (r) {
+      if (r === 'ok') { sent = true; store('mostra26_ok', sel.nome); for (var k = 0; k < 10; k++) store('mostra26_r' + k, ''); $('doneTxt').textContent = sel.nome + ', suas respostas foram registradas. A pontuação será confirmada depois da validação.'; show('done'); window.scrollTo(0, 0); return; }
+      btn.disabled = false; btn.textContent = 'Enviar minhas respostas';
+      if (r === 'fechado') { show('closed'); window.scrollTo(0, 0); return; }
+      if (r === 'antes') { show('before'); window.scrollTo(0, 0); return; }
+      if (r === 'duplicado') return err('Já existem respostas registradas no seu nome. Cada aluno responde uma única vez.');
+      if (typeof r === 'string' && r.indexOf('invalido:') === 0) { var n = parseInt(r.split(':')[1], 10) - 1; mark(n, true); $('r' + n).focus(); $('r' + n).scrollIntoView({ block: 'center', behavior: 'smooth' }); return err('Uma resposta não foi aceita. Reescreva a pergunta marcada em vermelho com palavras de verdade.'); }
+      err('Não foi possível registrar. Confira os campos e tente de novo.');
+    }).catch(function () { btn.disabled = false; btn.textContent = 'Enviar minhas respostas'; err('Falha de conexão. Suas respostas continuam na tela: verifique a internet e toque em Enviar novamente.'); });
+  });
+
+  // clock: server time decides what is shown; the server also enforces the window
+  function tick() {
+    var t = now();
+    if (sent || state === 'done') return;
+    if (t >= fecha) { if (state !== 'closed') show('closed'); return; }
+    if (t < abre) {
+      if (state !== 'before') show('before');
+      var d = Math.max(0, Math.floor((abre - t) / 1000));
+      $('cd').textContent = Math.floor(d / 86400); $('ch').textContent = p2(Math.floor(d % 86400 / 3600)); $('cm').textContent = p2(Math.floor(d % 3600 / 60)); $('cs').textContent = p2(d % 60);
+      return;
+    }
+    if (state !== 'form') show('form');
+    var left = Math.floor((fecha - t) / 60000);
+    $('clock').textContent = left >= 60 ? 'O questionário fecha às 22h30.' : (left > 0 ? 'Faltam ' + left + ' min para o encerramento (22h30).' : 'Menos de 1 minuto para o encerramento.');
+  }
+  function start() {
+    rpc('mostra_status').then(function (s) {
+      off = new Date(s.agora).getTime() - Date.now(); abre = new Date(s.abre).getTime(); fecha = new Date(s.fecha).getTime();
+      var ok = store('mostra26_ok');
+      if (ok && now() >= abre) { $('doneTxt').textContent = ok + ', suas respostas já foram registradas neste aparelho. A pontuação será confirmada depois da validação.'; show('done'); return; }
+      tick(); setInterval(tick, 1000);
+    }).catch(function () { $('loading').innerHTML = '<p>Não consegui conectar. Verifique a internet e recarregue a página.</p>'; setTimeout(start, 5000); });
+  }
+  start();
+})();
+</script>
+</body>
+</html>
